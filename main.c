@@ -96,6 +96,10 @@ int main()
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
+	GLuint vao;
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+
 	GLuint vertex_shader = create_shader(GL_VERTEX_SHADER, "vs1.glsl");
 	GLuint fragment_shader = create_shader(GL_FRAGMENT_SHADER, "fs1.glsl");
 
@@ -111,10 +115,6 @@ int main()
 	glVertexAttribPointer(pos_attrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(pos_attrib);
 
-	GLuint vao;
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
-
 	SDL_Event e;
 	while (1) {
 		if (SDL_PollEvent(&e)) {
@@ -123,10 +123,12 @@ int main()
 			else if (e.type == SDL_KEYUP && e.key.keysym.sym == SDLK_q)
 				break;
 		}
-		glClearColor(0.0, 0.0, 0.0, 0.0);
+		glClearColor(0.0, 0.0, 0.0, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		glDrawArrays(GL_TRIANGLES, 0, 3);
+
+		SDL_GL_SwapWindow(mainwin);
 	}
 
 	SDL_GL_DeleteContext(gl_context);
