@@ -55,5 +55,9 @@ int main()
 	}
 	
 
-	return 0;
+	SDL_GL_DeleteContext(gl_context);
+	SDL_DestroyWindow(mainwin);
+	SDL_Quit();
+
+	exit(EXIT_SUCCESS);
 }
