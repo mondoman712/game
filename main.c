@@ -67,6 +67,10 @@ int main()
 
 	GLchar * _vertex_source = malloc(4096);
 	FILE * vs = fopen("vs1.glsl", "r");
+	if (vs == NULL) {
+		fprintf(stderr, "Couldn't read vs1\n");
+		exit(EXIT_FAILURE);
+	}
 	fread(_vertex_source, 512, 8, vs);
 	fclose(vs);
 
@@ -79,11 +83,15 @@ int main()
 
 	GLchar * _fragment_source = malloc(4096);
 	FILE * fs = fopen("fs1.glsl", "r");
+	if (fs == NULL) {
+		fprintf(stderr, "Couldn't read fs1\n");
+		exit(EXIT_FAILURE);
+	}
 	fread(_fragment_source, 512, 8, vs);
 	fclose(fs);
 
 	const GLchar * fragment_source = _fragment_source;
-	free(_vertex_source);
+	free(_fragment_source);
 
 	GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(fragment_shader, 1, &fragment_source, NULL);
@@ -92,9 +100,19 @@ int main()
 	GLuint shader_program = glCreateProgram();
 	glAttachShader(shader_program, vertex_shader);
 	glAttachShader(shader_program, fragment_shader);
-
 	glBindFragDataLocation(shader_program, 0, "out_colour");
-	
+
+	glLinkProgram(shader_program);
+	glUseProgram(shader_program);
+
+	GLuint vao;
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+
+	GLint pos_attrib = glGetAttribLocation(shader_program, "position");
+	glVertexAttribPointer(pos_attrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(pos_attrib);
+
 	SDL_Event e;
 	while (1) {
 		if (SDL_PollEvent(&e)) {
@@ -103,6 +121,8 @@ int main()
 			else if (e.type == SDL_KEYUP && e.key.keysym.sym == SDLK_q)
 				break;
 		}
+
+		glDrawArrays(GL_TRIANGLES, 0, 3);
 	}
 
 	SDL_GL_DeleteContext(gl_context);
