@@ -64,6 +64,36 @@ int main()
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	GLchar * _vertex_source = malloc(4096);
+	FILE * vs = fopen("vs1.glsl", "r");
+	fread(_vertex_source, 512, 8, vs);
+	fclose(vs);
+
+	const GLchar * vertex_source = _vertex_source;
+	free(_vertex_source);
+
+	GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(vertex_shader, 1, &vertex_source, NULL);
+	glCompileShader(vertex_shader);
+
+	GLchar * _fragment_source = malloc(4096);
+	FILE * fs = fopen("fs1.glsl", "r");
+	fread(_fragment_source, 512, 8, vs);
+	fclose(fs);
+
+	const GLchar * fragment_source = _fragment_source;
+	free(_vertex_source);
+
+	GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(fragment_shader, 1, &fragment_source, NULL);
+	glCompileShader(fragment_shader);
+
+	GLuint shader_program = glCreateProgram();
+	glAttachShader(shader_program, vertex_shader);
+	glAttachShader(shader_program, fragment_shader);
+
+	glBindFragDataLocation(shader_program, 0, "out_colour");
 	
 	SDL_Event e;
 	while (1) {
