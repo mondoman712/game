@@ -22,8 +22,11 @@ int main()
 			DEFAULT_SCREEN_X,
 			DEFAULT_SCREEN_Y,
 			SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
-
-
+	if (mainwin == NULL) {
+		fprintf(stderr, "Failed to create SDL window\n");
+		exit(EXIT_FAILURE);
+	}
+	
 
 	return 0;
 }
