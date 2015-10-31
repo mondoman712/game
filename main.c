@@ -10,6 +10,29 @@
 #define GL_MAJOR_VER 3
 #define GL_MINOR_VER 3
 
+GLuint create_shader (GLenum shader_type, char * filename)
+{
+	GLchar * _source= malloc(4096);
+	FILE * s = fopen(filename, "r");
+	if (s == NULL) {
+		fprintf(stderr, "Couldn't read %s\n", filename);
+		return 1;
+	}
+	fread(_source, 512, 8, s);
+	fclose(s);
+
+	const GLchar * source = _source;
+	free(_source);
+
+	GLuint shader = glCreateShader(shader_type);
+	glShaderSource(shader, 1, &source, NULL);
+	glCompileShader(shader);
+
+	printf("Shader %s has been compiled\n", filename);
+
+	return shader;
+}
+
 int main()
 {
 	if (SDL_Init(SDL_INIT_VIDEO)) {
@@ -28,6 +51,8 @@ int main()
 	if (mainwin == NULL) {
 		fprintf(stderr, "Failed to create SDL window\n");
 		exit(EXIT_FAILURE);
+	} else {
+		printf("SDL window created\n");
 	}
 
 
@@ -35,12 +60,16 @@ int main()
 	if (gl_context == NULL) {
 		fprintf(stderr, "Failed to create OpenGL context\n");
 		exit(EXIT_FAILURE);
+	} else {
+		printf("OpenGL context created\n");
 	}
 
 	const unsigned char * version = glGetString(GL_VERSION);
 	if (version == NULL) {
 		fprintf(stderr, "Failed to get GL version\n");
 		exit(EXIT_FAILURE);
+	} else {
+		printf("GL version is: %s\n", version);
 	}
 
 	SDL_GL_MakeCurrent(mainwin, gl_context);
@@ -52,6 +81,8 @@ int main()
 	if (glew_status) {
 		fprintf(stderr, "Error %s\n", glewGetErrorString(glew_status));
 		exit(EXIT_FAILURE);
+	} else {
+		printf("GLEW is working\n");
 	}
 
 	float vertices[] = {
@@ -65,37 +96,8 @@ int main()
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-	GLchar * _vertex_source = malloc(4096);
-	FILE * vs = fopen("vs1.glsl", "r");
-	if (vs == NULL) {
-		fprintf(stderr, "Couldn't read vs1\n");
-		exit(EXIT_FAILURE);
-	}
-	fread(_vertex_source, 512, 8, vs);
-	fclose(vs);
-
-	const GLchar * vertex_source = _vertex_source;
-	free(_vertex_source);
-
-	GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertex_shader, 1, &vertex_source, NULL);
-	glCompileShader(vertex_shader);
-
-	GLchar * _fragment_source = malloc(4096);
-	FILE * fs = fopen("fs1.glsl", "r");
-	if (fs == NULL) {
-		fprintf(stderr, "Couldn't read fs1\n");
-		exit(EXIT_FAILURE);
-	}
-	fread(_fragment_source, 512, 8, vs);
-	fclose(fs);
-
-	const GLchar * fragment_source = _fragment_source;
-	free(_fragment_source);
-
-	GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragment_shader, 1, &fragment_source, NULL);
-	glCompileShader(fragment_shader);
+	GLuint vertex_shader = create_shader(GL_VERTEX_SHADER, "vs1.glsl");
+	GLuint fragment_shader = create_shader(GL_FRAGMENT_SHADER, "fs1.glsl");
 
 	GLuint shader_program = glCreateProgram();
 	glAttachShader(shader_program, vertex_shader);
@@ -105,13 +107,13 @@ int main()
 	glLinkProgram(shader_program);
 	glUseProgram(shader_program);
 
-	GLuint vao;
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
-
 	GLint pos_attrib = glGetAttribLocation(shader_program, "position");
 	glVertexAttribPointer(pos_attrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(pos_attrib);
+
+	GLuint vao;
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
 
 	SDL_Event e;
 	while (1) {
@@ -121,6 +123,8 @@ int main()
 			else if (e.type == SDL_KEYUP && e.key.keysym.sym == SDLK_q)
 				break;
 		}
+		glClearColor(0.0, 0.0, 0.0, 0.0);
+		glClear(GL_COLOR_BUFFER_BIT);
 
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 	}
