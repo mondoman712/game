@@ -53,7 +53,27 @@ int main()
 		fprintf(stderr, "Error %s\n", glewGetErrorString(glew_status));
 		exit(EXIT_FAILURE);
 	}
+
+	float vertices[] = {
+		0.0, 0.5,
+		0.5, -0.5,
+		-0.5, -0.5
+	};
+
+	GLuint vbo;
+	glGenBuffers(1, &vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 	
+	SDL_Event e;
+	while (1) {
+		if (SDL_PollEvent(&e)) {
+			if (e.type == SDL_QUIT) 
+				break;
+			else if (e.type == SDL_KEYUP && e.key.keysym.sym == SDLK_q)
+				break;
+		}
+	}
 
 	SDL_GL_DeleteContext(gl_context);
 	SDL_DestroyWindow(mainwin);
