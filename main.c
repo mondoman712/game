@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <math.h>
 
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
@@ -133,10 +134,14 @@ int main()
 	glLinkProgram(shader_program);
 	glUseProgram(shader_program);
 
+	GLint uni_colour = glGetUniformLocation(shader_program, "tri_colour");
+	glUniform3f(uni_colour, 1.0, 0.0, 0.0);
+
 	GLint pos_attrib = glGetAttribLocation(shader_program, "position");
 	glVertexAttribPointer(pos_attrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(pos_attrib);
 
+	float i = 0;
 	SDL_Event e;
 	while (1) {
 		if (SDL_PollEvent(&e)) {
@@ -151,6 +156,9 @@ int main()
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 
 		SDL_GL_SwapWindow(mainwin);
+
+		glUniform3f(uni_colour, sin(i), 0.0, 0.0);
+		i += 0.0001;
 	}
 
 	glDeleteProgram(shader_program);
