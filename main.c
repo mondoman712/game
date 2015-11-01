@@ -14,7 +14,7 @@
 
 GLuint create_shader (GLenum shader_type, char * filename)
 {
-	GLchar * _source= malloc(4096);
+	char _source[4096];
 	char dest[64];
 
 	strcpy(dest, SHADER_DIR);
@@ -25,17 +25,34 @@ GLuint create_shader (GLenum shader_type, char * filename)
 		fprintf(stderr, "Couldn't read %s\n", filename);
 		return 1;
 	}
-	fread(_source, 512, 8, s);
-	fclose(s);
+	
+	int i = 0;
+	char inc;
+	while (fscanf(s, "%c", &inc) >0)
+		_source[i++] = inc;
+	
+	_source[i - 1] = '\0';
 
-	const GLchar * source = _source;
-	free(_source);
+	const char * source = _source;
+	fclose(s);
 
 	GLuint shader = glCreateShader(shader_type);
 	glShaderSource(shader, 1, &source, NULL);
 	glCompileShader(shader);
 
-	printf("Shader %s has been compiled\n", filename);
+	puts(source);
+
+	GLint status;
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
+	if (status == GL_TRUE) {
+		printf("Shader %s has been compiled\n", filename);
+	} else {
+		fprintf(stderr, "Shader %s failed to compile\n", filename);
+		
+		char buff[512];
+		glGetShaderInfoLog(shader, 512, NULL, buff);
+		fprintf(stderr, "\t%s\n", buff);
+	}
 
 	return shader;
 }
