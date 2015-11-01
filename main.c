@@ -153,13 +153,6 @@ int main()
 		SDL_GL_SwapWindow(mainwin);
 	}
 
-	glDeleteProgram(shader_program);
-	glDeleteShader(fragment_shader);
-	glDeleteShader(vertex_shader);
-
-	glDeleteBuffers(1, &vbo);
-	glDeleteVertexArrays(1, &vao);
-
 	SDL_GL_DeleteContext(gl_context);
 	SDL_DestroyWindow(mainwin);
 	SDL_Quit();
