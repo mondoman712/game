@@ -1,7 +1,7 @@
 CC = gcc
 CSTD = c99
 
-CFLAGS =  -Wall -g -Werror -std=$(CSTD) $(shell sdl2-config --cflags)
+CFLAGS =  -g -W -Wall -Werror -std=$(CSTD) $(shell sdl2-config --cflags)
 LDFLAGS = $(shell sdl2-config --libs) -lGL -lGLEW
 
 MAIN = main.c
