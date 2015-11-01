@@ -10,10 +10,17 @@
 #define GL_MAJOR_VER 3
 #define GL_MINOR_VER 3
 
+#define SHADER_DIR "shaders/"
+
 GLuint create_shader (GLenum shader_type, char * filename)
 {
 	GLchar * _source= malloc(4096);
-	FILE * s = fopen(filename, "r");
+	char dest[64];
+
+	strcpy(dest, SHADER_DIR);
+	strcat(dest, filename);
+
+	FILE * s = fopen(dest, "r");
 	if (s == NULL) {
 		fprintf(stderr, "Couldn't read %s\n", filename);
 		return 1;
