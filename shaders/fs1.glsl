@@ -1,10 +1,10 @@
 #version 150
 
-uniform vec3 tri_colour;
+in vec3 _colour;
 
 out vec4 out_colour;
 
 void main()
 {
-	out_colour = vec4(tri_colour, 1.0);
+	out_colour = vec4(_colour, 1.0);
 }
