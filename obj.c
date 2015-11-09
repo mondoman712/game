@@ -29,15 +29,30 @@ cleanup:
 	return 0;
 }
 
-static int load_obj (const char * filename)
+static int load_obj (const char * filename, float * vertices, size_t * vertlen)
 {
+	char buf[80];
+	int vertc = 0;
+
 	FILE * m = fopen(filename, "r");
 	if (m == NULL) {
 		fprintf(stderr, "Could not open file %s\n", filename);
 		return 1;
 	}
 
+	while (fgets(buf, sizeof(buf), m)) {
+		if (buf[0] == 'v' && buf[1] == ' ') {
+			parse_vector(buf, vertices);
+			*vertices += 3;
+			vertc += 3;
+		}
+	}
+
 	fclose(m);
+
+	printf("%i\n", vertc);
+
+	vertlen += vertc;
 
 	return 0;
 }
@@ -45,10 +60,12 @@ static int load_obj (const char * filename)
 int main ()
 {
 	float buff[3];
+	size_t * vertlen = 0;
 
-	parse_vector("v 0.437500 -0.765625 0.164062", buff);
-	printf("%f, %f, %f\n", buff[0], buff[1], buff[2]);
+	float * vertices = malloc(64 * sizeof(float));
+	load_obj("models/sphere.obj", vertices, vertlen);
 
+	printf("%i\n", vertlen);
 
 	exit(EXIT_SUCCESS);
 }
