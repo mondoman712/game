@@ -2,28 +2,30 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-static int word_array (char * str, char ** buff)
-{
-	int i;
-	while (*str != '\0') {
-		buff = realloc(buff, sizeof(char *) * ++i);
-		if (*str == ' ') {
-			if (buff == NULL) return 1;
-
-			**buff++;
-			**buff = '\0';
-		}
-		(**buff) = (*str);
-		**buff++;
-		*str++;
-	}
-	return 0;
-}
 /* 
  * Puts the thee floats in the string str into an array given by buff
  */
 static int parse_vector (char * str, float * buff)
 {
+	char * _str = malloc(sizeof(char) * 80);
+	int i = 0;
+	char * wd = malloc(sizeof(char) * 20);
+
+	if (_str == NULL || wd == NULL) 
+		goto cleanup;
+
+	strcpy(_str, str);
+	strtok(_str, " ");
+
+	while ((wd = strtok(NULL, " "))) {
+		buff[i] = atof(wd);
+		i++;
+	}
+
+cleanup:
+	free(_str);
+	free(wd);
+
 	return 0;
 }
 
@@ -61,17 +63,8 @@ int main ()
 {
 	float buff[3];
 
-	/*
 	parse_vector("v 0.437500 -0.765625 0.164062", buff);
 	printf("%f, %f, %f\n", buff[0], buff[1], buff[2]);
-	*/
-
-	char ** but = malloc(0);
-	int i;
-	word_array("v 0.437500 -0.765625 0.164062", but);
-	for (i = 0; i < 3; i++) {
-		puts(*but);
-	}
 
 
 	exit(EXIT_SUCCESS);
