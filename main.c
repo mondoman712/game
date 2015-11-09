@@ -5,6 +5,8 @@
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
 
+#include "obj.h"
+
 #define WIN_TITLE "window title"
 #define DEFAULT_SCREEN_X 1280
 #define DEFAULT_SCREEN_Y 960
@@ -114,6 +116,7 @@ int main()
 		printf("GLEW is working\n");
 	}
 
+	/*
 	float vertices[] = {
 		-0.5,   0.5,  1.0,  0.0,  0.0,
 		 0.5,  -0.5,  0.0,  1.0,  0.0,
@@ -122,40 +125,21 @@ int main()
 	};
 
 	size_t nverts = sizeof(vertices) / sizeof(float);
+	*/
 
-	GLuint elements[] = {
-		0, 1, 2,
-		0, 1, 3
-	};
-	
-	GLuint ebo;
-	glGenBuffers(1, &ebo);
+	float * vertices = malloc(128 * sizeof(float));
+	size_t nverts = read_obj("models/sphere.obj", vertices);
+
 
 	GLuint vbo;
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, nverts * sizeof(float), vertices,
+			GL_STATIC_DRAW);
 
 	GLuint vao;
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
-
-	GLuint tex;
-	glGenTextures(1, &tex);
-	glBindTexture(GL_TEXTURE_2D, tex);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	float colour[] = {1.0, 0.0, 0.0, 1.0};
-	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, colour);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	float pixels[] = {
-		0.0, 0.0, 0.0, 1.0, 1.0, 1.0,
-		1.0, 1.0, 1.0, 0.0, 0.0, 0.0
-	};
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 2, 2, 0, GL_RGB, GL_FLOAT, pixels);
-
 
 	GLuint vertex_shader = create_shader(GL_VERTEX_SHADER, "vs1");
 	GLuint fragment_shader = create_shader(GL_FRAGMENT_SHADER, "fs1");
@@ -178,10 +162,6 @@ int main()
 	glVertexAttribPointer(col_attrib, 3, GL_FLOAT, GL_FALSE,
 			5 * sizeof(float), (void *)(2 * sizeof(float)));
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements), elements, 
-			GL_STATIC_DRAW);
-
 	SDL_Event e;
 	while (1) {
 		if (SDL_PollEvent(&e)) {
@@ -193,7 +173,7 @@ int main()
 		glClearColor(0.0, 0.0, 0.0, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glDrawElements(GL_TRIANGLES, nverts, GL_UNSIGNED_INT, 0);
+		glDrawArrays(GL_LINES, 0, nverts);
 
 		SDL_GL_SwapWindow(mainwin);
 	}

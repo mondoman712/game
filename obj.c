@@ -2,9 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-/* 
- * Puts the thee floats in the string str into an array given by buff
- */
+/* Puts the thee floats in the string str into an array given by buff */
 static int parse_vector (char * str, float * buff)
 {
 	char * _str = malloc(sizeof(char) * 80);
@@ -29,7 +27,8 @@ cleanup:
 	return 0;
 }
 
-static int load_obj (const char * filename, float * vertices, size_t * vertlen)
+/* Reads obj file and deposits vertices into float array */
+size_t read_obj (const char * filename, float * vertices)
 {
 	char buf[80];
 	int vertc = 0;
@@ -44,28 +43,29 @@ static int load_obj (const char * filename, float * vertices, size_t * vertlen)
 		if (buf[0] == 'v' && buf[1] == ' ') {
 			parse_vector(buf, vertices);
 			*vertices += 3;
-			vertc += 3;
+			vertc++;
 		}
 	}
 
 	fclose(m);
 
-	printf("%i\n", vertc);
-
-	vertlen += vertc;
-
-	return 0;
+	return vertc;
 }
 
+#ifdef FALSE
 int main ()
 {
-	float buff[3];
-	size_t * vertlen = 0;
+	size_t vertlen = 0;
+	int i;
 
-	float * vertices = malloc(64 * sizeof(float));
-	load_obj("models/sphere.obj", vertices, vertlen);
+	float * vertices = malloc(128 * sizeof(float));
+	vertlen = read_obj("models/sphere.obj", vertices);
 
 	printf("%i\n", vertlen);
 
+	for (i = 0; i < (int) vertlen; i++)
+		printf("%f, %f, %f\n", *vertices++, *vertices++, *vertices++);
+
 	exit(EXIT_SUCCESS);
 }
+#endif
