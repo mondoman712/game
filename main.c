@@ -4,7 +4,6 @@
 
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
-#include <png.h>
 
 #define WIN_TITLE "window title"
 #define DEFAULT_SCREEN_X 1280
@@ -157,11 +156,6 @@ int main()
 	};
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 2, 2, 0, GL_RGB, GL_FLOAT, pixels);
 
-	int width, height;
-	unsigned char * image =
-		SOIL_load_image("img.png", &width, &height, 0, SOIL_LOAD_RGB);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, 
-			GL_UNSIGNED_BYTE, image);
 
 	GLuint vertex_shader = create_shader(GL_VERTEX_SHADER, "vs1");
 	GLuint fragment_shader = create_shader(GL_FRAGMENT_SHADER, "fs1");
@@ -212,7 +206,6 @@ int main()
 	glDeleteBuffers(1, &vbo);
 	glDeleteVertexArrays(1, &vao);
 
-	SOIL_free_image_data(image);
 	SDL_GL_DeleteContext(gl_context);
 	SDL_DestroyWindow(mainwin);
 	SDL_Quit();
