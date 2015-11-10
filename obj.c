@@ -32,6 +32,7 @@ size_t read_obj (const char * filename, float * vertices)
 {
 	char buf[80];
 	int vertc = 0;
+	float * _verts = vertices;
 
 	FILE * m = fopen(filename, "r");
 	if (m == NULL) {
@@ -41,8 +42,8 @@ size_t read_obj (const char * filename, float * vertices)
 
 	while (fgets(buf, sizeof(buf), m)) {
 		if (buf[0] == 'v' && buf[1] == ' ') {
-			parse_vector(buf, vertices);
-			*vertices += 3;
+			parse_vector(buf, _verts);
+			_verts += 3;
 			vertc++;
 		}
 	}
@@ -61,10 +62,13 @@ int main ()
 	float * vertices = malloc(128 * sizeof(float));
 	vertlen = read_obj("models/sphere.obj", vertices);
 
-	printf("%i\n", vertlen);
+	printf("%i\n", (int) vertlen);
 
-	for (i = 0; i < (int) vertlen; i++)
-		printf("%f, %f, %f\n", *vertices++, *vertices++, *vertices++);
+	for (i = 0; i < (int) (vertlen * 3); i += 3) {
+		printf("%f, ", *(vertices + i));
+		printf("%f, ", *(vertices + i + 1));
+		printf("%f\n", *(vertices + i + 2));
+	}
 
 	exit(EXIT_SUCCESS);
 }

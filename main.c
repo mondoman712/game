@@ -56,7 +56,8 @@ GLuint create_shader (const GLenum shader_type, const char * filename)
 	} else {
 		char buff[512];
 		glGetShaderInfoLog(shader, 512, NULL, buff);
-		fprintf(stderr, "Shader %s failed to compile with error:\n", filename);
+		fprintf(stderr, "Shader %s failed to compile with error:\n", 
+				filename);
 		fprintf(stderr, "%s\n", buff);
 		fprintf(stderr, "\n");
 	}
@@ -130,6 +131,13 @@ int main()
 	float * vertices = malloc(128 * sizeof(float));
 	size_t nverts = read_obj("models/sphere.obj", vertices);
 
+	printf("nverts: %i\n", (int)nverts);
+	int i;
+	for (i = 0; i < (int) (nverts * 3); i += 3) {
+		printf("%f, ", *(vertices + i));
+		printf("%f, ", *(vertices + i + 1));
+		printf("%f\n", *(vertices + i + 2));
+	}
 
 	GLuint vbo;
 	glGenBuffers(1, &vbo);
@@ -173,11 +181,10 @@ int main()
 		glClearColor(0.0, 0.0, 0.0, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glDrawArrays(GL_LINES, 0, nverts);
+		glDrawArrays(GL_POINTS, 0, (int)(nverts * 3) / 2);
 
 		SDL_GL_SwapWindow(mainwin);
 	}
-
 
 	glDeleteProgram(shader_program);
 	glDeleteShader(fragment_shader);
