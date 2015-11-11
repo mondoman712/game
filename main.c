@@ -11,6 +11,8 @@
 #define DEFAULT_SCREEN_X 1280
 #define DEFAULT_SCREEN_Y 960
 
+#define PI 3.141592653589
+
 #define GL_MAJOR_VER 3
 #define GL_MINOR_VER 3
 
@@ -23,15 +25,22 @@ typedef struct {
 	GLfloat z;
 } vec3;
 
+/*
+ * finds the modulus of a 1x3 vector
+ */
 static GLfloat mod_vec3 (vec3 in)
 {
 	return sqrt((in.x * in.x) + (in.y  * in.y) + (in.z * in.z));
 }
 
+/*
+ * Finds the normal of a 1x3 vector
+ */
 static vec3 norm_vec3 (vec3 in)
 {
 	GLfloat mod = mod_vec3(in);
-	vec3 ret = {in.x / mod,
+	vec3 ret = {
+		in.x / mod,
 		in.y / mod,
 		in.z / mod
 	};
@@ -39,17 +48,23 @@ static vec3 norm_vec3 (vec3 in)
 	return ret;
 }
 
+/*
+ * Finds the cross product of vectors a and b
+ */
 static vec3 cross_vec3 (vec3 a, vec3 b)
 {
 	vec3 ret;
 
 	ret.x = (a.y * b.z) - (a.z * b.y);
-	ret.y = (a.x * b.z) - (a.z * b.x);
-	ret.z = (a.x * b.y) - (a.x * b.y);
+	ret.y = (a.z * b.x) - (a.x * b.z);
+	ret.z = (a.x * b.y) - (a.y * b.x);
 
 	return ret;
 }
 
+/*
+ * Deposits the values in a vec3 into the first 3 places in an array
+ */
 static void vec3_array (vec3 in, GLfloat * array)
 {
 	*(array) = in.x;
@@ -81,10 +96,36 @@ static void look_at (vec3 eye, vec3 centre, vec3 up, GLfloat * mat4)
 	f.z = -f.z;
 
 	vec3_array(f, (mat4 + 8));
+	*(mat4 + 11) = 0;
 	*(mat4 + 12) = 0;
 	*(mat4 + 13) = 0;
 	*(mat4 + 14) = 0;
 	*(mat4 + 15) = 1;
+}
+
+static void perspective (GLfloat fovy, GLfloat asp, GLfloat znear, GLfloat zfar,
+		GLfloat * mat4)
+{
+	GLfloat f = 1 / tan(fovy / 2);
+	*mat4 = f / asp;
+	*(mat4 + 1) = 0;
+	*(mat4 + 2) = 0;
+	*(mat4 + 3) = 0;
+
+	*(mat4 + 4) = 0;
+	*(mat4 + 5) = f;
+	*(mat4 + 6) = 0;
+	*(mat4 + 7) = 0;
+
+	*(mat4 + 8) = 0;
+	*(mat4 + 9) = 0;
+	*(mat4 + 10) = (znear + zfar) / (znear - zfar);
+	*(mat4 + 11) = (2 * zfar * znear) / (znear - zfar);
+
+	*(mat4 + 12) = 0;
+	*(mat4 + 13) = 0;
+	*(mat4 + 14) = -1;
+	*(mat4 + 15) = 0;
 }
 
 /*
@@ -233,13 +274,27 @@ int main()
 
 	GLint pos_attrib = glGetAttribLocation(shader_program, "position");
 	glEnableVertexAttribArray(pos_attrib);
-	glVertexAttribPointer(pos_attrib, 2, GL_FLOAT, GL_FALSE, 
-			5 * sizeof(float), 0);
+	glVertexAttribPointer(pos_attrib, 3, GL_FLOAT, GL_FALSE, 
+			3 * sizeof(GLfloat), 0);
 
+	GLfloat view[16];
+	vec3 eye = {1.2, 1.2, 1.2};
+	vec3 cent = {0.0, 0.0, 0.0};
+	vec3 up = {0.0, 0.0, 1.0};
+	look_at(eye, cent, up, view);
+	GLint uni_view = glGetUniformLocation(shader_program, "view");
+	glUniformMatrix4fv(uni_view, 1, GL_FALSE, view);
+
+	GLfloat proj[16];
+	perspective(PI / 2, DEFAULT_SCREEN_X / DEFAULT_SCREEN_Y, 0.1, 100.0,
+			proj);
+	GLint uni_proj = glGetUniformLocation(shader_program, "proj");
+	glUniformMatrix4fv(uni_proj, 1, GL_FALSE, proj);
+	/*
 	GLint col_attrib = glGetAttribLocation(shader_program, "in_colour");
 	glEnableVertexAttribArray(col_attrib);
-	glVertexAttribPointer(col_attrib, 3, GL_FLOAT, GL_FALSE,
-			5 * sizeof(float), (void *)(2 * sizeof(float)));
+	glVertexAttribPointer(col_attrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	*/
 
 	SDL_Event e;
 	while (1) {
@@ -252,7 +307,7 @@ int main()
 		glClearColor(0.0, 0.0, 0.0, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glDrawArrays(GL_LINE_LOOP, 0, (int)(nverts * 3) / 2);
+		glDrawArrays(GL_LINE_LOOP, 0, (int)(nverts * 3));
 
 		SDL_GL_SwapWindow(mainwin);
 	}
