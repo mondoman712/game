@@ -8,7 +8,7 @@
 #include "obj.h"
 
 #define WIN_TITLE "window title"
-#define DEFAULT_SCREEN_X 1280
+#define DEFAULT_SCREEN_X 960
 #define DEFAULT_SCREEN_Y 960
 
 #define PI 3.141592653589
@@ -126,6 +126,29 @@ static void perspective (GLfloat fovy, GLfloat asp, GLfloat znear, GLfloat zfar,
 	*(mat4 + 13) = 0;
 	*(mat4 + 14) = -1;
 	*(mat4 + 15) = 0;
+}
+
+static void rotatez (GLfloat ang, GLfloat * mat4)
+{
+	*mat4 = cos(ang);
+	*(mat4 + 1) = -sin(ang);
+	*(mat4 + 2) = 0;
+	*(mat4 + 3) = 0;
+
+	*(mat4 + 4) = sin(ang);
+	*(mat4 + 5) = cos(ang);
+	*(mat4 + 6) = 0;
+	*(mat4 + 7) = 0;
+
+	*(mat4 + 8) = 0;
+	*(mat4 + 9) = 0;
+	*(mat4 + 10) = 1;
+	*(mat4 + 11) = 0;
+
+	*(mat4 + 12) = 0;
+	*(mat4 + 13) = 0;
+	*(mat4 + 14) = 0;
+	*(mat4 + 15) = 1;
 }
 
 /*
@@ -290,6 +313,11 @@ int main()
 			proj);
 	GLint uni_proj = glGetUniformLocation(shader_program, "proj");
 	glUniformMatrix4fv(uni_proj, 1, GL_FALSE, proj);
+
+	GLfloat trans[16];
+	rotatez(PI / 4, trans);
+	GLint uni_trans = glGetUniformLocation(shader_program, "trans");
+	glUniformMatrix4fv(uni_trans, 1, GL_FALSE, trans);
 	/*
 	GLint col_attrib = glGetAttribLocation(shader_program, "in_colour");
 	glEnableVertexAttribArray(col_attrib);
