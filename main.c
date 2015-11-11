@@ -14,12 +14,13 @@
 #define GL_MAJOR_VER 3
 #define GL_MINOR_VER 3
 
-#define MODEL_DIR "models/"
-#define MODEL_EXT ".obj"
-
 #define SHADER_DIR "shaders/"
 #define SHADER_EXT ".glsl"
 
+/*
+ * Reads and compiles a .glsl shader file in the shaders folder, from just the
+ * core of the filename (to use shaders/vs1.glsl, filename is just vsl)
+ */
 GLuint create_shader (const GLenum shader_type, const char * filename)
 {
 	char _source[4096];
@@ -37,7 +38,7 @@ GLuint create_shader (const GLenum shader_type, const char * filename)
 	
 	int i = 0;
 	char inc;
-	while (fscanf(s, "%c", &inc) >0)
+	while (fscanf(s, "%c", &inc) > 0)
 		_source[i++] = inc;
 	
 	_source[i - 1] = '\0';
