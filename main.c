@@ -65,45 +65,36 @@ GLuint create_shader (const GLenum shader_type, const char * filename)
 	return shader;
 }
 
-static int sdl_init (SDL_Window * window, SDL_GLContext * gl_context)
+int main()
 {
 	if (SDL_Init(SDL_INIT_VIDEO)) {
 		fprintf(stderr, "Failed to initialise SDL\n");
-		return 1;
+		exit(EXIT_FAILURE);
 	}
 
-	window = SDL_CreateWindow(
+	SDL_Window * mainwin;
+	mainwin = SDL_CreateWindow(
 			WIN_TITLE,
 			SDL_WINDOWPOS_UNDEFINED,
 			SDL_WINDOWPOS_UNDEFINED,
 			DEFAULT_SCREEN_X,
 			DEFAULT_SCREEN_Y,
 			SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
-	if (window == NULL) {
+	if (mainwin == NULL) {
 		fprintf(stderr, "Failed to create SDL window\n");
-		return 1;
+		exit(EXIT_FAILURE);
 	} else {
 		printf("SDL window created\n");
 	}
-	
-	gl_context = SDL_GL_CreateContext(window);
+
+
+	SDL_GLContext gl_context = SDL_GL_CreateContext(mainwin);
 	if (gl_context == NULL) {
 		fprintf(stderr, "Failed to create OpenGL context\n");
 		exit(EXIT_FAILURE);
 	} else {
 		printf("OpenGL context created\n");
 	}
-
-	return 0;
-}
-
-
-int main()
-{
-	SDL_Window * mainwin = 0;
-	SDL_GLContext gl_context;
-	if (sdl_init(mainwin, &gl_context))
-		exit(EXIT_FAILURE);
 
 	const unsigned char * version = glGetString(GL_VERSION);
 	if (version == NULL) {
@@ -190,7 +181,7 @@ int main()
 		glClearColor(0.0, 0.0, 0.0, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glDrawArrays(GL_POINTS, 0, (int)(nverts * 3) / 2);
+		glDrawArrays(GL_LINE_LOOP, 0, (int)(nverts * 3) / 2);
 
 		SDL_GL_SwapWindow(mainwin);
 	}
