@@ -8,5 +8,5 @@ uniform mat4 trans;
 
 void main()
 {
-	gl_Position = trans * vec4(position, 1.0);
+	gl_Position = view * vec4(position, 1.0);
 }

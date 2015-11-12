@@ -253,20 +253,21 @@ int main()
 	}
 
 	/*
-	float vertices[] = {
-		-0.5,   0.5,  1.0,  0.0,  0.0,
-		 0.5,  -0.5,  0.0,  1.0,  0.0,
-		-0.5,  -0.5,  0.0,  0.0,  1.0,
-		 0.5,   0.5,  1.0,  1.0,  1.0,
+	GLfloat vertices[] = {
+		 0.5,  0.5,  0.0,
+		 0.5, -0.5,  0.0,
+		-0.5, -0.5,  0.0,
+		-0.5,  0.5,  0.0,
+		 0.0,  0.0,  0.0
 	};
 
-	size_t nverts = sizeof(vertices) / sizeof(float);
+	size_t nverts = (sizeof(vertices) / sizeof(GLfloat)) / 3;
 	*/
 
 	float * vertices = malloc(128 * sizeof(float));
 	size_t nverts = read_obj("models/sphere.obj", vertices);
 
-	printf("nverts: %i\n", (int)nverts);
+	printf("nverts: %i\n", (int) nverts);
 	int i;
 	for (i = 0; i < (int) (nverts * 3); i += 3) {
 		printf("%f, ", *(vertices + i));
@@ -277,7 +278,9 @@ int main()
 	GLuint vbo;
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, nverts * sizeof(float), vertices,
+	glBufferData(GL_ARRAY_BUFFER, 
+			nverts * 3 * sizeof(GLfloat) * sizeof(GLfloat), 
+			vertices,
 			GL_STATIC_DRAW);
 
 	GLuint vao;
@@ -301,7 +304,7 @@ int main()
 			3 * sizeof(GLfloat), 0);
 
 	GLfloat view[16];
-	vec3 eye = {1.2, 1.2, 1.2};
+	vec3 eye = {3.0, 3.0, 3.0};
 	vec3 cent = {0.0, 0.0, 0.0};
 	vec3 up = {0.0, 0.0, 1.0};
 	look_at(eye, cent, up, view);
@@ -309,20 +312,15 @@ int main()
 	glUniformMatrix4fv(uni_view, 1, GL_FALSE, view);
 
 	GLfloat proj[16];
-	perspective(PI / 2, DEFAULT_SCREEN_X / DEFAULT_SCREEN_Y, 0.1, 100.0,
+	perspective(PI / 2, DEFAULT_SCREEN_X / DEFAULT_SCREEN_Y, 1.0, 10.0,
 			proj);
 	GLint uni_proj = glGetUniformLocation(shader_program, "proj");
 	glUniformMatrix4fv(uni_proj, 1, GL_FALSE, proj);
 
 	GLfloat trans[16];
-	rotatez(PI / 4, trans);
+	rotatez(PI / 2, trans);
 	GLint uni_trans = glGetUniformLocation(shader_program, "trans");
 	glUniformMatrix4fv(uni_trans, 1, GL_FALSE, trans);
-	/*
-	GLint col_attrib = glGetAttribLocation(shader_program, "in_colour");
-	glEnableVertexAttribArray(col_attrib);
-	glVertexAttribPointer(col_attrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	*/
 
 	SDL_Event e;
 	while (1) {
@@ -335,7 +333,7 @@ int main()
 		glClearColor(0.0, 0.0, 0.0, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glDrawArrays(GL_LINE_LOOP, 0, (int)(nverts * 3));
+		glDrawArrays(GL_LINE_LOOP, 0, (int)(nverts));
 
 		SDL_GL_SwapWindow(mainwin);
 	}
