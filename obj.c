@@ -2,8 +2,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-/* Puts the thee floats in the string str into an array given by buff */
-static int parse_vector (char * str, float * buff)
+#include <GL/glew.h>
+
+/* 
+ * Puts the thee floats in the string str into an array given by buff
+ */
+static int parse_vector (char * str, GLfloat * buff)
 {
 	char * _str = malloc(sizeof(char) * 80);
 	int i = 0;
@@ -27,12 +31,40 @@ cleanup:
 	return 0;
 }
 
-/* Reads obj file and deposits vertices into float array */
-size_t read_obj (const char * filename, float * vertices)
+static int parse_face (char * str, GLuint * buff)
+{
+	char * _str = malloc(sizeof(char) * 80);
+	int i = 0;
+	char * wd = malloc(sizeof(char) * 20);
+
+	if (_str == NULL || wd == NULL) 
+		goto cleanup;
+
+	strcpy(_str, str);
+	strtok(_str, " ");
+
+	while ((wd = strtok(NULL, " "))) {
+		buff[i] = atoi(strtok(wd, "/")) - 1;
+		i++;
+	}
+
+cleanup:
+	free(_str);
+	free(wd);
+
+	return 0;
+}
+
+/* 
+ * Reads obj file and deposits vertices into float array
+ */
+size_t read_obj (const char * filename, GLfloat * vertices, GLuint * faces,
+		GLuint * facec)
 {
 	char buf[80];
 	int vertc = 0;
-	float * _verts = vertices;
+	GLfloat * _verts = vertices;
+	GLuint * _faces = faces;
 
 	FILE * m = fopen(filename, "r");
 	if (m == NULL) {
@@ -45,7 +77,9 @@ size_t read_obj (const char * filename, float * vertices)
 			parse_vector(buf, _verts);
 			_verts += 3;
 			vertc++;
+		} else if (buf[0] == 'f') {
 		}
+
 	}
 
 	fclose(m);
@@ -53,14 +87,16 @@ size_t read_obj (const char * filename, float * vertices)
 	return vertc;
 }
 
-#ifdef FALSE
 int main ()
 {
+	/*
 	size_t vertlen = 0;
 	int i;
+	GLuint * facec = 0;
 
-	float * vertices = malloc(128 * sizeof(float));
-	vertlen = read_obj("models/sphere.obj", vertices);
+	GLfloat * vertices = malloc(128 * sizeof(GLfloat));
+	GLuint * faces = malloc(128 * sizeof(GLuint));
+	vertlen = read_obj("models/sphere.obj", vertices, faces, facec);
 
 	printf("%i\n", (int) vertlen);
 
@@ -69,7 +105,13 @@ int main ()
 		printf("%f, ", *(vertices + i + 1));
 		printf("%f\n", *(vertices + i + 2));
 	}
+	*/
+
+
+	GLuint * faces = malloc(3 * sizeof(GLuint));
+	parse_face("f 1//5 20//5 17//5", faces);
+
+	printf("%i, %i, %i\n", (int) *faces, (int) *(faces+1), (int) *(faces+2));
 
 	exit(EXIT_SUCCESS);
 }
-#endif

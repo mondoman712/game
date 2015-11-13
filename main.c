@@ -8,8 +8,8 @@
 #include "obj.h"
 
 #define WIN_TITLE "window title"
-#define DEFAULT_SCREEN_X 960
-#define DEFAULT_SCREEN_Y 960
+#define DEFAULT_SCREEN_X 1920
+#define DEFAULT_SCREEN_Y 1080
 
 #define PI 3.141592653589
 
@@ -106,21 +106,24 @@ static void look_at (vec3 eye, vec3 centre, vec3 up, GLfloat * mat4)
 static void perspective (GLfloat fovy, GLfloat asp, GLfloat znear, GLfloat zfar,
 		GLfloat * mat4)
 {
-	GLfloat f = 1 / tan(fovy / 2);
-	*mat4 = f / asp;
+	GLfloat top = znear * tan(fovy / 2);
+	GLfloat bottom = -top;
+	GLfloat right = top * asp;
+	GLfloat left = -right;
+	*mat4 = (2 * znear) / (right - left);
 	*(mat4 + 1) = 0;
-	*(mat4 + 2) = 0;
+	*(mat4 + 2) = (right + left) / (right - left);
 	*(mat4 + 3) = 0;
 
 	*(mat4 + 4) = 0;
-	*(mat4 + 5) = f;
-	*(mat4 + 6) = 0;
+	*(mat4 + 5) = (2 * znear) / (top - bottom);
+	*(mat4 + 6) = (top + bottom) / (top - bottom);
 	*(mat4 + 7) = 0;
 
 	*(mat4 + 8) = 0;
 	*(mat4 + 9) = 0;
-	*(mat4 + 10) = (znear + zfar) / (znear - zfar);
-	*(mat4 + 11) = (2 * zfar * znear) / (znear - zfar);
+	*(mat4 + 10) = - (zfar + znear) / (zfar - znear); 
+	*(mat4 + 11) = - (2 * zfar * znear) / (zfar - znear); 
 
 	*(mat4 + 12) = 0;
 	*(mat4 + 13) = 0;
@@ -254,18 +257,21 @@ int main()
 
 	/*
 	GLfloat vertices[] = {
-		 0.5,  0.5,  0.0,
-		 0.5, -0.5,  0.0,
-		-0.5, -0.5,  0.0,
-		-0.5,  0.5,  0.0,
-		 0.0,  0.0,  0.0
+		 0.5,  0.5,  0.5,
+		 0.5, -0.5,  0.5,
+		-0.5, -0.5,  0.5,
+		-0.5,  0.5, -0.5,
+		 0.5,  0.5, -0.5,
+		 0.5, -0.5, -0.5,
+		-0.5, -0.5, -0.5,
+		-0.5,  0.5,  0.5
 	};
 
 	size_t nverts = (sizeof(vertices) / sizeof(GLfloat)) / 3;
 	*/
 
-	float * vertices = malloc(128 * sizeof(float));
-	size_t nverts = read_obj("models/sphere.obj", vertices);
+	float * vertices = malloc(512 * sizeof(float));
+	size_t nverts = read_obj("models/monkey.obj", vertices);
 
 	printf("nverts: %i\n", (int) nverts);
 	int i;
@@ -304,7 +310,7 @@ int main()
 			3 * sizeof(GLfloat), 0);
 
 	GLfloat view[16];
-	vec3 eye = {3.0, 3.0, 3.0};
+	vec3 eye = {1.8, 1.8, 1.8};
 	vec3 cent = {0.0, 0.0, 0.0};
 	vec3 up = {0.0, 0.0, 1.0};
 	look_at(eye, cent, up, view);
@@ -312,16 +318,17 @@ int main()
 	glUniformMatrix4fv(uni_view, 1, GL_FALSE, view);
 
 	GLfloat proj[16];
-	perspective(PI / 2, DEFAULT_SCREEN_X / DEFAULT_SCREEN_Y, 1.0, 10.0,
+	perspective(PI / 2.0, DEFAULT_SCREEN_X / DEFAULT_SCREEN_Y, 1.0, 10.0,
 			proj);
 	GLint uni_proj = glGetUniformLocation(shader_program, "proj");
 	glUniformMatrix4fv(uni_proj, 1, GL_FALSE, proj);
 
-	GLfloat trans[16];
-	rotatez(PI / 2, trans);
-	GLint uni_trans = glGetUniformLocation(shader_program, "trans");
-	glUniformMatrix4fv(uni_trans, 1, GL_FALSE, trans);
+	GLfloat model[16];
+	rotatez(0, model);
+	GLint uni_model = glGetUniformLocation(shader_program, "model");
+	glUniformMatrix4fv(uni_model, 1, GL_FALSE, model);
 
+	float k = 0.0;
 	SDL_Event e;
 	while (1) {
 		if (SDL_PollEvent(&e)) {
@@ -332,11 +339,16 @@ int main()
 		}
 		glClearColor(0.0, 0.0, 0.0, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT);
+		
+		rotatez((PI / 180) * (k += 0.001), model);
+		glUniformMatrix4fv(uni_model, 1, GL_FALSE, model);
 
 		glDrawArrays(GL_LINE_LOOP, 0, (int)(nverts));
 
 		SDL_GL_SwapWindow(mainwin);
 	}
+
+	free(vertices);
 
 	glDeleteProgram(shader_program);
 	glDeleteShader(fragment_shader);
