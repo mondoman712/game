@@ -9,9 +9,9 @@
  */
 static int parse_vector (char * str, GLfloat * buff)
 {
-	char * _str = malloc(sizeof(char) * 80);
+	char * _str = malloc(sizeof(char) * 32);
+	char * wd = malloc(sizeof(char) * 10);
 	int i = 0;
-	char * wd = malloc(sizeof(char) * 20);
 
 	if (_str == NULL || wd == NULL) 
 		goto cleanup;
@@ -33,9 +33,9 @@ cleanup:
 
 static int parse_face (char * str, GLuint * buff)
 {
-	char * _str = malloc(sizeof(char) * 80);
+	char * _str = malloc(sizeof(char) * 35);
+	char * wd = malloc(sizeof(char) * 12);
 	int i = 0;
-	char * wd = malloc(sizeof(char) * 20);
 
 	if (_str == NULL || wd == NULL) 
 		goto cleanup;
@@ -44,7 +44,7 @@ static int parse_face (char * str, GLuint * buff)
 	strtok(_str, " ");
 
 	while ((wd = strtok(NULL, " "))) {
-		buff[i] = atoi(strtok(wd, "/")) - 1;
+		buff[i] = atoi(wd) - 1;
 		i++;
 	}
 
@@ -65,6 +65,7 @@ size_t read_obj (const char * filename, GLfloat * vertices, GLuint * faces,
 	int vertc = 0;
 	GLfloat * _verts = vertices;
 	GLuint * _faces = faces;
+	GLuint fc = 0;
 
 	FILE * m = fopen(filename, "r");
 	if (m == NULL) {
@@ -74,10 +75,11 @@ size_t read_obj (const char * filename, GLfloat * vertices, GLuint * faces,
 
 	while (fgets(buf, sizeof(buf), m)) {
 		if (buf[0] == 'v' && buf[1] == ' ') {
-			parse_vector(buf, _verts);
-			_verts += 3;
+			parse_vector(buf, _verts +(vertc * 3));
 			vertc++;
 		} else if (buf[0] == 'f') {
+			parse_face(buf, _faces + (fc * 3));
+			fc++;
 		}
 
 	}
@@ -89,10 +91,9 @@ size_t read_obj (const char * filename, GLfloat * vertices, GLuint * faces,
 
 int main ()
 {
-	/*
 	size_t vertlen = 0;
-	int i;
 	GLuint * facec = 0;
+	int i;
 
 	GLfloat * vertices = malloc(128 * sizeof(GLfloat));
 	GLuint * faces = malloc(128 * sizeof(GLuint));
@@ -105,13 +106,6 @@ int main ()
 		printf("%f, ", *(vertices + i + 1));
 		printf("%f\n", *(vertices + i + 2));
 	}
-	*/
-
-
-	GLuint * faces = malloc(3 * sizeof(GLuint));
-	parse_face("f 1//5 20//5 17//5", faces);
-
-	printf("%i, %i, %i\n", (int) *faces, (int) *(faces+1), (int) *(faces+2));
 
 	exit(EXIT_SUCCESS);
 }
