@@ -5,7 +5,7 @@
 #include <GL/glew.h>
 
 /* 
- * Puts the thee floats in the string str into an array given by buff
+ * Puts the three floats in the string str into an array given by buff
  */
 static int parse_vector (char * str, GLfloat * buff)
 {
@@ -31,6 +31,11 @@ cleanup:
 	return 0;
 }
 
+/*
+ * Puts the three ints in the string str into an array given by buff
+ *
+ * TODO: Merge this and parse_obj because of large amounts of copied code
+ */
 static int parse_face (char * str, GLuint * buff)
 {
 	char * _str = malloc(sizeof(char) * 35);
@@ -88,6 +93,7 @@ int read_obj (const char * filename, GLfloat * vertices, GLuint * faces)
 	return 0;
 }
 
+#ifdef FALSE
 int main ()
 {
 	int i;
@@ -120,3 +126,4 @@ int main ()
 
 	exit(EXIT_SUCCESS);
 }
+#endif
