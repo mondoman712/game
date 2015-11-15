@@ -72,12 +72,6 @@ static void vec3_array (vec3 in, GLfloat * array)
 	*(array + 2) = in.z;
 }
 
-static GLfloat dot_vec3 (vec3 a, vec3 b)
-{
-	return (a.x * b.x) + (a.y * b.y) + (a.z * b.z);
-}
-
-#ifdef FALSE
 static void look_at (vec3 eye, vec3 centre, vec3 up, GLfloat * mat4)
 {
 	vec3 f, s, u;
@@ -108,7 +102,12 @@ static void look_at (vec3 eye, vec3 centre, vec3 up, GLfloat * mat4)
 	*(mat4 + 14) = 0;
 	*(mat4 + 15) = 1;
 }
-#endif
+
+#ifdef FALSE
+static GLfloat dot_vec3 (vec3 a, vec3 b)
+{
+	return (a.x * b.x) + (a.y * b.y) + (a.z * b.z);
+}
 
 static void look_at (vec3 eye, vec3 centre, vec3 up, GLfloat * mat4)
 {
@@ -140,6 +139,7 @@ static void look_at (vec3 eye, vec3 centre, vec3 up, GLfloat * mat4)
 	*(mat4 + 14) = 0;
 	*(mat4 + 15) = 1.0;
 }
+#endif
 
 static void perspective (GLfloat fovy, GLfloat asp, GLfloat znear, GLfloat zfar,
 		GLfloat * mat4)
@@ -207,7 +207,7 @@ GLuint create_shader (const GLenum shader_type, const char * filename)
 		fprintf(stderr, "Could not open file %s\n", dest);
 		return 1;
 	}
-	
+
 	int i = 0;
 	char inc;
 	while (fscanf(s, "%c", &inc) > 0)
@@ -290,20 +290,35 @@ int main()
 		printf("GLEW is working\n");
 	}
 
-	/*
 	GLfloat vertices[] = {
 		8.0,
-		 0.5,  0.5,  0.5,
+		 0.5, -0.5, -0.5,
 		 0.5, -0.5,  0.5,
 		-0.5, -0.5,  0.5,
-		-0.5,  0.5, -0.5,
-		 0.5,  0.5, -0.5,
-		 0.5, -0.5, -0.5,
 		-0.5, -0.5, -0.5,
-		-0.5,  0.5,  0.5
+		 0.5,  0.5, -0.5,
+		 0.5,  0.5,  0.5,
+		-0.5,  0.5,  0.5,
+		-0.5,  0.5, -0.5
 	};
-	*/
 
+	GLuint faces[] = {
+		12,
+		1, 2, 3,
+		7, 6, 5,
+		4, 5, 1,
+		5, 6, 2,
+		2, 6, 7,
+		0, 3, 7,
+		0, 1, 3,
+		4, 7, 5,
+		0, 4, 1,
+		1, 5, 2,
+		3, 2, 7,
+		4, 0, 7
+	};
+
+	/*
 	GLfloat * vertices = malloc(16 * sizeof(GLfloat));
 	GLuint * faces = malloc(16 * sizeof(GLuint));
 	if (vertices == NULL || faces == NULL) {
@@ -320,7 +335,6 @@ int main()
 		printf("%f\n", *(vertices + i + 2));
 	}
 
-	/*
 	printf("faces: %i\n", (int) *faces);
 	for (i = 1; i < (int) (*faces * 3); i += 3) {
 		printf("%d, ", *(faces + i));
@@ -333,16 +347,19 @@ int main()
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, 
-			(size_t) (*vertices * 3 * sizeof(GLfloat)),
+			(*vertices * 3 * sizeof(GLfloat)),
 			vertices + 1,
 			GL_STATIC_DRAW);
+
+	GLuint vertex_shader = create_shader(GL_VERTEX_SHADER, "vs1");
+	GLuint fragment_shader = create_shader(GL_FRAGMENT_SHADER, "fs1");
 
 	GLuint vao;
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 
-	GLuint vertex_shader = create_shader(GL_VERTEX_SHADER, "vs1");
-	GLuint fragment_shader = create_shader(GL_FRAGMENT_SHADER, "fs1");
+	GLuint ebo;
+	glGenBuffers(1, &ebo);
 
 	GLuint shader_program = glCreateProgram();
 	glAttachShader(shader_program, vertex_shader);
@@ -358,7 +375,7 @@ int main()
 			3 * sizeof(GLfloat), 0);
 
 	GLfloat view[16];
-	vec3 eye = {2.0, 2.0, 2.0};
+	vec3 eye = {8.0, 8.0, 0.0};
 	vec3 cent = {0.0, 0.0, 0.0};
 	vec3 up = {0.0, 0.0, 1.0};
 	look_at(eye, cent, up, view);
@@ -372,9 +389,11 @@ int main()
 	glUniformMatrix4fv(uni_proj, 1, GL_FALSE, proj);
 
 	GLfloat model[16];
-	rotatez(0, model);
 	GLint uni_model = glGetUniformLocation(shader_program, "model");
-	glUniformMatrix4fv(uni_model, 1, GL_FALSE, model);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+			*faces, (faces + 1), GL_STATIC_DRAW);
 
 	float k = 0.0;
 	SDL_Event e;
@@ -388,10 +407,10 @@ int main()
 		glClearColor(0.0, 0.0, 0.0, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 		
-		rotatez((PI / 180) * (k += 0.001), model);
+		rotatez((PI / 180) * (k += 0.002), model);
 		glUniformMatrix4fv(uni_model, 1, GL_FALSE, model);
 
-		glDrawArrays(GL_LINE_LOOP, 0, (int)(*vertices));
+		glDrawElements(GL_TRIANGLES, (*faces * 3), GL_UNSIGNED_INT, 0);
 
 		SDL_GL_SwapWindow(mainwin);
 	}
