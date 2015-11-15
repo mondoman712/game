@@ -8,8 +8,8 @@
 #include "obj.h"
 
 #define WIN_TITLE "window title"
-#define DEFAULT_SCREEN_X 1920
-#define DEFAULT_SCREEN_Y 1080
+#define DEFAULT_SCREEN_X 1280
+#define DEFAULT_SCREEN_Y 720
 
 #define PI 3.141592653589
 
@@ -72,6 +72,12 @@ static void vec3_array (vec3 in, GLfloat * array)
 	*(array + 2) = in.z;
 }
 
+static GLfloat dot_vec3 (vec3 a, vec3 b)
+{
+	return (a.x * b.x) + (a.y * b.y) + (a.z * b.z);
+}
+
+#ifdef FALSE
 static void look_at (vec3 eye, vec3 centre, vec3 up, GLfloat * mat4)
 {
 	vec3 f, s, u;
@@ -102,28 +108,57 @@ static void look_at (vec3 eye, vec3 centre, vec3 up, GLfloat * mat4)
 	*(mat4 + 14) = 0;
 	*(mat4 + 15) = 1;
 }
+#endif
+
+static void look_at (vec3 eye, vec3 centre, vec3 up, GLfloat * mat4)
+{
+	vec3 x, y, z;
+
+	z.x = centre.x - eye.x;
+	z.y = centre.y - eye.y;
+	z.z = centre.z - eye.z;
+	z = norm_vec3(z);
+
+	y = up;
+	x = cross_vec3(y, z);
+	y = cross_vec3(z, x);
+
+	y = norm_vec3(y);
+	z = norm_vec3(z);
+
+	vec3_array(x, mat4);
+	*(mat4 + 3) = - dot_vec3(x, eye);
+
+	vec3_array(y, (mat4 + 4));
+	*(mat4 + 7) = - dot_vec3(y, eye);
+
+	vec3_array(z, (mat4 + 8));
+	*(mat4 + 11) = - dot_vec3(z, eye);
+
+	*(mat4 + 12) = 0;
+	*(mat4 + 13) = 0;
+	*(mat4 + 14) = 0;
+	*(mat4 + 15) = 1.0;
+}
 
 static void perspective (GLfloat fovy, GLfloat asp, GLfloat znear, GLfloat zfar,
 		GLfloat * mat4)
 {
-	GLfloat top = znear * tan(fovy / 2);
-	GLfloat bottom = -top;
-	GLfloat right = top * asp;
-	GLfloat left = -right;
-	*mat4 = (2 * znear) / (right - left);
+	GLfloat f = 1 / tan(fovy / 2);
+	*mat4 = f / asp;
 	*(mat4 + 1) = 0;
-	*(mat4 + 2) = (right + left) / (right - left);
+	*(mat4 + 2) = 0;
 	*(mat4 + 3) = 0;
 
 	*(mat4 + 4) = 0;
-	*(mat4 + 5) = (2 * znear) / (top - bottom);
-	*(mat4 + 6) = (top + bottom) / (top - bottom);
+	*(mat4 + 5) = f;
+	*(mat4 + 6) = 0;
 	*(mat4 + 7) = 0;
 
 	*(mat4 + 8) = 0;
 	*(mat4 + 9) = 0;
-	*(mat4 + 10) = - (zfar + znear) / (zfar - znear); 
-	*(mat4 + 11) = - (2 * zfar * znear) / (zfar - znear); 
+	*(mat4 + 10) = (zfar + znear) / (zfar - znear); 
+	*(mat4 + 11) = (2 * zfar * znear) / (zfar - znear); 
 
 	*(mat4 + 12) = 0;
 	*(mat4 + 13) = 0;
@@ -257,6 +292,7 @@ int main()
 
 	/*
 	GLfloat vertices[] = {
+		8.0,
 		 0.5,  0.5,  0.5,
 		 0.5, -0.5,  0.5,
 		-0.5, -0.5,  0.5,
@@ -266,27 +302,39 @@ int main()
 		-0.5, -0.5, -0.5,
 		-0.5,  0.5,  0.5
 	};
-
-	size_t nverts = (sizeof(vertices) / sizeof(GLfloat)) / 3;
 	*/
 
-	float * vertices = malloc(512 * sizeof(float));
-	size_t nverts = read_obj("models/monkey.obj", vertices);
+	GLfloat * vertices = malloc(16 * sizeof(GLfloat));
+	GLuint * faces = malloc(16 * sizeof(GLuint));
+	if (vertices == NULL || faces == NULL) {
+		fprintf(stderr, "Failed to allocate memory 01\n");
+		exit(EXIT_FAILURE);
+	}
+	read_obj("models/cube.obj", vertices, faces);
 
-	printf("nverts: %i\n", (int) nverts);
 	int i;
-	for (i = 0; i < (int) (nverts * 3); i += 3) {
+	printf("vertices: %i\n", (int) *vertices);
+	for (i = 1; i < (*vertices * 3); i += 3) {
 		printf("%f, ", *(vertices + i));
 		printf("%f, ", *(vertices + i + 1));
 		printf("%f\n", *(vertices + i + 2));
 	}
 
+	/*
+	printf("faces: %i\n", (int) *faces);
+	for (i = 1; i < (int) (*faces * 3); i += 3) {
+		printf("%d, ", *(faces + i));
+		printf("%d, ", *(faces + i + 1));
+		printf("%d\n", *(faces + i + 2));
+	}
+	*/
+
 	GLuint vbo;
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, 
-			nverts * 3 * sizeof(GLfloat) * sizeof(GLfloat), 
-			vertices,
+			(size_t) (*vertices * 3 * sizeof(GLfloat)),
+			vertices + 1,
 			GL_STATIC_DRAW);
 
 	GLuint vao;
@@ -310,7 +358,7 @@ int main()
 			3 * sizeof(GLfloat), 0);
 
 	GLfloat view[16];
-	vec3 eye = {1.8, 1.8, 1.8};
+	vec3 eye = {2.0, 2.0, 2.0};
 	vec3 cent = {0.0, 0.0, 0.0};
 	vec3 up = {0.0, 0.0, 1.0};
 	look_at(eye, cent, up, view);
@@ -318,7 +366,7 @@ int main()
 	glUniformMatrix4fv(uni_view, 1, GL_FALSE, view);
 
 	GLfloat proj[16];
-	perspective(PI / 2.0, DEFAULT_SCREEN_X / DEFAULT_SCREEN_Y, 1.0, 10.0,
+	perspective(PI / 2, DEFAULT_SCREEN_X / DEFAULT_SCREEN_Y, 1.0, 10.0,
 			proj);
 	GLint uni_proj = glGetUniformLocation(shader_program, "proj");
 	glUniformMatrix4fv(uni_proj, 1, GL_FALSE, proj);
@@ -343,12 +391,15 @@ int main()
 		rotatez((PI / 180) * (k += 0.001), model);
 		glUniformMatrix4fv(uni_model, 1, GL_FALSE, model);
 
-		glDrawArrays(GL_LINE_LOOP, 0, (int)(nverts));
+		glDrawArrays(GL_LINE_LOOP, 0, (int)(*vertices));
 
 		SDL_GL_SwapWindow(mainwin);
 	}
 
+	/*
 	free(vertices);
+	free(faces);
+	*/
 
 	glDeleteProgram(shader_program);
 	glDeleteShader(fragment_shader);
