@@ -107,6 +107,60 @@ int main()
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, GL_MAJOR_VER);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, GL_MINOR_VER);
 
+	glewExperimental = GL_TRUE;
+	GLenum glew_status = glewInit();
+	if (glew_status) {
+		fprintf(stderr, "Error %s\n", glewGetErrorString(glew_status));
+		exit(EXIT_FAILURE);
+	} else {
+		printf("GLEW is working\n");
+	}
+
+	GLfloat verts[] = {
+		 0.0, 	 0.5,
+		 0.5, 	-0.5,
+		-0.5, 	-0.5
+	};
+
+	GLuint vbo;
+	glGenBuffers(1, &vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts,
+			GL_STATIC_DRAW);	
+
+	GLuint vert_shader = create_shader(GL_VERTEX_SHADER, "vs1");
+	GLuint frag_shader = create_shader(GL_FRAGMENT_SHADER, "fs1");
+
+	GLuint vao;
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+
+	GLuint shader_prog = glCreateProgram();
+	glAttachShader(shader_prog, vert_shader);
+	glAttachShader(shader_prog, frag_shader);
+	glBindFragDataLocation(shader_prog, 0, "out_colour");
+	glLinkProgram(shader_prog);
+	glUseProgram(shader_prog);
+
+	GLuint pos_attr = glGetAttribLocation(shader_prog, "position");
+	glVertexAttribPointer(pos_attr, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(pos_attr);
+
+	SDL_Event e;
+	while (1) {
+		if (SDL_PollEvent(&e)) {
+				if (e.type == SDL_QUIT)
+					break;
+				else if (e.type == SDL_KEYUP && e.key.keysym.sym == SDLK_q)
+					break;
+		}
+		glClearColor(0.0, 0.0, 0.0, 0.0);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		glDrawArrays(GL_TRIANGLES, 0, 3);
+
+		SDL_GL_SwapWindow(mainwin);
+	}
 
 	SDL_GL_DeleteContext(gl_context);
 	SDL_DestroyWindow(mainwin);
