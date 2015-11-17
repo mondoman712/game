@@ -117,9 +117,9 @@ int main()
 	}
 
 	GLfloat verts[] = {
-		 0.0, 	 0.5,
-		 0.5, 	-0.5,
-		-0.5, 	-0.5
+		 0.0, 	 0.5, 	1.0, 	0.0, 	0.0,
+		 0.5, 	-0.5, 	0.0, 	1.0, 	0.0,
+		-0.5, 	-0.5, 	0.0, 	0.0, 	1.0
 	};
 
 	GLuint vbo;
@@ -143,26 +143,26 @@ int main()
 	glUseProgram(shader_prog);
 
 	GLuint pos_attr = glGetAttribLocation(shader_prog, "position");
-	glVertexAttribPointer(pos_attr, 2, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(pos_attr);
+	glVertexAttribPointer(pos_attr, 2, GL_FLOAT, GL_FALSE,
+		       5 * sizeof(GLfloat), 0);
 
-	GLint ucol = glGetUniformLocation(shader_prog, "tri_colour");
-	GLfloat col = 0.0;
+	GLuint col_attr = glGetAttribLocation(shader_prog, "in_colour");
+	glEnableVertexAttribArray(col_attr);
+	glVertexAttribPointer(col_attr, 3, GL_FLOAT, GL_FALSE,
+			5 * sizeof(GLfloat), (void *)(2 * sizeof(GLfloat)));
 
 	SDL_Event e;
 	while (1) {
 		if (SDL_PollEvent(&e)) {
-				if (e.type == SDL_QUIT)
-					break;
-				else if (e.type == SDL_KEYUP && e.key.keysym.sym == SDLK_q)
-					break;
+			if (e.type == SDL_QUIT)
+				break;
+			else if (e.type == SDL_KEYUP && e.key.keysym.sym == SDLK_q)
+				break;
 		}
 		glClearColor(0.0, 0.0, 0.0, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		col += 0.0001;
-		glUniform3f(ucol, (sin(col * 4) + 1) / 2, 0.0, 0.0);
-		
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 
 		SDL_GL_SwapWindow(mainwin);
