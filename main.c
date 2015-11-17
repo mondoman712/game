@@ -146,6 +146,9 @@ int main()
 	glVertexAttribPointer(pos_attr, 2, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(pos_attr);
 
+	GLint ucol = glGetUniformLocation(shader_prog, "tri_colour");
+	GLfloat col = 0.0;
+
 	SDL_Event e;
 	while (1) {
 		if (SDL_PollEvent(&e)) {
@@ -157,6 +160,9 @@ int main()
 		glClearColor(0.0, 0.0, 0.0, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 
+		col += 0.0001;
+		glUniform3f(ucol, (sin(col * 4) + 1) / 2, 0.0, 0.0);
+		
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 
 		SDL_GL_SwapWindow(mainwin);
