@@ -17,41 +17,105 @@
 #define SHADER_DIR "shaders/"
 #define SHADER_EXT ".glsl"
 
+#define PNG_SIGBYTES 8
+
 /*
  * Checks the signature of the png file being read at stream
  */
 GLuint readpng_checksig (FILE * stream)
 {
-	GLubyte sig[8];
-	fread(sig, 1, 8, stream);
-	return !png_check_sig(sig, 8);
+	GLubyte sig[PNG_SIGBYTES];
+	fread(sig, 1, PNG_SIGBYTES, stream);
+	return !png_check_sig(sig, PNG_SIGBYTES);
 }
 
-GLuint readpng_init (char * filename, GLuint * width, GLuint * height)
+/*
+ * Reads png file
+ */
+GLuint read_png(const char * filename, GLuint * width, GLuint * height,
+		png_byte * img_data)
 {
-	GLuint err = 0;
-
-	/* Read File */
-	FILE * f = fopen(filename, "rb");
-	if (f == NULL) {
+	/* Open File */
+	FILE * fp = fopen(filename, "rb");
+	if (fp == NULL) {
 		fprintf(stderr, "Error opening file %s\n", filename);
 		return 1;
 	}
 
-	if (readpng_checksig(f)) {
+	/* Check Signature */
+	if (readpng_checksig(fp)) {
 		fprintf(stderr, "PNG signature for %s is invalid\n", filename);
-		err += 1;
 		goto cleanup;
 	}
 
-	printf("w: %i, h: %i\n", *width, *height);
+	/* Create png structs */
+	png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL,
+			NULL, NULL);
+	if (!png)
+		goto cleanup;
 
-	png_structp png_ptr;
-	png_infop info_ptr;
+	png_infop info = png_create_info_struct(png);
+	if (!info) {
+		png_destroy_read_struct(&png, (png_infopp) NULL,
+				(png_infopp) NULL);
+		goto cleanup;
+	}
 
+	png_infop end_info = png_create_info_struct(png);
+	if (!end_info) {
+		png_destroy_read_struct(&png, &info, (png_infopp) NULL);
+		goto cleanup;
+	}
+
+	/* Set libpng error jump point */
+	if (setjmp(png_jmpbuf(png))) {
+		goto cleanup1;
+	}
+
+	/* Actually read the png */
+	png_init_io(png, fp);
+	png_set_sig_bytes(png, 8);
+	png_read_info(png, info);
+
+	GLint bit_depth, colour_type;
+	png_uint_32 tmpw, tmph;
+	png_get_IHDR(png, info, &tmpw, &tmph, &bit_depth, &colour_type, NULL,
+			NULL, NULL);
+
+	if (width) *width = tmpw;
+	if (height) *height = tmph;
+
+	png_read_update_info(png, info);
+	size_t rowbytes = png_get_rowbytes(png, info);
+	rowbytes += 3 - ((rowbytes - 1) % 4);
+
+	img_data = malloc(rowbytes * tmph * sizeof(png_byte) + 15);
+	if (img_data == NULL) {
+		fprintf(stderr, "Failed to allocate memory for %s\n", filename);
+		goto cleanup1;
+	}
+
+	png_bytep * row_ptrs = malloc(tmph * sizeof(png_bytep));
+	if (row_ptrs == NULL) {
+		fprintf(stderr, "Failed to allocate memory for %s\n", filename);
+		goto cleanup2;
+	}
+
+	GLuint i;
+	for (i = 0; i < tmph; i++)
+		row_ptrs[tmph - 1 - i] = img_data + i * rowbytes;
+
+	png_read_image(png, row_ptrs);
+
+
+	free(row_ptrs);
+cleanup2:
+	free(img_data);
+cleanup1:
+	png_destroy_read_struct(&png, &info, &end_info);
 cleanup:
-	fclose(f);
-	return err;
+	fclose(fp);
+	return 0;
 }
 
 /*
@@ -156,10 +220,10 @@ int main()
 	}
 
 	GLfloat verts[] = {
-		-0.5, 	 0.5, 	1.0, 	0.0, 	0.0,
-		 0.5, 	 0.5, 	0.0, 	1.0, 	0.0,
-		 0.5, 	-0.5, 	0.0, 	0.0, 	1.0,
-		-0.5, 	-0.5, 	1.0, 	1.0, 	1.0
+		-0.5, 	 0.5, 	1.0, 	0.0, 	0.0, 	0.0, 	0.0,
+		 0.5, 	 0.5, 	0.0, 	1.0, 	0.0, 	1.0, 	0.0,
+		 0.5, 	-0.5, 	0.0, 	0.0, 	1.0, 	1.0, 	1.0,
+		-0.5, 	-0.5, 	1.0, 	1.0, 	1.0, 	0.0, 	1.0
 	};
 
 	GLuint elements[] = {
@@ -183,21 +247,21 @@ int main()
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements), elements,
 			GL_STATIC_DRAW);
 
-	GLuint tex;
+	GLuint w, h, tex;
+	png_byte * img_data = NULL;
+	if (read_png("pat.png", &w, &h, img_data)) {
+		fprintf(stderr, "Failed to load png\n");
+		exit(EXIT_FAILURE);
+	}
 	glGenTextures(1, &tex);
 	glBindTexture(GL_TEXTURE_2D, tex);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	GLfloat col[] = {1.0, 0.0, 0.0, 1.0};
-	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, col);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB,
+			GL_UNSIGNED_BYTE, img_data);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glGenerateMipmap(GL_TEXTURE_2D);
-	GLfloat pixels[] = {
-		0.0, 0.0, 0.0, 	1.0, 1.0, 1.0,
-		1.0, 1.0, 1.0, 	0.0, 0.0, 0.0
-	};
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 2, 2, 0, GL_RGB, GL_FLOAT, pixels);
 
 	GLuint vert_shader = create_shader(GL_VERTEX_SHADER, "vs1");
 	GLuint frag_shader = create_shader(GL_FRAGMENT_SHADER, "fs1");
@@ -212,12 +276,17 @@ int main()
 	GLuint pos_attr = glGetAttribLocation(shader_prog, "position");
 	glEnableVertexAttribArray(pos_attr);
 	glVertexAttribPointer(pos_attr, 2, GL_FLOAT, GL_FALSE,
-		       5 * sizeof(GLfloat), 0);
+			7 * sizeof(GLfloat), 0);
 
 	GLuint col_attr = glGetAttribLocation(shader_prog, "in_colour");
 	glEnableVertexAttribArray(col_attr);
 	glVertexAttribPointer(col_attr, 3, GL_FLOAT, GL_FALSE,
-			5 * sizeof(GLfloat), (void *)(2 * sizeof(GLfloat)));
+			7 * sizeof(GLfloat), (void *)(2 * sizeof(GLfloat)));
+
+	GLint tex_attr = glGetAttribLocation(shader_prog, "texcoord");
+	glEnableVertexAttribArray(tex_attr);
+	glVertexAttribPointer(tex_attr, 2, GL_FLOAT, GL_FALSE,
+			7 * sizeof(GLfloat), (void *)(5 * sizeof(GLfloat)));
 
 	SDL_Event e;
 	while (1) {
@@ -238,14 +307,6 @@ int main()
 	SDL_GL_DeleteContext(gl_context);
 	SDL_DestroyWindow(mainwin);
 	SDL_Quit();
-
-	printf("Compiled with libpng %s; using libpng %s\n",
-			PNG_LIBPNG_VER_STRING, png_libpng_ver);
-	printf("Compiled with zlib %s; using zlib %s\n",
-			ZLIB_VERSION, zlib_version);
-
-	GLuint w = 1, h = 0;
-	printf("%i\n", readpng_init("pat.png", &w, &h));
 
 	exit(EXIT_SUCCESS);
 }
