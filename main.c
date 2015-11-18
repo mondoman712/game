@@ -4,6 +4,8 @@
 
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
+#include <zlib.h>
+#include <png.h>
 
 #define WIN_TITLE "window title"
 #define DEFAULT_SCREEN_X 1280
@@ -14,6 +16,43 @@
 
 #define SHADER_DIR "shaders/"
 #define SHADER_EXT ".glsl"
+
+/*
+ * Checks the signature of the png file being read at stream
+ */
+GLuint readpng_checksig (FILE * stream)
+{
+	GLubyte sig[8];
+	fread(sig, 1, 8, stream);
+	return !png_check_sig(sig, 8);
+}
+
+GLuint readpng_init (char * filename, GLuint * width, GLuint * height)
+{
+	GLuint err = 0;
+
+	/* Read File */
+	FILE * f = fopen(filename, "rb");
+	if (f == NULL) {
+		fprintf(stderr, "Error opening file %s\n", filename);
+		return 1;
+	}
+
+	if (readpng_checksig(f)) {
+		fprintf(stderr, "PNG signature for %s is invalid\n", filename);
+		err += 1;
+		goto cleanup;
+	}
+
+	printf("w: %i, h: %i\n", *width, *height);
+
+	png_structp png_ptr;
+	png_infop info_ptr;
+
+cleanup:
+	fclose(f);
+	return err;
+}
 
 /*
  * Reads and compiles a .glsl shader file in the shaders folder, from just the
@@ -117,9 +156,15 @@ int main()
 	}
 
 	GLfloat verts[] = {
-		 0.0, 	 0.5, 	1.0, 	0.0, 	0.0,
-		 0.5, 	-0.5, 	0.0, 	1.0, 	0.0,
-		-0.5, 	-0.5, 	0.0, 	0.0, 	1.0
+		-0.5, 	 0.5, 	1.0, 	0.0, 	0.0,
+		 0.5, 	 0.5, 	0.0, 	1.0, 	0.0,
+		 0.5, 	-0.5, 	0.0, 	0.0, 	1.0,
+		-0.5, 	-0.5, 	1.0, 	1.0, 	1.0
+	};
+
+	GLuint elements[] = {
+		0, 1, 2,
+		2, 3, 0
 	};
 
 	GLuint vbo;
@@ -128,12 +173,34 @@ int main()
 	glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts,
 			GL_STATIC_DRAW);	
 
-	GLuint vert_shader = create_shader(GL_VERTEX_SHADER, "vs1");
-	GLuint frag_shader = create_shader(GL_FRAGMENT_SHADER, "fs1");
-
 	GLuint vao;
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
+
+	GLuint ebo;
+	glGenBuffers(1, &ebo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements), elements,
+			GL_STATIC_DRAW);
+
+	GLuint tex;
+	glGenTextures(1, &tex);
+	glBindTexture(GL_TEXTURE_2D, tex);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	GLfloat col[] = {1.0, 0.0, 0.0, 1.0};
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, col);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	GLfloat pixels[] = {
+		0.0, 0.0, 0.0, 	1.0, 1.0, 1.0,
+		1.0, 1.0, 1.0, 	0.0, 0.0, 0.0
+	};
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 2, 2, 0, GL_RGB, GL_FLOAT, pixels);
+
+	GLuint vert_shader = create_shader(GL_VERTEX_SHADER, "vs1");
+	GLuint frag_shader = create_shader(GL_FRAGMENT_SHADER, "fs1");
 
 	GLuint shader_prog = glCreateProgram();
 	glAttachShader(shader_prog, vert_shader);
@@ -163,7 +230,7 @@ int main()
 		glClearColor(0.0, 0.0, 0.0, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 		SDL_GL_SwapWindow(mainwin);
 	}
@@ -171,6 +238,14 @@ int main()
 	SDL_GL_DeleteContext(gl_context);
 	SDL_DestroyWindow(mainwin);
 	SDL_Quit();
+
+	printf("Compiled with libpng %s; using libpng %s\n",
+			PNG_LIBPNG_VER_STRING, png_libpng_ver);
+	printf("Compiled with zlib %s; using zlib %s\n",
+			ZLIB_VERSION, zlib_version);
+
+	GLuint w = 1, h = 0;
+	printf("%i\n", readpng_init("pat.png", &w, &h));
 
 	exit(EXIT_SUCCESS);
 }

@@ -3,7 +3,7 @@ CSTD = c89
 
 CFLAGS = -g -W -Wall -Werror -std=$(CSTD)
 SDL_CFLAGS = $(shell sdl2-config --cflags)
-LDFLAGS = $(shell sdl2-config --libs) -lGL -lGLEW -lm
+LDFLAGS = $(shell sdl2-config --libs) -lGL -lGLEW -lm -lpng -lz
 
 MAIN = main.c
 
