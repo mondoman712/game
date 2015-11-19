@@ -5,7 +5,7 @@
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
 
-#include "png.h"
+#include "f_png.h"
 
 #define WIN_TITLE "window title"
 #define DEFAULT_SCREEN_X 1280
