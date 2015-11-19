@@ -20,8 +20,7 @@ static GLuint readpng_checksig (FILE * stream)
 /*
  * Reads png file
  */
-GLuint read_png(const char * filename, GLuint * width, GLuint * height,
-		png_byte * img_data)
+GLuint read_png(const char * filename, GLuint * width, GLuint * height)
 {
 	/* Open File */
 	FILE * fp = fopen(filename, "rb");
@@ -73,10 +72,21 @@ GLuint read_png(const char * filename, GLuint * width, GLuint * height,
 	if (width) *width = tmpw;
 	if (height) *height = tmph;
 
+	char * s;
+	if (colour_type == PNG_COLOR_TYPE_RGB)
+		s = "RGB";
+	else if (colour_type == PNG_COLOR_TYPE_RGBA)
+		s = "RGBA";
+	else
+		s = "Unknown";
+	printf("width = %i,\t height = %i\n", tmpw, tmph);
+	printf("bit depth = %i,\t colour type = %s\n", bit_depth, s);
+
 	png_read_update_info(png, info);
 	size_t rowbytes = png_get_rowbytes(png, info);
 	rowbytes += 3 - ((rowbytes - 1) % 4);
 
+	png_byte * img_data = NULL;
 	img_data = malloc(rowbytes * tmph * sizeof(png_byte) + 15);
 	if (img_data == NULL) {
 		fprintf(stderr, "Failed to allocate memory for %s\n", filename);
@@ -95,6 +105,16 @@ GLuint read_png(const char * filename, GLuint * width, GLuint * height,
 
 	png_read_image(png, row_ptrs);
 
+	GLuint tex;
+	glGenTextures(1, &tex);
+	glBindTexture(GL_TEXTURE_2D, tex);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tmpw, tmph, 0, GL_RGBA,
+			GL_UNSIGNED_BYTE, img_data);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glGenerateMipmap(GL_TEXTURE_2D);
 
 	free(row_ptrs);
 cleanup2:

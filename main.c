@@ -8,8 +8,8 @@
 #include "f_png.h"
 
 #define WIN_TITLE "window title"
-#define DEFAULT_SCREEN_X 1280
-#define DEFAULT_SCREEN_Y 720
+#define DEFAULT_SCREEN_X 960
+#define DEFAULT_SCREEN_Y 960
 
 #define GL_MAJOR_VER 3
 #define GL_MINOR_VER 3
@@ -88,7 +88,6 @@ int main()
 		printf("SDL window created\n");
 	}
 
-
 	SDL_GLContext gl_context = SDL_GL_CreateContext(mainwin);
 	if (gl_context == NULL) {
 		fprintf(stderr, "Failed to create OpenGL context\n");
@@ -146,21 +145,11 @@ int main()
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements), elements,
 			GL_STATIC_DRAW);
 
-	GLuint w, h, tex;
-	png_byte * img_data = NULL;
-	if (read_png("pat.png", &w, &h, img_data)) {
+	GLuint w, h;
+	if (read_png("pat.png", &w, &h)) {
 		fprintf(stderr, "Failed to load png\n");
 		exit(EXIT_FAILURE);
 	}
-	glGenTextures(1, &tex);
-	glBindTexture(GL_TEXTURE_2D, tex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB,
-			GL_UNSIGNED_BYTE, img_data);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glGenerateMipmap(GL_TEXTURE_2D);
 
 	GLuint vert_shader = create_shader(GL_VERTEX_SHADER, "vs1");
 	GLuint frag_shader = create_shader(GL_FRAGMENT_SHADER, "fs1");
