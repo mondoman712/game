@@ -20,13 +20,13 @@ static GLuint readpng_checksig (FILE * stream)
 /*
  * Reads png file
  */
-GLuint read_png(const char * filename, GLuint * width, GLuint * height)
+png_byte * read_png(const char * filename, GLuint * width, GLuint * height)
 {
 	/* Open File */
 	FILE * fp = fopen(filename, "rb");
 	if (fp == NULL) {
 		fprintf(stderr, "Error opening file %s\n", filename);
-		return 1;
+		return NULL;
 	}
 
 	/* Check Signature */
@@ -73,14 +73,20 @@ GLuint read_png(const char * filename, GLuint * width, GLuint * height)
 	if (height) *height = tmph;
 
 	char * s;
-	if (colour_type == PNG_COLOR_TYPE_RGB)
+	switch (colour_type) {
+	case PNG_COLOR_TYPE_RGB:
 		s = "RGB";
-	else if (colour_type == PNG_COLOR_TYPE_RGBA)
+		break;
+	case PNG_COLOR_TYPE_RGB_ALPHA:
 		s = "RGBA";
-	else
+		break;
+	default:
 		s = "Unknown";
-	printf("width = %i,\t height = %i\n", tmpw, tmph);
-	printf("bit depth = %i,\t colour type = %s\n", bit_depth, s);
+	}
+
+	printf("%s:\n", filename);
+	printf("\twidth = %i,\t height = %i\n", tmpw, tmph);
+	printf("\tbit depth = %i,\t colour type = %s\n", bit_depth, s);
 
 	png_read_update_info(png, info);
 	size_t rowbytes = png_get_rowbytes(png, info);
@@ -105,23 +111,11 @@ GLuint read_png(const char * filename, GLuint * width, GLuint * height)
 
 	png_read_image(png, row_ptrs);
 
-	GLuint tex;
-	glGenTextures(1, &tex);
-	glBindTexture(GL_TEXTURE_2D, tex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tmpw, tmph, 0, GL_RGBA,
-			GL_UNSIGNED_BYTE, img_data);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glGenerateMipmap(GL_TEXTURE_2D);
-
 	free(row_ptrs);
 cleanup2:
-	free(img_data);
 cleanup1:
 	png_destroy_read_struct(&png, &info, &end_info);
 cleanup:
 	fclose(fp);
-	return 0;
+	return img_data;
 }

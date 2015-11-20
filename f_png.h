@@ -7,6 +7,6 @@
 /*
  * Reads png file
  */
-GLuint read_png(const char * filename, GLuint * width, GLuint * height);
+png_byte * read_png(const char * filename, GLuint * width, GLuint * height);
 
 #endif /* _F_PNG_H */

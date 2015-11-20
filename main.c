@@ -145,12 +145,6 @@ int main()
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements), elements,
 			GL_STATIC_DRAW);
 
-	GLuint w, h;
-	if (read_png("pat.png", &w, &h)) {
-		fprintf(stderr, "Failed to load png\n");
-		exit(EXIT_FAILURE);
-	}
-
 	GLuint vert_shader = create_shader(GL_VERTEX_SHADER, "vs1");
 	GLuint frag_shader = create_shader(GL_FRAGMENT_SHADER, "fs1");
 
@@ -160,6 +154,38 @@ int main()
 	glBindFragDataLocation(shader_prog, 0, "out_colour");
 	glLinkProgram(shader_prog);
 	glUseProgram(shader_prog);
+
+	GLuint tex[2];
+	glGenTextures(2, tex);
+
+	GLuint w, h;
+	glBindTexture(GL_TEXTURE_2D, tex[0]);
+	glActiveTexture(GL_TEXTURE0);
+	png_byte * pat_data;
+	if ((pat_data = read_png("pat.png", &w, &h)) == NULL) {
+		fprintf(stderr, "Failed to load png\n");
+		exit(EXIT_FAILURE);
+	}
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA,
+			GL_UNSIGNED_BYTE, pat_data);
+	glUniform1i(glGetUniformLocation(shader_prog, "texpat"), 0);
+
+	glBindTexture(GL_TEXTURE_2D, tex[1]);
+	glActiveTexture(GL_TEXTURE1);
+	png_byte * bmo_data;
+	if ((bmo_data = read_png("bmo.png", &w, &h)) == NULL) {
+		fprintf(stderr, "Failed to load png\n");
+		exit(EXIT_FAILURE);
+	}
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA,
+			GL_UNSIGNED_BYTE, bmo_data);
+	glUniform1i(glGetUniformLocation(shader_prog, "texbmo"), 1);
+
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glGenerateMipmap(GL_TEXTURE_2D);
 
 	GLuint pos_attr = glGetAttribLocation(shader_prog, "position");
 	glEnableVertexAttribArray(pos_attr);
