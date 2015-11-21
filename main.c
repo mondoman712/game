@@ -159,26 +159,22 @@ int main()
 	glGenTextures(2, tex);
 
 	GLuint w, h;
-	glBindTexture(GL_TEXTURE_2D, tex[0]);
+	png_byte * img_data;
+
 	glActiveTexture(GL_TEXTURE0);
-	png_byte * pat_data;
-	if ((pat_data = read_png("pat.png", &w, &h)) == NULL) {
-		fprintf(stderr, "Failed to load png\n");
-		exit(EXIT_FAILURE);
-	}
+	glBindTexture(GL_TEXTURE_2D, tex[0]);
+	img_data = read_png("cat.png", &w, &h);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA,
-			GL_UNSIGNED_BYTE, pat_data);
+			GL_UNSIGNED_BYTE, img_data);
+	free(img_data);
 	glUniform1i(glGetUniformLocation(shader_prog, "texpat"), 0);
 
-	glBindTexture(GL_TEXTURE_2D, tex[1]);
 	glActiveTexture(GL_TEXTURE1);
-	png_byte * bmo_data;
-	if ((bmo_data = read_png("bmo.png", &w, &h)) == NULL) {
-		fprintf(stderr, "Failed to load png\n");
-		exit(EXIT_FAILURE);
-	}
+	glBindTexture(GL_TEXTURE_2D, tex[1]);
+	img_data = read_png("dog.png", &w, &h);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA,
-			GL_UNSIGNED_BYTE, bmo_data);
+			GL_UNSIGNED_BYTE, img_data);
+	free(img_data);
 	glUniform1i(glGetUniformLocation(shader_prog, "texbmo"), 1);
 
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
