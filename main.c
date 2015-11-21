@@ -66,6 +66,19 @@ GLuint create_shader (const GLenum shader_type, const char * filename)
 	return shader;
 }
 
+/*
+ * Handles key up event in main loop
+ */
+GLuint handle_keyup(SDL_Event e)
+{
+	switch(e.key.keysym.sym) {
+	case (SDLK_q):
+		return 1;
+	}
+	
+	return 0;
+}
+
 int main()
 {
 	if (SDL_Init(SDL_INIT_VIDEO)) {
@@ -203,7 +216,7 @@ int main()
 		if (SDL_PollEvent(&e)) {
 			if (e.type == SDL_QUIT)
 				break;
-			else if (e.type == SDL_KEYUP && e.key.keysym.sym == SDLK_q)
+			else if (e.type == SDL_KEYUP && handle_keyup(e))
 				break;
 		}
 		glClearColor(0.0, 0.0, 0.0, 0.0);
