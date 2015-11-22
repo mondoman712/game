@@ -6,10 +6,13 @@
 #include <SDL2/SDL.h>
 
 #include "f_png.h"
+#include "trans.h"
 
 #define WIN_TITLE "window title"
 #define DEFAULT_SCREEN_X 960
 #define DEFAULT_SCREEN_Y 960
+
+#define PI 3.141592653589
 
 #define GL_MAJOR_VER 3
 #define GL_MINOR_VER 3
@@ -183,7 +186,6 @@ int main()
 			GL_UNSIGNED_BYTE, img_data);
 	free(img_data);
 	glUniform1i(glGetUniformLocation(shader_prog, "texpat"), 0);
-
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -197,7 +199,6 @@ int main()
 			GL_UNSIGNED_BYTE, img_data);
 	free(img_data);
 	glUniform1i(glGetUniformLocation(shader_prog, "texbmo"), 1);
-
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -219,6 +220,24 @@ int main()
 	glVertexAttribPointer(tex_attr, 2, GL_FLOAT, GL_FALSE,
 			7 * sizeof(GLfloat), (void *)(5 * sizeof(GLfloat)));
 
+	GLfloat view[16];
+	vec3 eye = {1.2, 1.2, 1.2};
+	vec3 cent = {0.0, 0.0, 0.0};
+	vec3 up = {0.0, 0.0, 1.0};
+	look_at(eye, cent, up, view);
+	GLint uni_view = glGetUniformLocation(shader_prog, "view");
+	glUniformMatrix4fv(uni_view, 1, GL_FALSE, view);
+
+	GLfloat proj[16];
+	perspective(PI / 4, DEFAULT_SCREEN_X / DEFAULT_SCREEN_Y, 1.0, 10.0,
+			proj);
+	GLint uni_proj = glGetUniformLocation(shader_prog, "proj");
+	glUniformMatrix4fv(uni_proj, 1, GL_FALSE, proj);
+
+	GLfloat model[16];
+	GLint uni_model = glGetUniformLocation(shader_prog, "model");
+	GLfloat k = 0.0;
+
 	SDL_Event e;
 	while (1) {
 		if (SDL_PollEvent(&e)) {
@@ -230,6 +249,8 @@ int main()
 		glClearColor(0.0, 0.0, 0.0, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 
+		rotatez((PI / 180) * (k += 0.01), model);
+		glUniformMatrix4fv(uni_model, 1, GL_FALSE, model);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 		SDL_GL_SwapWindow(mainwin);

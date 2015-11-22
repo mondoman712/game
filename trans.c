@@ -1,4 +1,6 @@
 #include <math.h>
+#include <assert.h>
+
 #include <GL/glew.h>
 
 #include "trans.h"
@@ -41,13 +43,11 @@ vec3 cross_vec3 (vec3 a, vec3 b)
 }
 
 /*
- * Deposits the values in a vec3 into the first 3 places in an array
+ * Calculates the dot product between two 3 value vectors
  */
-void vec3_array (vec3 in, GLfloat * array)
+static GLfloat dot_vec3 (vec3 a, vec3 b)
 {
-	*(array) = in.x;
-	*(array + 1) = in.y;
-	*(array + 2) = in.z;
+	return (a.x * b.x) + (a.y * b.y) + (a.z * b.z);
 }
 
 /*
@@ -62,34 +62,34 @@ void look_at (vec3 eye, vec3 centre, vec3 up, GLfloat * mat4)
 	f.z = centre.z - eye.z;
 
 	f = norm_vec3(f);
-	up = norm_vec3(up);
+	s = norm_vec3(cross_vec3(f, up));
+	u = cross_vec3(s, f);
 
-	s = cross_vec3(f, up);
-	u = cross_vec3(norm_vec3(s), f);
+	*mat4 = s.x;
+	*(mat4 + 1) = u.x;
+	*(mat4 + 2) = -f.x;
+	*(mat4 + 3) = 1;
 
-	vec3_array(s, mat4);
-	*(mat4 + 3) = 0;
-	vec3_array(u, (mat4 + 4));
-	*(mat4 + 7) = 0;
+	*(mat4 + 4) = s.y;
+	*(mat4 + 5) = u.y;
+	*(mat4 + 6) = -f.y;
+	*(mat4 + 7) = 1;
 
-	f.x = -f.x;
-	f.y = -f.y;
-	f.z = -f.z;
+	*(mat4 + 8) = s.z;
+	*(mat4 + 9) = u.z;
+	*(mat4 + 10) = -f.z;
+	*(mat4 + 11) = 1;
 
-	vec3_array(f, (mat4 + 8));
-	*(mat4 + 11) = 0;
-	*(mat4 + 12) = 0;
-	*(mat4 + 13) = 0;
-	*(mat4 + 14) = 0;
+	*(mat4 + 12) = - dot_vec3(s, eye);
+	*(mat4 + 13) = - dot_vec3(u, eye);
+	*(mat4 + 14) = dot_vec3(f, eye);
 	*(mat4 + 15) = 1;
 }
 
 #ifdef FALSE
-GLfloat dot_vec3 (vec3 a, vec3 b)
-{
-	return (a.x * b.x) + (a.y * b.y) + (a.z * b.z);
-}
-
+/*
+ * Defines a matrix transformation to move the camera position
+ */
 void look_at (vec3 eye, vec3 centre, vec3 up, GLfloat * mat4)
 {
 	vec3 x, y, z;
@@ -128,25 +128,28 @@ void look_at (vec3 eye, vec3 centre, vec3 up, GLfloat * mat4)
 void perspective (GLfloat fovy, GLfloat asp, GLfloat znear, GLfloat zfar,
 		GLfloat * mat4)
 {
-	GLfloat f = 1 / tan(fovy / 2);
-	*mat4 = f / asp;
-	*(mat4 + 1) = 0;
-	*(mat4 + 2) = 0;
-	*(mat4 + 3) = 0;
+	assert(asp != 0);
+	assert(znear != zfar);
 
+	GLfloat f = tan(fovy / 2);
+	*mat4 = 1 / (f * asp);
 	*(mat4 + 4) = 0;
-	*(mat4 + 5) = f;
-	*(mat4 + 6) = 0;
-	*(mat4 + 7) = 0;
-
 	*(mat4 + 8) = 0;
-	*(mat4 + 9) = 0;
-	*(mat4 + 10) = (zfar + znear) / (zfar - znear); 
-	*(mat4 + 11) = (2 * zfar * znear) / (zfar - znear); 
-
 	*(mat4 + 12) = 0;
+
+	*(mat4 + 1) = 0;
+	*(mat4 + 5) = 1 / f;
+	*(mat4 + 9) = 0;
 	*(mat4 + 13) = 0;
-	*(mat4 + 14) = -1;
+
+	*(mat4 + 2) = 0;
+	*(mat4 + 6) = 0;
+	*(mat4 + 10) = - (zfar + znear) / (zfar - znear); 
+	*(mat4 + 14) = - (2 * zfar * znear) / (zfar - znear); 
+
+	*(mat4 + 3) = 0;
+	*(mat4 + 7) = 0;
+	*(mat4 + 11) = -1;
 	*(mat4 + 15) = 0;
 }
 
@@ -156,11 +159,11 @@ void perspective (GLfloat fovy, GLfloat asp, GLfloat znear, GLfloat zfar,
 void rotatez (GLfloat ang, GLfloat * mat4)
 {
 	*mat4 = cos(ang);
-	*(mat4 + 1) = -sin(ang);
+	*(mat4 + 1) = sin(ang);
 	*(mat4 + 2) = 0;
 	*(mat4 + 3) = 0;
 
-	*(mat4 + 4) = sin(ang);
+	*(mat4 + 4) = -sin(ang);
 	*(mat4 + 5) = cos(ang);
 	*(mat4 + 6) = 0;
 	*(mat4 + 7) = 0;
