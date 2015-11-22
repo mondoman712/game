@@ -7,6 +7,7 @@
 
 #include "f_png.h"
 #include "trans.h"
+#include "obj.h"
 
 #define WIN_TITLE "window title"
 #define DEFAULT_SCREEN_X 960
@@ -77,6 +78,9 @@ static GLuint handle_keyup(SDL_Event e)
 	switch(e.key.keysym.sym) {
 	case (SDLK_q):
 		return 1;
+	case (SDLK_F10):
+		/* TODO: Take screenshot */
+		break;
 	}
 	
 	return 0;
@@ -136,23 +140,34 @@ int main()
 		printf("GLEW is working\n");
 	}
 
-	GLfloat verts[] = {
-		-0.5, 	 0.5, 	1.0, 	0.0, 	0.0, 	0.0, 	1.0,
-		 0.5, 	 0.5, 	0.0, 	1.0, 	0.0, 	1.0, 	1.0,
-		 0.5, 	-0.5, 	0.0, 	0.0, 	1.0, 	1.0, 	0.0,
-		-0.5, 	-0.5, 	1.0, 	1.0, 	1.0, 	0.0, 	0.0
-	};
+	GLfloat * verts = malloc(512 * 3 * sizeof(GLfloat));
+	GLuint * faces = malloc(512 * 3 * sizeof(GLuint));
+	if (verts == NULL || faces == NULL) {
+		fprintf(stderr, "Failed to allocate memory 01\n");
+		exit(EXIT_FAILURE);
+	}
+	read_obj("models/monkey.obj", verts, faces);
 
-	GLuint elements[] = {
-		0, 1, 2,
-		2, 3, 0
-	};
+	int i;
+	printf("vertices: %i\n", (int) *verts);
+	for (i = 1; i < (*verts * 3); i += 3) {
+		printf("%f, ", *(verts + i));
+		printf("%f, ", *(verts + i + 1));
+		printf("%f\n", *(verts + i + 2));
+	}
+
+	printf("faces: %i\n", (int) *faces);
+	for (i = 1; i < (int) (*faces * 3); i += 3) {
+		printf("%d, ", *(faces + i));
+		printf("%d, ", *(faces + i + 1));
+		printf("%d\n", *(faces + i + 2));
+	}
 
 	GLuint vbo;
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts,
-			GL_STATIC_DRAW);	
+	glBufferData(GL_ARRAY_BUFFER, (*verts * 3 * sizeof(GLfloat)),
+			verts + 1, GL_STATIC_DRAW);	
 
 	GLuint vao;
 	glGenVertexArrays(1, &vao);
@@ -161,8 +176,8 @@ int main()
 	GLuint ebo;
 	glGenBuffers(1, &ebo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements), elements,
-			GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, (*faces * 3 * sizeof(GLuint)),
+			faces + 1, GL_STATIC_DRAW);
 
 	GLuint vert_shader = create_shader(GL_VERTEX_SHADER, "vs1");
 	GLuint frag_shader = create_shader(GL_FRAGMENT_SHADER, "fs1");
@@ -174,6 +189,7 @@ int main()
 	glLinkProgram(shader_prog);
 	glUseProgram(shader_prog);
 
+	/*
 	GLuint tex[2];
 	glGenTextures(2, tex);
 	GLuint w, h;
@@ -204,24 +220,27 @@ int main()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glGenerateMipmap(GL_TEXTURE_2D);
+	*/
 
 	GLuint pos_attr = glGetAttribLocation(shader_prog, "position");
 	glEnableVertexAttribArray(pos_attr);
-	glVertexAttribPointer(pos_attr, 2, GL_FLOAT, GL_FALSE,
-			7 * sizeof(GLfloat), 0);
+	glVertexAttribPointer(pos_attr, 3, GL_FLOAT, GL_FALSE,
+			3 * sizeof(GLfloat), 0);
 
+	/*
 	GLuint col_attr = glGetAttribLocation(shader_prog, "in_colour");
 	glEnableVertexAttribArray(col_attr);
 	glVertexAttribPointer(col_attr, 3, GL_FLOAT, GL_FALSE,
-			7 * sizeof(GLfloat), (void *)(2 * sizeof(GLfloat)));
+			8 * sizeof(GLfloat), (void *)(3 * sizeof(GLfloat)));
 
 	GLint tex_attr = glGetAttribLocation(shader_prog, "texcoord");
 	glEnableVertexAttribArray(tex_attr);
 	glVertexAttribPointer(tex_attr, 2, GL_FLOAT, GL_FALSE,
-			7 * sizeof(GLfloat), (void *)(5 * sizeof(GLfloat)));
+			8 * sizeof(GLfloat), (void *)(6 * sizeof(GLfloat)));
+	*/
 
 	GLfloat view[16];
-	vec3 eye = {1.2, 1.2, 1.2};
+	vec3 eye = {3.2, 3.2, 3.2};
 	vec3 cent = {0.0, 0.0, 0.0};
 	vec3 up = {0.0, 0.0, 1.0};
 	look_at(eye, cent, up, view);
@@ -229,7 +248,7 @@ int main()
 	glUniformMatrix4fv(uni_view, 1, GL_FALSE, view);
 
 	GLfloat proj[16];
-	perspective(PI / 4, DEFAULT_SCREEN_X / DEFAULT_SCREEN_Y, 1.0, 10.0,
+	perspective(PI / 2, DEFAULT_SCREEN_X / DEFAULT_SCREEN_Y, 0.5, 15.0,
 			proj);
 	GLint uni_proj = glGetUniformLocation(shader_prog, "proj");
 	glUniformMatrix4fv(uni_proj, 1, GL_FALSE, proj);
@@ -237,6 +256,8 @@ int main()
 	GLfloat model[16];
 	GLint uni_model = glGetUniformLocation(shader_prog, "model");
 	GLfloat k = 0.0;
+
+	glEnable(GL_DEPTH_TEST);
 
 	SDL_Event e;
 	while (1) {
@@ -247,14 +268,25 @@ int main()
 				break;
 		}
 		glClearColor(0.0, 0.0, 0.0, 0.0);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		rotatez((PI / 180) * (k += 0.01), model);
 		glUniformMatrix4fv(uni_model, 1, GL_FALSE, model);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+		glDrawElements(GL_TRIANGLES, (*faces * 3), GL_UNSIGNED_INT, 0);
 
 		SDL_GL_SwapWindow(mainwin);
 	}
+
+	free(verts);
+	free(faces);
+
+	glDeleteProgram(shader_prog);
+	glDeleteShader(frag_shader);
+	glDeleteShader(vert_shader);
+
+	glDeleteBuffers(1, &vbo);
+	glDeleteVertexArrays(1, &vao);
 
 	SDL_GL_DeleteContext(gl_context);
 	SDL_DestroyWindow(mainwin);

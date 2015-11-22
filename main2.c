@@ -121,6 +121,7 @@ int main()
 		printf("GLEW is working\n");
 	}
 
+	/*
 	GLfloat vertices[] = {
 		8.0,
 		 0.5, -0.5, -0.5,
@@ -148,8 +149,8 @@ int main()
 		3, 2, 7,
 		4, 0, 7
 	};
+	*/
 
-	/*
 	GLfloat * vertices = malloc(16 * sizeof(GLfloat));
 	GLuint * faces = malloc(16 * sizeof(GLuint));
 	if (vertices == NULL || faces == NULL) {
@@ -172,18 +173,12 @@ int main()
 		printf("%d, ", *(faces + i + 1));
 		printf("%d\n", *(faces + i + 2));
 	}
-	*/
 
 	GLuint vbo;
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, 
-			(*vertices * 3 * sizeof(GLfloat)),
-			vertices + 1,
-			GL_STATIC_DRAW);
-
-	GLuint vertex_shader = create_shader(GL_VERTEX_SHADER, "vs1");
-	GLuint fragment_shader = create_shader(GL_FRAGMENT_SHADER, "fs1");
+	glBufferData(GL_ARRAY_BUFFER, (*vertices * 3 * sizeof(GLfloat)),
+			vertices + 1, GL_STATIC_DRAW);
 
 	GLuint vao;
 	glGenVertexArrays(1, &vao);
@@ -191,12 +186,17 @@ int main()
 
 	GLuint ebo;
 	glGenBuffers(1, &ebo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, (*faces),
+			(faces + 1), GL_STATIC_DRAW);
+
+	GLuint vertex_shader = create_shader(GL_VERTEX_SHADER, "vs1");
+	GLuint fragment_shader = create_shader(GL_FRAGMENT_SHADER, "fs1");
 
 	GLuint shader_program = glCreateProgram();
 	glAttachShader(shader_program, vertex_shader);
 	glAttachShader(shader_program, fragment_shader);
 	glBindFragDataLocation(shader_program, 0, "out_colour");
-
 	glLinkProgram(shader_program);
 	glUseProgram(shader_program);
 
@@ -206,7 +206,7 @@ int main()
 			3 * sizeof(GLfloat), 0);
 
 	GLfloat view[16];
-	vec3 eye = {8.0, 8.0, 8.0};
+	vec3 eye = {2.0, 2.0, 2.0};
 	vec3 cent = {0.0, 0.0, 0.0};
 	vec3 up = {0.0, 0.0, 1.0};
 	look_at(eye, cent, up, view);
@@ -222,10 +222,6 @@ int main()
 	GLfloat model[16];
 	GLint uni_model = glGetUniformLocation(shader_program, "model");
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-			*faces, (faces + 1), GL_STATIC_DRAW);
-
 	glEnable(GL_DEPTH_TEST);
 
 	float k = 0.0;
@@ -238,7 +234,7 @@ int main()
 				break;
 		}
 		glClearColor(0.0, 0.0, 0.0, 1.0);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
 		rotatez((PI / 180) * (k += 0.002), model);
 		glUniformMatrix4fv(uni_model, 1, GL_FALSE, model);
@@ -248,10 +244,8 @@ int main()
 		SDL_GL_SwapWindow(mainwin);
 	}
 
-	/*
 	free(vertices);
 	free(faces);
-	*/
 
 	glDeleteProgram(shader_program);
 	glDeleteShader(fragment_shader);

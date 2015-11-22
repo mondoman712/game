@@ -86,42 +86,6 @@ void look_at (vec3 eye, vec3 centre, vec3 up, GLfloat * mat4)
 	*(mat4 + 15) = 1;
 }
 
-#ifdef FALSE
-/*
- * Defines a matrix transformation to move the camera position
- */
-void look_at (vec3 eye, vec3 centre, vec3 up, GLfloat * mat4)
-{
-	vec3 x, y, z;
-
-	z.x = centre.x - eye.x;
-	z.y = centre.y - eye.y;
-	z.z = centre.z - eye.z;
-	z = norm_vec3(z);
-
-	y = up;
-	x = cross_vec3(y, z);
-	y = cross_vec3(z, x);
-
-	y = norm_vec3(y);
-	z = norm_vec3(z);
-
-	vec3_array(x, mat4);
-	*(mat4 + 3) = - dot_vec3(x, eye);
-
-	vec3_array(y, (mat4 + 4));
-	*(mat4 + 7) = - dot_vec3(y, eye);
-
-	vec3_array(z, (mat4 + 8));
-	*(mat4 + 11) = - dot_vec3(z, eye);
-
-	*(mat4 + 12) = 0;
-	*(mat4 + 13) = 0;
-	*(mat4 + 14) = 0;
-	*(mat4 + 15) = 1.0;
-}
-#endif
-
 /*
  * Defines a perspective projection matrix transformation
  */
