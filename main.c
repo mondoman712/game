@@ -173,22 +173,27 @@ int main()
 
 	GLuint tex[2];
 	glGenTextures(2, tex);
-
 	GLuint w, h;
 	png_byte * img_data;
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, tex[0]);
 	img_data = read_png("cat.png", &w, &h);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA,
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB,
 			GL_UNSIGNED_BYTE, img_data);
 	free(img_data);
 	glUniform1i(glGetUniformLocation(shader_prog, "texpat"), 0);
 
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, tex[1]);
 	img_data = read_png("dog.png", &w, &h);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA,
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB,
 			GL_UNSIGNED_BYTE, img_data);
 	free(img_data);
 	glUniform1i(glGetUniformLocation(shader_prog, "texbmo"), 1);

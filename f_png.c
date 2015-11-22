@@ -20,7 +20,8 @@ static GLuint readpng_checksig (FILE * stream)
 /*
  * Reads png file
  */
-png_byte * read_png(const char * filename, GLuint * width, GLuint * height)
+png_byte * read_png(const char * filename, GLuint * width, GLuint * height,
+		GLint colour_type)
 {
 	/* Open File */
 	FILE * fp = fopen(filename, "rb");
@@ -64,16 +65,16 @@ png_byte * read_png(const char * filename, GLuint * width, GLuint * height)
 	png_set_sig_bytes(png, 8);
 	png_read_info(png, info);
 
-	GLint bit_depth, colour_type;
+	GLint bit_depth, act_colour_type;
 	png_uint_32 tmpw, tmph;
-	png_get_IHDR(png, info, &tmpw, &tmph, &bit_depth, &colour_type, NULL,
+	png_get_IHDR(png, info, &tmpw, &tmph, &bit_depth, &act_colour_type, NULL,
 			NULL, NULL);
 
 	if (width) *width = tmpw;
 	if (height) *height = tmph;
 
 	char * s;
-	switch (colour_type) {
+	switch (act_colour_type) {
 	case PNG_COLOR_TYPE_RGB:
 		s = "RGB";
 		break;
