@@ -102,7 +102,7 @@ png_byte * read_png(const char * filename, GLuint * width, GLuint * height)
 	png_bytep * row_ptrs = malloc(tmph * sizeof(png_bytep));
 	if (row_ptrs == NULL) {
 		fprintf(stderr, "Failed to allocate memory for %s\n", filename);
-		goto cleanup2;
+		goto cleanup1;
 	}
 
 	GLuint i;
@@ -111,8 +111,8 @@ png_byte * read_png(const char * filename, GLuint * width, GLuint * height)
 
 	png_read_image(png, row_ptrs);
 
+	/* Free data and close file */
 	free(row_ptrs);
-cleanup2:
 cleanup1:
 	png_destroy_read_struct(&png, &info, &end_info);
 cleanup:

@@ -69,7 +69,7 @@ GLuint create_shader (const GLenum shader_type, const char * filename)
 /*
  * Handles key up event in main loop
  */
-GLuint handle_keyup(SDL_Event e)
+static GLuint handle_keyup(SDL_Event e)
 {
 	switch(e.key.keysym.sym) {
 	case (SDLK_q):
@@ -79,6 +79,9 @@ GLuint handle_keyup(SDL_Event e)
 	return 0;
 }
 
+/*
+ * Main
+ */
 int main()
 {
 	if (SDL_Init(SDL_INIT_VIDEO)) {

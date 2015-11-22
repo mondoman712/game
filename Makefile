@@ -1,4 +1,3 @@
-CC = gcc
 CSTD = c89
 CFLAGS = -g -W -Wall -Werror -std=$(CSTD)
 SDL_CFLAGS = $(shell sdl2-config --cflags)
