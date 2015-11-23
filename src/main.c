@@ -2,6 +2,7 @@
 #include <math.h>
 #include <string.h>
 #include <unistd.h>
+#include <time.h>
 
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
@@ -74,9 +75,7 @@ GLuint create_shader (const GLenum shader_type, const char * filename)
 }
 
 /*
- * Takes a screenshot
- *
- * TODO: Allow multiple screenshots
+ * Takes a screenshot, saves it to scrnXXXX.png
  */
 static GLuint take_screenshot (GLuint w, GLuint h)
 {
@@ -295,7 +294,7 @@ int main (void)
 
 	GLfloat model[16];
 	GLint uni_model = glGetUniformLocation(shader_prog, "model");
-	GLfloat k = 0.0;
+	clock_t k;
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -316,7 +315,8 @@ int main (void)
 		glClearColor(0.0, 0.0, 0.0, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		rotatez((PI / 180) * (k += 0.01), model);
+		k = clock();
+		rotatez((PI / 180) * k / 10000.0, model);
 		glUniformMatrix4fv(uni_model, 1, GL_FALSE, model);
 
 		glDrawElements(GL_TRIANGLES, (*faces * 3), GL_UNSIGNED_INT, 0);
