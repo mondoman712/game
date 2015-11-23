@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <unistd.h>
 
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
@@ -20,6 +21,8 @@
 
 #define SHADER_DIR "src/shaders/"
 #define SHADER_EXT ".glsl"
+
+#define SCRN_LIMIT 9999
 
 /*
  * Reads and compiles a .glsl shader file in the shaders folder, from just the
@@ -80,14 +83,26 @@ static GLuint take_screenshot (GLuint w, GLuint h)
 	GLuint ret = 0;
 	GLuint tex;
 	GLubyte * pix = malloc(w * h * 3 * sizeof(GLubyte));
+
+	GLuint scrni;
+	char filename[16];
 	
 	glBindTexture(GL_TEXTURE_2D, tex);
 	glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, w, h);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
 	glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, (GLvoid *) pix);
 	
-	if (save_png("scrn.png", pix, w, h))
-		ret = 1;
+	for (scrni = 1; scrni <= SCRN_LIMIT; scrni++) {
+		sprintf(filename, "scrn%04d.png", scrni);
+		if (access(filename, F_OK) == -1) {
+			if (save_png(filename, pix, w, h)) ret = 1;
+			printf("Taken screenshot %s\n", filename);
+			break;
+		}
+
+		if (scrni == SCRN_LIMIT)
+			fprintf(stderr, "Screenshot limit reached\n");
+	}
 
 	free(pix);
 	return ret;
@@ -98,6 +113,7 @@ static GLuint take_screenshot (GLuint w, GLuint h)
  */
 static GLuint handle_keyup (SDL_Event e, GLuint w, GLuint h)
 {
+	GLuint i = 12;
 	switch(e.key.keysym.sym) {
 	case (SDLK_q):
 		return 1;
@@ -187,21 +203,6 @@ int main (void)
 		exit(EXIT_FAILURE);
 	}
 	read_obj("assets/models/monkey.obj", verts, faces);
-
-	int i;
-	printf("vertices: %i\n", (int) *verts);
-	for (i = 1; i < (*verts * 3); i += 3) {
-		printf("%f, ", *(verts + i));
-		printf("%f, ", *(verts + i + 1));
-		printf("%f\n", *(verts + i + 2));
-	}
-
-	printf("faces: %i\n", (int) *faces);
-	for (i = 1; i < (int) (*faces * 3); i += 3) {
-		printf("%d, ", *(faces + i));
-		printf("%d, ", *(faces + i + 1));
-		printf("%d\n", *(faces + i + 2));
-	}
 
 	GLuint vbo;
 	glGenBuffers(1, &vbo);

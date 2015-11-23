@@ -8,21 +8,6 @@ typedef struct {
 } vec3;
 
 /*
- * finds the modulus of a 1x3 vector
- */
-GLfloat mod_vec3 (vec3 in);
-
-/*
- * Finds the normal of a 1x3 vector
- */
-vec3 norm_vec3 (vec3 in);
-
-/*
- * Finds the cross product of vectors a and b
- */
-vec3 cross_vec3 (vec3 a, vec3 b);
-
-/*
  * Deposits the values in a vec3 into the first 3 places in an array
  */
 void vec3_array (vec3 in, GLfloat * array);
