@@ -70,14 +70,16 @@ GLuint create_shader (const GLenum shader_type, const char * filename)
 	return shader;
 }
 
-static GLuint take_screenshot ()
+/*
+ * Takes a screenshot
+ *
+ * TODO: Allow multiple screenshots
+ */
+static GLuint take_screenshot (GLuint w, GLuint h)
 {
 	GLuint ret = 0;
-	GLubyte * pix = malloc(DEFAULT_SCREEN_X * DEFAULT_SCREEN_Y * 3
-			* sizeof(GLubyte));
 	GLuint tex;
-	GLuint w = DEFAULT_SCREEN_X;
-	GLuint h = DEFAULT_SCREEN_Y;
+	GLubyte * pix = malloc(w * h * 3 * sizeof(GLubyte));
 	
 	glBindTexture(GL_TEXTURE_2D, tex);
 	glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, w, h);
@@ -97,13 +99,13 @@ cleanup:
 /*
  * Handles key up event in main loop
  */
-static GLuint handle_keyup (SDL_Event e)
+static GLuint handle_keyup (SDL_Event e, GLuint w, GLuint h)
 {
 	switch(e.key.keysym.sym) {
 	case (SDLK_q):
 		return 1;
 	case (SDLK_F10):
-		take_screenshot();
+		take_screenshot(w, h);
 		break;
 	}
 	
@@ -111,10 +113,29 @@ static GLuint handle_keyup (SDL_Event e)
 }
 
 /*
+ * Handles window resize event
+ */
+static void window_resize (SDL_Event e, SDL_Window * window, GLuint * width,
+		GLuint * height)
+{
+	GLuint w, h;
+
+	SDL_GetWindowSize(window, &w, &h);
+
+	if (w != 0 || h != 0) {
+		glViewport(0, 0, w, h);
+		*width = w;
+		*height = h;
+	}
+}
+
+/*
  * Main
  */
 int main (void)
 {
+	GLuint w = DEFAULT_SCREEN_X;
+	GLuint h = DEFAULT_SCREEN_Y;
 	if (SDL_Init(SDL_INIT_VIDEO)) {
 		fprintf(stderr, "Failed to initialise SDL\n");
 		exit(EXIT_FAILURE);
@@ -125,9 +146,9 @@ int main (void)
 			WIN_TITLE,
 			SDL_WINDOWPOS_UNDEFINED,
 			SDL_WINDOWPOS_UNDEFINED,
-			DEFAULT_SCREEN_X,
-			DEFAULT_SCREEN_Y,
-			SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
+			w, h,
+			SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL
+				| SDL_WINDOW_RESIZABLE);
 	if (mainwin == NULL) {
 		fprintf(stderr, "Failed to create SDL window\n");
 		exit(EXIT_FAILURE);
@@ -272,8 +293,7 @@ int main (void)
 	glUniformMatrix4fv(uni_view, 1, GL_FALSE, view);
 
 	GLfloat proj[16];
-	perspective(PI / 2, DEFAULT_SCREEN_X / DEFAULT_SCREEN_Y, 0.1, 100.0,
-			proj);
+	perspective(PI / 2, w / h, 0.1, 100.0, proj);
 	GLint uni_proj = glGetUniformLocation(shader_prog, "proj");
 	glUniformMatrix4fv(uni_proj, 1, GL_FALSE, proj);
 
@@ -286,10 +306,15 @@ int main (void)
 	SDL_Event e;
 	while (1) {
 		if (SDL_PollEvent(&e)) {
-			if (e.type == SDL_QUIT)
+			if (e.type == SDL_QUIT) {
 				break;
-			else if (e.type == SDL_KEYUP && handle_keyup(e))
+			} else if (e.type == SDL_KEYUP && handle_keyup(e, w, h)) {
 				break;
+			} else if (e.window.event = SDL_WINDOWEVENT_RESIZED) {
+				window_resize(e, mainwin, &w, &h);
+				perspective(PI / 2, w / h, 0.1, 100.0, proj);
+				glUniformMatrix4fv(uni_proj, 1, GL_FALSE, proj);
+			}
 		}
 		glClearColor(0.0, 0.0, 0.0, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
