@@ -120,3 +120,63 @@ cleanup:
 	fclose(fp);
 	return img_data;
 }
+
+/*
+ * Saves a byte array stored in pixels of width w and height h as a png into
+ * filename
+ */
+GLuint save_png (const char * filename, GLubyte * pixels, GLuint w, GLuint h)
+{
+	png_structp png;
+	png_infop info;
+	png_colorp palette;
+	png_bytepp rows;
+	FILE * fp;
+
+	GLuint i;
+
+	png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+	if (!png) return 1;
+
+	info = png_create_info_struct(png);
+	if(!info) {
+		png_destroy_write_struct(&png, NULL);
+		return 1;
+	}
+
+	fp = fopen(filename, "wb");
+	if (!fp) {
+		png_destroy_write_struct(&png, &info);
+		return 1;
+	}
+
+	png_init_io(png, fp);
+	png_set_IHDR(png, info, w, h, 8, PNG_COLOR_TYPE_RGB, PNG_INTERLACE_NONE,
+			PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
+	palette = (png_colorp) png_malloc(png, PNG_MAX_PALETTE_LENGTH
+			* sizeof(png_color));
+	if (!palette) {
+		fclose(fp);
+		png_destroy_write_struct(&png, &info);
+		return 1;
+	}
+
+	png_set_PLTE(png, info, palette, PNG_MAX_PALETTE_LENGTH);
+	png_write_info(png, info);
+	png_set_packing(png);
+
+	rows = (png_bytepp) png_malloc(png, h * sizeof(png_bytep));
+	
+	for (i = 0; i < h; ++i)
+		rows[i] = (png_bytep) (pixels + (h - i) * w * 3);
+
+	png_write_image(png, rows);
+	png_write_end(png, info);
+	png_free(png, palette);
+	png_destroy_write_struct(&png, &info);
+
+	fclose(fp);
+	free(rows);
+	
+	return 0;
+}

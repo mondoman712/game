@@ -70,16 +70,40 @@ GLuint create_shader (const GLenum shader_type, const char * filename)
 	return shader;
 }
 
+static GLuint take_screenshot ()
+{
+	GLuint ret = 0;
+	GLubyte * pix = malloc(DEFAULT_SCREEN_X * DEFAULT_SCREEN_Y * 3
+			* sizeof(GLubyte));
+	GLuint tex;
+	GLuint w = DEFAULT_SCREEN_X;
+	GLuint h = DEFAULT_SCREEN_Y;
+	
+	glBindTexture(GL_TEXTURE_2D, tex);
+	glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, w, h);
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+	glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, (GLvoid *) pix);
+	
+	if (save_png("scrn.png", pix, w, h)) {
+		ret = 1;
+		goto cleanup;
+	}
+
+cleanup:
+	free(pix);
+	return ret;
+}
+
 /*
  * Handles key up event in main loop
  */
-static GLuint handle_keyup(SDL_Event e)
+static GLuint handle_keyup (SDL_Event e)
 {
 	switch(e.key.keysym.sym) {
 	case (SDLK_q):
 		return 1;
 	case (SDLK_F10):
-		/* TODO: Take screenshot */
+		take_screenshot();
 		break;
 	}
 	
@@ -89,7 +113,7 @@ static GLuint handle_keyup(SDL_Event e)
 /*
  * Main
  */
-int main()
+int main (void)
 {
 	if (SDL_Init(SDL_INIT_VIDEO)) {
 		fprintf(stderr, "Failed to initialise SDL\n");
