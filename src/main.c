@@ -7,7 +7,7 @@
 
 #include "f_png.h"
 #include "trans.h"
-#include "obj.h"
+#include "f_obj.h"
 
 #define WIN_TITLE "window title"
 #define DEFAULT_SCREEN_X 960
@@ -140,13 +140,13 @@ int main()
 		printf("GLEW is working\n");
 	}
 
-	GLfloat * verts = malloc(512 * 3 * sizeof(GLfloat));
-	GLuint * faces = malloc(512 * 3 * sizeof(GLuint));
+	GLfloat * verts = malloc(150 * 3 * sizeof(GLfloat));
+	GLuint * faces = malloc(256 * 3 * sizeof(GLuint));
 	if (verts == NULL || faces == NULL) {
 		fprintf(stderr, "Failed to allocate memory 01\n");
 		exit(EXIT_FAILURE);
 	}
-	read_obj("models/monkey.obj", verts, faces);
+	read_obj("assets/models/monkey.obj", verts, faces);
 
 	int i;
 	printf("vertices: %i\n", (int) *verts);
@@ -197,7 +197,7 @@ int main()
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, tex[0]);
-	img_data = read_png("cat.png", &w, &h);
+	img_data = read_png("assets/textures/cat.png", &w, &h);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB,
 			GL_UNSIGNED_BYTE, img_data);
 	free(img_data);
@@ -210,7 +210,7 @@ int main()
 
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, tex[1]);
-	img_data = read_png("dog.png", &w, &h);
+	img_data = read_png("assets/textures/dog.png", &w, &h);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB,
 			GL_UNSIGNED_BYTE, img_data);
 	free(img_data);
@@ -240,7 +240,7 @@ int main()
 	*/
 
 	GLfloat view[16];
-	vec3 eye = {3.2, 3.2, 3.2};
+	vec3 eye = {3.2, 0.0, 0.0};
 	vec3 cent = {0.0, 0.0, 0.0};
 	vec3 up = {0.0, 0.0, 1.0};
 	look_at(eye, cent, up, view);
@@ -248,7 +248,7 @@ int main()
 	glUniformMatrix4fv(uni_view, 1, GL_FALSE, view);
 
 	GLfloat proj[16];
-	perspective(PI / 2, DEFAULT_SCREEN_X / DEFAULT_SCREEN_Y, 0.5, 15.0,
+	perspective(PI / 2, DEFAULT_SCREEN_X / DEFAULT_SCREEN_Y, 0.1, 100.0,
 			proj);
 	GLint uni_proj = glGetUniformLocation(shader_prog, "proj");
 	glUniformMatrix4fv(uni_proj, 1, GL_FALSE, proj);
