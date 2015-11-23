@@ -5,7 +5,7 @@
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
 
-#include "obj.h"
+#include "f_obj.h"
 #include "trans.h"
 
 #define WIN_TITLE "window title"
