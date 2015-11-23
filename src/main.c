@@ -18,7 +18,7 @@
 #define GL_MAJOR_VER 3
 #define GL_MINOR_VER 3
 
-#define SHADER_DIR "shaders/"
+#define SHADER_DIR "src/shaders/"
 #define SHADER_EXT ".glsl"
 
 /*
