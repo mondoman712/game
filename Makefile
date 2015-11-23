@@ -1,5 +1,5 @@
 CSTD = c89
-CFLAGS = -g -W -Wall -Werror -std=$(CSTD)
+CFLAGS = -g -W -Wall -std=$(CSTD)
 SDL_CFLAGS = $(shell sdl2-config --cflags)
 LDFLAGS = $(shell sdl2-config --libs) -lGL -lGLEW -lm -lpng -lz
 

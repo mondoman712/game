@@ -86,12 +86,9 @@ static GLuint take_screenshot (GLuint w, GLuint h)
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
 	glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, (GLvoid *) pix);
 	
-	if (save_png("scrn.png", pix, w, h)) {
+	if (save_png("scrn.png", pix, w, h))
 		ret = 1;
-		goto cleanup;
-	}
 
-cleanup:
 	free(pix);
 	return ret;
 }
@@ -122,11 +119,9 @@ static void window_resize (SDL_Event e, SDL_Window * window, GLuint * width,
 
 	SDL_GetWindowSize(window, &w, &h);
 
-	if (w != 0 || h != 0) {
-		glViewport(0, 0, w, h);
-		*width = w;
-		*height = h;
-	}
+	glViewport(0, 0, w, h);
+	if (w > 0) *width = w;
+	if (h > 0) *height = h;
 }
 
 /*
@@ -285,7 +280,7 @@ int main (void)
 	*/
 
 	GLfloat view[16];
-	vec3 eye = {3.2, 0.0, 0.0};
+	vec3 eye = {3.0, 0.0, 1.0};
 	vec3 cent = {0.0, 0.0, 0.0};
 	vec3 up = {0.0, 0.0, 1.0};
 	look_at(eye, cent, up, view);
@@ -312,7 +307,8 @@ int main (void)
 				break;
 			} else if (e.window.event = SDL_WINDOWEVENT_RESIZED) {
 				window_resize(e, mainwin, &w, &h);
-				perspective(PI / 2, w / h, 0.1, 100.0, proj);
+				perspective(PI / 2, (GLfloat) w / (GLfloat) h,
+						0.1, 100.0, proj);
 				glUniformMatrix4fv(uni_proj, 1, GL_FALSE, proj);
 			}
 		}
