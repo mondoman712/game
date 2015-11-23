@@ -168,7 +168,7 @@ GLuint save_png (const char * filename, GLubyte * pixels, GLuint w, GLuint h)
 	rows = (png_bytepp) png_malloc(png, h * sizeof(png_bytep));
 	
 	for (i = 0; i < h; ++i)
-		rows[i] = (png_bytep) (pixels + (h - i) * w * 3);
+		rows[i] = (png_bytep) (pixels + (h - i - 1) * w * 3);
 
 	png_write_image(png, rows);
 	png_write_end(png, info);
