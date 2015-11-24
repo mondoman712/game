@@ -7,3 +7,5 @@ That's just the project title for what will eventually become a quake-like fps.
 * Get png loader to handle RGB/RGBA properly
 * have obj loader allocate memory for arrays
 * fix clipping issues
+* Make screenshot file names use date and time taken
+* Lighting
