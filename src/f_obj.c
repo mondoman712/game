@@ -92,38 +92,3 @@ int read_obj (const char * filename, GLfloat * vertices, GLuint * faces)
 
 	return 0;
 }
-
-#ifdef FALSE
-int main ()
-{
-	int i;
-
-	GLfloat * vertices = malloc(128 * sizeof(GLfloat));
-	GLuint * faces = malloc(128 * sizeof(GLuint));
-	if (vertices == NULL || faces == NULL) {
-		fprintf(stderr, "Failed to allocate memory\n");
-		exit(EXIT_FAILURE);
-	}
-	read_obj("models/cube.obj", vertices, faces);
-
-	printf("vertices: %i\n", (int) *vertices);
-	printf("faces: %d\n", *faces);
-
-	for (i = 1; i < (int) (*vertices * 3); i += 3) {
-		printf("%f, ", *(vertices + i));
-		printf("%f, ", *(vertices + i + 1));
-		printf("%f\n", *(vertices + i + 2));
-	}
-
-	for (i = 1; i < (int) (*faces * 3); i += 3) {
-		printf("%d, ", *(faces + i));
-		printf("%d, ", *(faces + i + 1));
-		printf("%d\n", *(faces + i + 2));
-	}
-
-	free(vertices);
-	free(faces);
-
-	exit(EXIT_SUCCESS);
-}
-#endif
