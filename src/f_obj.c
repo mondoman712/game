@@ -7,11 +7,11 @@
 /* 
  * Puts the three floats in the string str into an array given by buff
  */
-static int parse_vector (char * str, GLfloat * buff)
+static GLushort parse_vector (char * str, GLfloat * buff)
 {
 	char * _str = malloc(sizeof(char) * 32);
 	char * wd = malloc(sizeof(char) * 10);
-	int i = 0;
+	GLushort i = 0;
 
 	if (_str == NULL || wd == NULL) 
 		goto cleanup;
@@ -36,11 +36,11 @@ cleanup:
  *
  * TODO: Merge this and parse_obj because of large amounts of copied code
  */
-static int parse_face (char * str, GLuint * buff)
+static GLushort parse_face (char * str, GLuint * buff)
 {
-	char * _str = malloc(sizeof(char) * 35);
-	char * wd = malloc(sizeof(char) * 12);
-	int i = 0;
+	GLchar * _str = malloc(sizeof(GLchar) * 35);
+	GLchar * wd = malloc(sizeof(GLchar) * 12);
+	GLushort i = 0;
 
 	if (_str == NULL || wd == NULL) 
 		goto cleanup;
@@ -63,11 +63,11 @@ cleanup:
 /* 
  * Reads obj file and deposits vertices into float array
  */
-int read_obj (const char * filename, GLfloat * vertices, GLuint * faces)
+GLushort read_obj (const char * filename, GLfloat * vertices, GLuint * faces)
 {
 	char buf[64];
-	GLuint vc = 0;
-	GLuint fc = 0;
+	GLushort vc = 0;
+	GLushort fc = 0;
 
 	FILE * m = fopen(filename, "r");
 	if (m == NULL) {
