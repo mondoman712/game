@@ -20,8 +20,7 @@ static GLuint readpng_checksig (FILE * stream)
 /*
  * Reads png file
  */
-png_byte * read_png(const char * filename, GLuint * width, GLuint * height,
-		GLint colour_type)
+png_byte * read_png(const char * filename, GLuint * width, GLuint * height)
 {
 	/* Open File */
 	FILE * fp = fopen(filename, "rb");

@@ -78,7 +78,7 @@ GLuint create_shader (const GLenum shader_type, const char * filename)
 static GLuint take_screenshot (GLuint w, GLuint h)
 {
 	GLuint ret = 0;
-	GLuint tex;
+	GLuint tex = NULL;
 	GLubyte * pix = malloc(w * h * 3 * sizeof(GLubyte));
 
 	struct tm * tm;
@@ -131,10 +131,10 @@ static GLuint handle_keyup (SDL_Event e, GLuint w, GLuint h)
 /*
  * Handles window resize event
  */
-static void window_resize (SDL_Event e, SDL_Window * window, GLuint * width,
+static void window_resize (SDL_Window * window, GLuint * width,
 		GLuint * height)
 {
-	GLuint w, h;
+	GLint w, h;
 
 	SDL_GetWindowSize(window, &w, &h);
 
@@ -309,8 +309,8 @@ int main (void)
 				break;
 			} else if (e.type == SDL_KEYUP && handle_keyup(e, w, h)) {
 				break;
-			} else if (e.window.event = SDL_WINDOWEVENT_RESIZED) {
-				window_resize(e, mainwin, &w, &h);
+			} else if (e.window.event == SDL_WINDOWEVENT_RESIZED) {
+				window_resize(mainwin, &w, &h);
 				perspective(PI / 2, (GLfloat) w / (GLfloat) h,
 						0.1, 100.0, proj);
 				glUniformMatrix4fv(uni_proj, 1, GL_FALSE, proj);
