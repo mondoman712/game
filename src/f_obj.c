@@ -10,6 +10,19 @@
  */
 static GLushort parse_vector (char * str, GLfloat * buff)
 {
+	SCM str_numlist_sym;
+	SCM str_numlist;
+	SCM numlist;
+	SCM scmstr;
+	int i;
+
+	str_numlist_sym = scm_c_lookup("string->numlist");
+	str_numlist = scm_variable_ref(str_numlist_sym);
+	numlist = scm_call_1(str_numlist, scm_from_locale_string(str));
+	
+	for (i = 0; i < 3; i++)
+		buff[i] = (GLfloat) scm_to_double(scm_list_ref(numlist, 
+					scm_from_int(i)));
 }
 
 /*
@@ -49,14 +62,18 @@ GLushort read_obj (const char * filename, GLfloat * vertices, GLuint * faces)
 	char buf[64];
 	GLushort vc = 0;
 	GLushort fc = 0;
+	FILE * fp;
 
-	FILE * m = fopen(filename, "r");
-	if (m == NULL) {
+	scm_init_guile();
+	scm_c_primitive_load("src/f_obj.scm");
+
+	fp = fopen(filename, "r");
+	if (fp == NULL) {
 		fprintf(stderr, "Could not open file %s\n", filename);
 		return 1;
 	}
 	
-	while (fgets(buf, sizeof(buf), m)) {
+	while (fgets(buf, sizeof(buf), fp)) {
 		if (buf[0] == 'v' && buf[1] == ' ') {
 			parse_vector(buf, vertices + (vc * 3) + 1);
 			vc++;
@@ -66,7 +83,7 @@ GLushort read_obj (const char * filename, GLfloat * vertices, GLuint * faces)
 		}
 	}
 
-	fclose(m);
+	fclose(fp);
 
 	*vertices = (GLfloat) vc;
 	*faces = fc;
