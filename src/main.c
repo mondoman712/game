@@ -23,8 +23,6 @@
 #define SHADER_DIR "src/shaders/"
 #define SHADER_EXT ".glsl"
 
-#define SCRN_LIMIT 9999
-
 /*
  * Reads and compiles a .glsl shader file in the shaders folder, from just the
  * core of the filename (to use shaders/vs1.glsl, filename is just vsl)
@@ -83,25 +81,29 @@ static GLuint take_screenshot (GLuint w, GLuint h)
 	GLuint tex;
 	GLubyte * pix = malloc(w * h * 3 * sizeof(GLubyte));
 
-	GLuint scrni;
-	char filename[16];
+	struct tm * tm;
+	time_t t;
+	char strtime[128];
+
+	GLushort i = 1;
+	char filename[128];
 	
 	glBindTexture(GL_TEXTURE_2D, tex);
 	glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, w, h);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
 	glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, (GLvoid *) pix);
 	
-	for (scrni = 1; scrni <= SCRN_LIMIT; scrni++) {
-		sprintf(filename, "scrn%04d.png", scrni);
-		if (access(filename, F_OK) == -1) {
-			if (save_png(filename, pix, w, h)) ret = 1;
-			printf("Taken screenshot %s\n", filename);
-			break;
-		}
+	t = time(NULL);
+	tm = localtime(&t);
+	strftime(strtime, sizeof(strtime), "%Y-%m-%d-%H-%M-%S", tm);
+	printf("%s\n", strtime);
+	sprintf(filename, "screenshot-%s.png", strtime);
 
-		if (scrni == SCRN_LIMIT)
-			fprintf(stderr, "Screenshot limit reached\n");
+	if (access(filename, F_OK) == -1) {
+		if (save_png(filename, pix, w, h)) ret = 1;
+		printf("Taken screenshot %s\n", filename);
 	}
+
 
 	free(pix);
 	return ret;
