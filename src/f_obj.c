@@ -3,32 +3,13 @@
 #include <stdio.h>
 
 #include <GL/glew.h>
+#include <libguile.h>
 
 /* 
  * Puts the three floats in the string str into an array given by buff
  */
 static GLushort parse_vector (char * str, GLfloat * buff)
 {
-	char * _str = malloc(sizeof(char) * 32);
-	char * wd = malloc(sizeof(char) * 10);
-	GLushort i = 0;
-
-	if (_str == NULL || wd == NULL) 
-		goto cleanup;
-
-	strcpy(_str, str);
-	strtok(_str, " ");
-
-	while ((wd = strtok(NULL, " "))) {
-		buff[i] = (GLfloat) atof(wd);
-		i++;
-	}
-
-cleanup:
-	free(_str);
-	free(wd);
-
-	return 0;
 }
 
 /*
