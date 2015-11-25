@@ -1,0 +1,2 @@
+assets/textures/cat.png filter=lfs diff=lfs merge=lfs -text
+assets/textures/dog.png filter=lfs diff=lfs merge=lfs -text
