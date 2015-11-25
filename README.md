@@ -9,4 +9,3 @@ That's just the project title for what will eventually become a quake-like fps.
 * have obj loader allocate memory for arrays
 * fix clipping issues
 * Lighting
-* fix compiler errors
