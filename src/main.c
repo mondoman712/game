@@ -117,7 +117,6 @@ static GLuint take_screenshot (GLuint w, GLuint h)
  */
 static GLuint handle_keyup (SDL_Event e, GLuint w, GLuint h)
 {
-	GLuint i = 12;
 	switch(e.key.keysym.sym) {
 	case (SDLK_q):
 		return 1;
