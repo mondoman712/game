@@ -14,7 +14,7 @@ $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
 	rm main.o f_obj.o trans.o f_png.o
 
-%.o: $(SOURCES)
+$(OBJECTS): $(SOURCES)
 	$(CC) $(CFLAGS) -c $(SOURCES)
 
 clean:
