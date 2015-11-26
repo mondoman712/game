@@ -8,21 +8,21 @@
 /* 
  * Puts the three floats in the string str into an array given by buff
  */
-static GLushort parse_vector (char * str, GLfloat * buff)
+static GLushort parse_vector (char * str, GLfloat * buff, SCM fun)
 {
 	SCM str_numlist_sym;
 	SCM str_numlist;
 	SCM numlist;
-	SCM scmstr;
 	int i;
 
-	str_numlist_sym = scm_c_lookup("string->numlist");
-	str_numlist = scm_variable_ref(str_numlist_sym);
-	numlist = scm_call_1(str_numlist, scm_from_locale_string(str));
+	numlist = scm_call_1(fun, scm_from_locale_stringn(str, strlen(str)));
 	
-	for (i = 0; i < 3; i++)
-		buff[i] = (GLfloat) scm_to_double(scm_list_ref(numlist, 
-					scm_from_int(i)));
+	printf("%i\n", scm_to_int(scm_length(numlist)));
+	printf("%f, ", scm_to_double(scm_list_ref(numlist, scm_from_int(0))));
+	printf("%f, ", scm_to_double(scm_list_ref(numlist, scm_from_int(1))));
+	printf("%f\n", scm_to_double(scm_list_ref(numlist, scm_from_int(2))));
+
+	return 0;
 }
 
 /*
@@ -64,8 +64,17 @@ GLushort read_obj (const char * filename, GLfloat * vertices, GLuint * faces)
 	GLushort fc = 0;
 	FILE * fp;
 
-	scm_init_guile();
 	scm_c_primitive_load("src/f_obj.scm");
+	SCM str_numlist_sym = scm_c_lookup("string->numlist");
+	SCM str_numlist = scm_variable_ref(str_numlist_sym);
+	SCM numlist = scm_call_1(str_numlist,
+			scm_from_locale_string("-0.12314 0.12412 -0.98867"));
+	printf("%i\n", scm_to_int(scm_length(numlist)));
+	printf("%f, ", scm_to_double(scm_list_ref(numlist, scm_from_int(0))));
+	printf("%f, ", scm_to_double(scm_list_ref(numlist, scm_from_int(1))));
+	printf("%f\n", scm_to_double(scm_list_ref(numlist, scm_from_int(2))));
+
+	parse_vector("-0.12314 0.12412 -0.98867", vertices, str_numlist);
 
 	fp = fopen(filename, "r");
 	if (fp == NULL) {
@@ -75,7 +84,7 @@ GLushort read_obj (const char * filename, GLfloat * vertices, GLuint * faces)
 	
 	while (fgets(buf, sizeof(buf), fp)) {
 		if (buf[0] == 'v' && buf[1] == ' ') {
-			parse_vector(buf, vertices + (vc * 3) + 1);
+			parse_vector(buf, vertices + (vc * 3) + 1, str_numlist);
 			vc++;
 		} else if (buf[0] == 'f' && buf[1] == ' ') {
 			parse_face(buf, faces + (fc * 3) + 1);

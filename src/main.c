@@ -6,6 +6,7 @@
 
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
+#include<libguile.h>
 
 #include "f_png.h"
 #include "trans.h"
@@ -148,8 +149,11 @@ static void window_resize (SDL_Window * window, GLuint * width,
  */
 int main (void)
 {
+	scm_init_guile();
+
 	GLuint w = DEFAULT_SCREEN_X;
 	GLuint h = DEFAULT_SCREEN_Y;
+
 	if (SDL_Init(SDL_INIT_VIDEO)) {
 		fprintf(stderr, "Failed to initialise SDL\n");
 		exit(EXIT_FAILURE);
