@@ -104,8 +104,12 @@ static GLuint take_screenshot (GLuint w, GLuint h)
 		sprintf(filename, "screenshot-%s-%d.png", strtime, i++);
 
 	if (access(filename, F_OK) == -1) {
-		if (save_png(filename, pix, w, h)) ret = 1;
-		printf("Taken screenshot %s\n", filename);
+		if (save_png(filename, pix, w, h)) { 
+			ret = 1;
+			fprintf(stderr, "Screenshot Failed\n");
+		} else {
+			printf("Taken screenshot %s\n", filename);
+		}
 	}
 
 
