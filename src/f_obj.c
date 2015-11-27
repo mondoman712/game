@@ -65,17 +65,13 @@ GLushort read_obj (const char * filename, GLfloat * vertices, GLuint * faces)
 	FILE * fp;
 
 	scm_c_primitive_load("src/f_obj.scm");
-	SCM str_numlist_sym = scm_c_lookup("string->numlist");
-	SCM str_numlist = scm_variable_ref(str_numlist_sym);
-	SCM numlist = scm_call_1(str_numlist,
-			scm_from_locale_string("-0.12314 0.12412 -0.98867"));
-	printf("%i\n", scm_to_int(scm_length(numlist)));
-	printf("%f, ", scm_to_double(scm_list_ref(numlist, scm_from_int(0))));
-	printf("%f, ", scm_to_double(scm_list_ref(numlist, scm_from_int(1))));
-	printf("%f\n", scm_to_double(scm_list_ref(numlist, scm_from_int(2))));
+	scm_c_use_module("ice-9 rdelim");
+	SCM load_obj_sym = scm_c_lookup("load-obj");
+	SCM load_obj = scm_variable_ref(load_obj_sym);
 
-	parse_vector("-0.12314 0.12412 -0.98867", vertices, str_numlist);
+	scm_call_1(load_obj, scm_from_locale_string(filename));
 
+	/*
 	fp = fopen(filename, "r");
 	if (fp == NULL) {
 		fprintf(stderr, "Could not open file %s\n", filename);
@@ -96,6 +92,7 @@ GLushort read_obj (const char * filename, GLfloat * vertices, GLuint * faces)
 
 	*vertices = (GLfloat) vc;
 	*faces = fc;
+	*/
 
 	return 0;
 }
