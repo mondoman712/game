@@ -64,12 +64,19 @@ GLushort read_obj (const char * filename, GLfloat * vertices, GLuint * faces)
 	GLushort fc = 0;
 	FILE * fp;
 
+	SCM verts;
 	scm_c_primitive_load("src/f_obj.scm");
 	scm_c_use_module("ice-9 rdelim");
 	SCM load_obj_sym = scm_c_lookup("load-obj");
 	SCM load_obj = scm_variable_ref(load_obj_sym);
 
-	scm_call_1(load_obj, scm_from_locale_string(filename));
+	int i;
+	verts = scm_call_1(load_obj, scm_from_locale_string(filename));
+	*vertices = scm_to_int(scm_length(verts));
+	for (i = 1; i < *vertices; i++) {
+		*(vertices + i) =  (GLfloat) scm_to_double(scm_list_ref(verts,
+					scm_from_int(i)));
+	}
 
 	/*
 	fp = fopen(filename, "r");
