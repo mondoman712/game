@@ -3,127 +3,40 @@
 #include <stdio.h>
 
 #include <GL/glew.h>
-
-/* 
- * Puts the three floats in the string str into an array given by buff
- */
-static int parse_vector (char * str, GLfloat * buff)
-{
-	char * _str = malloc(sizeof(char) * 32);
-	char * wd = malloc(sizeof(char) * 10);
-	int i = 0;
-
-	if (_str == NULL || wd == NULL) 
-		goto cleanup;
-
-	strcpy(_str, str);
-	strtok(_str, " ");
-
-	while ((wd = strtok(NULL, " "))) {
-		buff[i] = (GLfloat) atof(wd);
-		i++;
-	}
-
-cleanup:
-	free(_str);
-	free(wd);
-
-	return 0;
-}
-
-/*
- * Puts the three ints in the string str into an array given by buff
- *
- * TODO: Merge this and parse_obj because of large amounts of copied code
- */
-static int parse_face (char * str, GLuint * buff)
-{
-	char * _str = malloc(sizeof(char) * 35);
-	char * wd = malloc(sizeof(char) * 12);
-	int i = 0;
-
-	if (_str == NULL || wd == NULL) 
-		goto cleanup;
-
-	strcpy(_str, str);
-	strtok(_str, " ");
-
-	while ((wd = strtok(NULL, " "))) {
-		buff[i] = (GLuint) (atoi(wd) - 1);
-		i++;
-	}
-
-cleanup:
-	free(_str);
-	free(wd);
-
-	return 0;
-}
+#include <libguile.h>
 
 /* 
  * Reads obj file and deposits vertices into float array
  */
-int read_obj (const char * filename, GLfloat * vertices, GLuint * faces)
+GLushort read_obj (const char * filename, GLfloat * vertices, GLuint * faces)
 {
 	char buf[64];
-	GLuint vc = 0;
-	GLuint fc = 0;
+	GLushort vc = 0;
+	GLushort fc = 0;
+	FILE * fp;
+	int i;
 
-	FILE * m = fopen(filename, "r");
-	if (m == NULL) {
-		fprintf(stderr, "Could not open file %s\n", filename);
-		return 1;
+	SCM res, vrts, fces;
+	scm_c_primitive_load("src/f_obj.scm");
+	scm_c_use_module("ice-9 rdelim");
+	SCM load_obj_sym = scm_c_lookup("load-obj");
+	SCM load_obj = scm_variable_ref(load_obj_sym);
+
+	res = scm_call_1(load_obj, scm_from_locale_string(filename));
+	vrts = scm_list_ref(res, scm_from_int(0));
+	fces = scm_list_ref(res, scm_from_int(1));
+
+	*vertices = (GLfloat) scm_to_double(scm_length(vrts));
+	for (i = 0; i < *vertices; i++) {
+		*(vertices + i + 1) =  (GLfloat) scm_to_double(scm_list_ref(vrts,
+					scm_from_int(i)));
 	}
-	
-	while (fgets(buf, sizeof(buf), m)) {
-		if (buf[0] == 'v' && buf[1] == ' ') {
-			parse_vector(buf, vertices + (vc * 3) + 1);
-			vc++;
-		} else if (buf[0] == 'f' && buf[1] == ' ') {
-			parse_face(buf, faces + (fc * 3) + 1);
-			fc++;
-		}
+
+	*faces = (GLuint) scm_to_uint(scm_length(fces));
+	for (i = 0; i < *faces; i++) {
+		*(faces + i + 1) =  (GLuint) scm_to_uint(scm_list_ref(fces,
+					scm_from_int(i)));
 	}
-
-	fclose(m);
-
-	*vertices = (GLfloat) vc;
-	*faces = fc;
 
 	return 0;
 }
-
-#ifdef FALSE
-int main ()
-{
-	int i;
-
-	GLfloat * vertices = malloc(128 * sizeof(GLfloat));
-	GLuint * faces = malloc(128 * sizeof(GLuint));
-	if (vertices == NULL || faces == NULL) {
-		fprintf(stderr, "Failed to allocate memory\n");
-		exit(EXIT_FAILURE);
-	}
-	read_obj("models/cube.obj", vertices, faces);
-
-	printf("vertices: %i\n", (int) *vertices);
-	printf("faces: %d\n", *faces);
-
-	for (i = 1; i < (int) (*vertices * 3); i += 3) {
-		printf("%f, ", *(vertices + i));
-		printf("%f, ", *(vertices + i + 1));
-		printf("%f\n", *(vertices + i + 2));
-	}
-
-	for (i = 1; i < (int) (*faces * 3); i += 3) {
-		printf("%d, ", *(faces + i));
-		printf("%d, ", *(faces + i + 1));
-		printf("%d\n", *(faces + i + 2));
-	}
-
-	free(vertices);
-	free(faces);
-
-	exit(EXIT_SUCCESS);
-}
-#endif

@@ -6,6 +6,7 @@
 
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
+#include<libguile.h>
 
 #include "f_png.h"
 #include "trans.h"
@@ -152,8 +153,11 @@ static void window_resize (SDL_Window * window, GLuint * width,
  */
 int main (void)
 {
+	scm_init_guile();
+
 	GLuint w = DEFAULT_SCREEN_X;
 	GLuint h = DEFAULT_SCREEN_Y;
+
 	if (SDL_Init(SDL_INIT_VIDEO)) {
 		fprintf(stderr, "Failed to initialise SDL\n");
 		exit(EXIT_FAILURE);
@@ -209,7 +213,7 @@ int main (void)
 		fprintf(stderr, "Failed to allocate memory 01\n");
 		exit(EXIT_FAILURE);
 	}
-	read_obj("assets/models/monkey.obj", verts, faces);
+	read_obj("assets/models/sphere.obj", verts, faces);
 
 	GLuint vbo;
 	glGenBuffers(1, &vbo);

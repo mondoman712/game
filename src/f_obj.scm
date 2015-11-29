@@ -1,0 +1,21 @@
+(define (string->numlist str)
+  (map string->number (string-split str #\space)))
+
+(define (parse-face str)
+  (map (lambda (s) (- (string->number s) 1))
+       (map (lambda (s) (substring s 0 (string-index s #\/)))
+	    (string-split (substring str 2) #\space))))
+
+(define (read-obj-lines file vlst flst)
+  (let ((line (read-line file)))
+    (if (not (eof-object? line))
+	(cond ((string-contains line "v " 0 2)
+	       (read-obj-lines file (append vlst (string->numlist (substring line 2))) flst))
+	      ((string-contains line "f " 0 2)
+	       (read-obj-lines file vlst (append flst (parse-face line))))
+	      (else (read-obj-lines file vlst flst)))
+	(list vlst flst))))
+
+(define (load-obj filename)
+  (let ((fp (open-file filename "r")))
+    (read-obj-lines fp '() '())))
