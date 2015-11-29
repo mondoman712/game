@@ -213,7 +213,7 @@ int main (void)
 		fprintf(stderr, "Failed to allocate memory 01\n");
 		exit(EXIT_FAILURE);
 	}
-	read_obj("assets/models/monkey.obj", verts, faces);
+	read_obj("assets/models/sphere.obj", verts, faces);
 
 	GLuint vbo;
 	glGenBuffers(1, &vbo);
