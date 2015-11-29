@@ -207,18 +207,24 @@ int main (void)
 		printf("GLEW is working\n");
 	}
 
-	GLfloat * verts = malloc(150 * 3 * sizeof(GLfloat));
-	GLuint * faces = malloc(256 * 3 * sizeof(GLuint));
-	if (verts == NULL || faces == NULL) {
-		fprintf(stderr, "Failed to allocate memory 01\n");
-		exit(EXIT_FAILURE);
-	}
-	read_obj("assets/models/sphere.obj", verts, faces);
+	GLfloat * verts = NULL;
+	GLuint * faces = NULL;
+	read_obj("assets/models/monkey.obj", &verts, &faces);
+
+	int i;
+	printf("vert count: %i\n", (int) *verts);
+	for (i = 1; i < *verts; i += 3)
+		printf("%f, %f, %f\n", *(verts + i), *(verts + i + 1),
+				*(verts + i + 2));
+	printf("face count: %i\n", *faces);
+	for (i = 1; i < (int) *faces; i += 3)
+		printf("%d, %d, %d\n", *(faces + i), *(faces + i + 1),
+				*(faces + i + 2));
 
 	GLuint vbo;
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, (*verts * 3 * sizeof(GLfloat)),
+	glBufferData(GL_ARRAY_BUFFER, (int) (*verts * sizeof(GLfloat)),
 			verts + 1, GL_STATIC_DRAW);	
 
 	GLuint vao;
@@ -228,7 +234,7 @@ int main (void)
 	GLuint ebo;
 	glGenBuffers(1, &ebo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, (*faces * 3 * sizeof(GLuint)),
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, (*faces * sizeof(GLuint)),
 			faces + 1, GL_STATIC_DRAW);
 
 	GLuint vert_shader = create_shader(GL_VERTEX_SHADER, "vs1");
@@ -331,7 +337,7 @@ int main (void)
 		rotatez((PI / 180) * k / 10000.0, model);
 		glUniformMatrix4fv(uni_model, 1, GL_FALSE, model);
 
-		glDrawElements(GL_TRIANGLES, (*faces * 3), GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, *faces,GL_UNSIGNED_INT, 0);
 
 		SDL_GL_SwapWindow(mainwin);
 	}
