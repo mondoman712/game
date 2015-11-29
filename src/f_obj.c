@@ -29,10 +29,9 @@ GLushort read_obj (const char * filename, GLfloat ** vertices, GLuint ** faces)
 		return 1;
 	}
 	**vertices = (GLfloat) scm_to_double(scm_length(vrts));
-	for (i = 0; i < **vertices; i++) {
+	for (i = 0; i < **vertices; i++)
 		*(*vertices + i + 1) =  (GLfloat) scm_to_double(scm_list_ref(vrts,
 					scm_from_int(i)));
-	}
 
 	*faces = (GLuint *) malloc((1 + scm_to_int(scm_length(fces))) 
 			* sizeof(GLuint));
@@ -41,10 +40,9 @@ GLushort read_obj (const char * filename, GLfloat ** vertices, GLuint ** faces)
 		return 1;
 	}
 	**faces = (GLuint) scm_to_uint(scm_length(fces));
-	for (i = 0; i < (int) **faces; i++) {
+	for (i = 0; i < (int) **faces; i++)
 		*(*faces + i + 1) =  (GLuint) scm_to_uint(scm_list_ref(fces,
 					scm_from_int(i)));
-	}
 
 	return 0;
 }
