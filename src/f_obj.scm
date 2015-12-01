@@ -1,8 +1,5 @@
-(define (string->numlist str)
-  (map string->number (string-split str #\space)))
-
 (define (parse-vector str)
-  (map string->number (string-split (substring str 2) #\space)))
+  (map string->number (cdr (string-split str #\space))))
 
 (define (parse-face str)
   (map (lambda (s) (- (string->number s) 1))
@@ -18,7 +15,7 @@
 	       (read-obj-lines file vlst (append vtlst (list (parse-vector line))) flst))
 	      ((string-contains line "f " 0 2)
 	       (read-obj-lines file vlst vtlst (append flst (list (parse-face line)))))
-	      (else (read-obj-lines file vlst flst)))
+	      (else (read-obj-lines file vlst vtlst flst)))
 	(list vlst vtlst flst))))
 
 (define (load-obj filename)
