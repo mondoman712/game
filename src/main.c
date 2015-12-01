@@ -211,16 +211,6 @@ int main (void)
 	GLuint * faces = NULL;
 	read_obj("assets/models/monkey.obj", &verts, &faces);
 
-	int i;
-	printf("vert count: %i\n", (int) *verts);
-	for (i = 1; i < *verts; i += 3)
-		printf("%f, %f, %f\n", *(verts + i), *(verts + i + 1),
-				*(verts + i + 2));
-	printf("face count: %i\n", *faces);
-	for (i = 1; i < (int) *faces; i += 3)
-		printf("%d, %d, %d\n", *(faces + i), *(faces + i + 1),
-				*(faces + i + 2));
-
 	GLuint vbo;
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);

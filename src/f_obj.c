@@ -22,6 +22,7 @@ GLushort read_obj (const char * filename, GLfloat ** vertices, GLuint ** faces)
 	vrts = scm_list_ref(res, scm_from_int(0));
 	fces = scm_list_ref(res, scm_from_int(1));
 
+	/* Copy vertices from scm list into array */
 	*vertices = (GLfloat *) malloc((1 + scm_to_int(scm_length(vrts))) 
 			* sizeof(GLfloat));
 	if (*vertices == NULL) {
@@ -33,6 +34,7 @@ GLushort read_obj (const char * filename, GLfloat ** vertices, GLuint ** faces)
 		*(*vertices + i + 1) =  (GLfloat) scm_to_double(scm_list_ref(vrts,
 					scm_from_int(i)));
 
+	/* Copy faces from scm list into array */
 	*faces = (GLuint *) malloc((1 + scm_to_int(scm_length(fces))) 
 			* sizeof(GLuint));
 	if (*faces == NULL) {
