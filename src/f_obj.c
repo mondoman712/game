@@ -13,11 +13,19 @@ GLushort read_obj (const char * filename, GLfloat ** vertices, GLuint ** faces)
 	int i;
 
 	SCM res, vrts, fces;
+
+	/* load scheme source file */
 	scm_c_primitive_load("src/f_obj.scm");
+
+	/* load scheme packages to use */
 	scm_c_use_module("ice-9 rdelim");
+	scm_c_use_module("srfi srfi-1");
+
+	/* load necessary scheme function */
 	SCM load_obj_sym = scm_c_lookup("load-obj");
 	SCM load_obj = scm_variable_ref(load_obj_sym);
 
+	/* call scheme function */
 	res = scm_call_1(load_obj, scm_from_locale_string(filename));
 	vrts = scm_list_ref(res, scm_from_int(0));
 	fces = scm_list_ref(res, scm_from_int(1));
