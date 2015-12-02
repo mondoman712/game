@@ -30,9 +30,6 @@
 			(list-ref (list-ref lst 2) (list-ref l 2))))
 	      (list-ref lst 3)))
 
-(define (parse-obj lst)
-  
-
 (define (load-obj filename)
   (let ((fp (open-file filename "r")))
     (parse-obj (read-obj-lines fp))))

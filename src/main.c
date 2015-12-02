@@ -270,10 +270,10 @@ int main (void)
 	GLint tex_attr = glGetAttribLocation(shader_prog, "texcoord");
 	glEnableVertexAttribArray(tex_attr);
 	glVertexAttribPointer(tex_attr, 2, GL_FLOAT, GL_FALSE,
-			8 * sizeof(GLfloat), (void *)(6 * sizeof(GLfloat)));
+			8 * sizeof(GLfloat), (void *)(3 * sizeof(GLfloat)));
 
 	GLfloat view[16];
-	vec3 eye = {3.0, 0.0, 1.0};
+	vec3 eye = {3.0, 2.0, 2.0};
 	vec3 cent = {0.0, 0.0, 0.0};
 	vec3 up = {0.0, 0.0, 1.0};
 	look_at(eye, cent, up, view);
