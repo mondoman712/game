@@ -79,7 +79,6 @@ GLuint create_shader (const GLenum shader_type, const char * filename)
 static GLuint take_screenshot (GLuint w, GLuint h)
 {
 	GLuint ret = 0;
-	GLuint tex = NULL;
 	GLubyte * pix = malloc(w * h * 3 * sizeof(GLubyte));
 
 	struct tm * tm;
@@ -89,7 +88,6 @@ static GLuint take_screenshot (GLuint w, GLuint h)
 	GLushort i = 1;
 	char filename[128];
 	
-	glBindTexture(GL_TEXTURE_2D, tex);
 	glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, w, h);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
 	glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, (GLvoid *) pix);
