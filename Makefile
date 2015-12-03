@@ -1,4 +1,4 @@
-CSTD = c89
+CSTD = c90
 
 GUILE_CFLAGS = $(shell pkg-config guile-2.0 --cflags)
 SDL_CFLAGS = $(shell sdl2-config --cflags)

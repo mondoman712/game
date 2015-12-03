@@ -206,7 +206,7 @@ int main (void)
 	}
 
 	GLfloat * verts = NULL;
-	read_obj("assets/models/cube.obj", &verts);
+	read_obj("assets/models/monkey.obj", &verts);
 
 	GLuint vbo;
 	glGenBuffers(1, &vbo);
