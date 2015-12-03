@@ -6,3 +6,8 @@ That's just the project title for what will eventually become a quake-like fps.
 * Get png loader to handle RGB/RGBA properly
 * fix clipping issues
 * Lighting
+* find textures in mtl file
+* handle loading multiple objects
+* sky box textures
+* User controls
+* OpenGL ES Support 
