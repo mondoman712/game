@@ -79,7 +79,6 @@ GLuint create_shader (const GLenum shader_type, const char * filename)
 static GLuint take_screenshot (GLuint w, GLuint h)
 {
 	GLuint ret = 0;
-	GLuint tex = NULL;
 	GLubyte * pix = malloc(w * h * 3 * sizeof(GLubyte));
 
 	struct tm * tm;
@@ -89,7 +88,6 @@ static GLuint take_screenshot (GLuint w, GLuint h)
 	GLushort i = 1;
 	char filename[128];
 	
-	glBindTexture(GL_TEXTURE_2D, tex);
 	glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, w, h);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
 	glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, (GLvoid *) pix);
@@ -208,18 +206,7 @@ int main (void)
 	}
 
 	GLfloat * verts = NULL;
-	GLuint * faces = NULL;
-	read_obj("assets/models/monkey.obj", &verts, &faces);
-
-	int i;
-	printf("vert count: %i\n", (int) *verts);
-	for (i = 1; i < *verts; i += 3)
-		printf("%f, %f, %f\n", *(verts + i), *(verts + i + 1),
-				*(verts + i + 2));
-	printf("face count: %i\n", *faces);
-	for (i = 1; i < (int) *faces; i += 3)
-		printf("%d, %d, %d\n", *(faces + i), *(faces + i + 1),
-				*(faces + i + 2));
+	read_obj("assets/models/monkey.obj", &verts);
 
 	GLuint vbo;
 	glGenBuffers(1, &vbo);
@@ -231,12 +218,6 @@ int main (void)
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 
-	GLuint ebo;
-	glGenBuffers(1, &ebo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, (*faces * sizeof(GLuint)),
-			faces + 1, GL_STATIC_DRAW);
-
 	GLuint vert_shader = create_shader(GL_VERTEX_SHADER, "vs1");
 	GLuint frag_shader = create_shader(GL_FRAGMENT_SHADER, "fs1");
 
@@ -247,26 +228,25 @@ int main (void)
 	glLinkProgram(shader_prog);
 	glUseProgram(shader_prog);
 
-	/*
-	GLuint tex[2];
-	glGenTextures(2, tex);
-	GLuint w, h;
+	GLuint tex;
+	glGenTextures(1, &tex);
+	GLuint tw, th;
 	png_byte * img_data;
 
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, tex[0]);
-	img_data = read_png("assets/textures/cat.png", &w, &h);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB,
+	glBindTexture(GL_TEXTURE_2D, tex);
+	img_data = read_png("assets/textures/dog.png", &tw, &th);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tw, th, 0, GL_RGB,
 			GL_UNSIGNED_BYTE, img_data);
 	free(img_data);
-	glUniform1i(glGetUniformLocation(shader_prog, "texpat"), 0);
+	glUniform1i(glGetUniformLocation(shader_prog, "tex"), 0);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glGenerateMipmap(GL_TEXTURE_2D);
 
-	glActiveTexture(GL_TEXTURE1);
+	/*
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, tex[1]);
 	img_data = read_png("assets/textures/dog.png", &w, &h);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB,
@@ -283,22 +263,15 @@ int main (void)
 	GLuint pos_attr = glGetAttribLocation(shader_prog, "position");
 	glEnableVertexAttribArray(pos_attr);
 	glVertexAttribPointer(pos_attr, 3, GL_FLOAT, GL_FALSE,
-			3 * sizeof(GLfloat), 0);
-
-	/*
-	GLuint col_attr = glGetAttribLocation(shader_prog, "in_colour");
-	glEnableVertexAttribArray(col_attr);
-	glVertexAttribPointer(col_attr, 3, GL_FLOAT, GL_FALSE,
-			8 * sizeof(GLfloat), (void *)(3 * sizeof(GLfloat)));
+			8 * sizeof(GLfloat), 0);
 
 	GLint tex_attr = glGetAttribLocation(shader_prog, "texcoord");
 	glEnableVertexAttribArray(tex_attr);
 	glVertexAttribPointer(tex_attr, 2, GL_FLOAT, GL_FALSE,
-			8 * sizeof(GLfloat), (void *)(6 * sizeof(GLfloat)));
-	*/
+			8 * sizeof(GLfloat), (void *)(3 * sizeof(GLfloat)));
 
 	GLfloat view[16];
-	vec3 eye = {3.0, 0.0, 1.0};
+	vec3 eye = {3.0, 2.0, 2.0};
 	vec3 cent = {0.0, 0.0, 0.0};
 	vec3 up = {0.0, 0.0, 1.0};
 	look_at(eye, cent, up, view);
@@ -337,13 +310,12 @@ int main (void)
 		rotatez((PI / 180) * k / 10000.0, model);
 		glUniformMatrix4fv(uni_model, 1, GL_FALSE, model);
 
-		glDrawElements(GL_TRIANGLES, *faces,GL_UNSIGNED_INT, 0);
+		glDrawArrays(GL_TRIANGLES, 0, (GLuint) *verts);
 
 		SDL_GL_SwapWindow(mainwin);
 	}
 
 	free(verts);
-	free(faces);
 
 	glDeleteProgram(shader_prog);
 	glDeleteShader(frag_shader);
