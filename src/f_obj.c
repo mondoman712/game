@@ -38,8 +38,9 @@ GLushort read_obj (const char * filename, GLfloat ** vertices)
 
 	**vertices = (GLfloat) scm_to_double(scm_length(vrts));
 	for (i = 0; i < **vertices; i++)
-		*(*vertices + i + 1) =  (GLfloat) scm_to_double(scm_list_ref(vrts,
-					scm_from_int(i)));
+		*(*vertices + i + 1) =
+			(GLfloat) scm_to_double(scm_list_ref(vrts,
+						scm_from_int(i)));
 
 	return 0;
 }
