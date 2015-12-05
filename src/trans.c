@@ -65,6 +65,13 @@ void look_at (vec3 eye, vec3 centre, vec3 up, GLfloat * mat4)
 	s = norm_vec3(cross_vec3(f, up));
 	u = cross_vec3(s, f);
 
+	/*
+	 * s.x 		s.y 		s.z 		0
+	 * u.x 		u.y 		u.z 		0
+	 * -f.x 	-f.y 		-f.z 		0
+	 * 0 		0 		0 		1
+	 */
+
 	*mat4 = s.x;
 	*(mat4 + 1) = u.x;
 	*(mat4 + 2) = -f.x;
@@ -97,23 +104,23 @@ void perspective (GLfloat fovy, GLfloat asp, GLfloat znear, GLfloat zfar,
 
 	GLfloat f = tan(fovy / 2);
 	*mat4 = 1 / (f * asp);
-	*(mat4 + 4) = 0;
-	*(mat4 + 8) = 0;
-	*(mat4 + 12) = 0;
-
 	*(mat4 + 1) = 0;
-	*(mat4 + 5) = 1 / f;
-	*(mat4 + 9) = 0;
-	*(mat4 + 13) = 0;
-
 	*(mat4 + 2) = 0;
-	*(mat4 + 6) = 0;
-	*(mat4 + 10) = - (zfar + znear) / (zfar - znear); 
-	*(mat4 + 14) = - (2 * zfar * znear) / (zfar - znear); 
-
 	*(mat4 + 3) = 0;
+
+	*(mat4 + 4) = 0;
+	*(mat4 + 5) = 1 / f;
+	*(mat4 + 6) = 0;
 	*(mat4 + 7) = 0;
+
+	*(mat4 + 8) = 0;
+	*(mat4 + 9) = 0;
+	*(mat4 + 10) = - (zfar + znear) / (zfar - znear); 
 	*(mat4 + 11) = -1;
+
+	*(mat4 + 12) = 0;
+	*(mat4 + 13) = 0;
+	*(mat4 + 14) = - (2 * zfar * znear) / (zfar - znear); 
 	*(mat4 + 15) = 0;
 }
 
@@ -143,3 +150,37 @@ void rotatez (GLfloat ang, GLfloat * mat4)
 	*(mat4 + 15) = 1;
 }
 
+/*
+ * Fills a mat4 with zeros
+ */
+void zeros (GLfloat * mat4)
+{
+	GLushort i;
+	for (i = 0; i < 16; i++)
+		*(mat4 + i) = 0;
+}
+
+/*
+ * Creates a 4x4 identity matrix
+ */
+void identity (GLfloat * mat4)
+{
+	zeros(mat4);
+	
+	*mat4 = 1;
+	*(mat4 + 5) = 1;
+	*(mat4 + 10) = 1;
+	*(mat4 + 15) = 1;
+}
+
+/*
+ * Creates a matrix to move a vector by the vector pos
+ */
+void translate (vec3 pos, GLfloat * mat4)
+{
+	identity(mat4);
+
+	*(mat4 + 12) = pos.x;
+	*(mat4 + 13) = pos.y;
+	*(mat4 + 14) = pos.z;
+}

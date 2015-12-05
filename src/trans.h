@@ -27,4 +27,20 @@ void perspective (GLfloat fovy, GLfloat asp, GLfloat znear, GLfloat zfar,
  * Defines a matrix transformation to rotate around the Z axis
  */
 void rotatez (GLfloat ang, GLfloat * mat4);
+
+/*
+ * Fills a mat4 with zeros
+ */
+void zeros (GLfloat * mat4);
+
+/*
+ * Creates a 4x4 identity matrix
+ */
+void identity (GLfloat * mat4);
+
+/*
+ * Creates a matrix to move a vector by the vector pos
+ */
+void translate (vec3 pos, GLfloat * mat4);
+
 #endif /* _TRANS_H */
