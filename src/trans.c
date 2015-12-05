@@ -1,3 +1,14 @@
+/*
+ * This file includes functions to create matrix transformations for
+ * transforming 3D objects.
+ *
+ * They take a GLfloat matrix of size 16, and create matrices in this format:
+ *
+ * 0 	4 	8 	12
+ * 1 	5 	9 	13
+ * 2 	6 	10 	14
+ * 3 	7 	11 	15
+ */
 #include <math.h>
 #include <assert.h>
 
@@ -48,6 +59,29 @@ static vec3 cross_vec3 (vec3 a, vec3 b)
 static GLfloat dot_vec3 (vec3 a, vec3 b)
 {
 	return (a.x * b.x) + (a.y * b.y) + (a.z * b.z);
+}
+
+/*
+ * Fills a mat4 with zeros
+ */
+void zeros (GLfloat * mat4)
+{
+	GLushort i;
+	for (i = 0; i < 16; i++)
+		*(mat4 + i) = 0;
+}
+
+/*
+ * Creates a 4x4 identity matrix
+ */
+void identity (GLfloat * mat4)
+{
+	zeros(mat4);
+	
+	*mat4 = 1;
+	*(mat4 + 5) = 1;
+	*(mat4 + 10) = 1;
+	*(mat4 + 15) = 1;
 }
 
 /*
@@ -129,47 +163,21 @@ void perspective (GLfloat fovy, GLfloat asp, GLfloat znear, GLfloat zfar,
  */
 void rotatez (GLfloat ang, GLfloat * mat4)
 {
+	/*
+	 * 0 		-sin(ang)	0 	 	0
+	 * sin(ang) 	cos(ang)	0 		0
+	 * 0 		0 		1 		0
+	 * 0 		0 		0 		1
+	 */
+	zeros(mat4);
 	*mat4 = cos(ang);
 	*(mat4 + 1) = sin(ang);
-	*(mat4 + 2) = 0;
-	*(mat4 + 3) = 0;
 
 	*(mat4 + 4) = -sin(ang);
 	*(mat4 + 5) = cos(ang);
-	*(mat4 + 6) = 0;
-	*(mat4 + 7) = 0;
 
-	*(mat4 + 8) = 0;
-	*(mat4 + 9) = 0;
 	*(mat4 + 10) = 1;
-	*(mat4 + 11) = 0;
 
-	*(mat4 + 12) = 0;
-	*(mat4 + 13) = 0;
-	*(mat4 + 14) = 0;
-	*(mat4 + 15) = 1;
-}
-
-/*
- * Fills a mat4 with zeros
- */
-void zeros (GLfloat * mat4)
-{
-	GLushort i;
-	for (i = 0; i < 16; i++)
-		*(mat4 + i) = 0;
-}
-
-/*
- * Creates a 4x4 identity matrix
- */
-void identity (GLfloat * mat4)
-{
-	zeros(mat4);
-	
-	*mat4 = 1;
-	*(mat4 + 5) = 1;
-	*(mat4 + 10) = 1;
 	*(mat4 + 15) = 1;
 }
 
