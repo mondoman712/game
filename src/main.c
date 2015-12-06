@@ -283,6 +283,12 @@ int main (void)
 	GLint uni_proj = glGetUniformLocation(shader_prog, "proj");
 	glUniformMatrix4fv(uni_proj, 1, GL_FALSE, proj);
 
+	GLfloat pos[16];
+	vec3 p = {1.0, 0.0, 0.0};
+	translate(p, pos);
+	GLint uni_pos = glGetUniformLocation(shader_prog, "pos");
+	glUniformMatrix4fv(uni_pos, 1, GL_FALSE, pos);
+
 	GLfloat model[16];
 	GLint uni_model = glGetUniformLocation(shader_prog, "model");
 	clock_t k;

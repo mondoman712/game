@@ -10,6 +10,7 @@
 	    (cdr (string-split str #\space)))))
 
 (define* (read-obj-lines file #:optional (vlst '()) (vtlst '()) (vnlst '()) (flst '()))
+  "Reads lines from obj file and deposits different vertex types into different lists"
   (let ((line (read-line file)))
     (if (not (eof-object? line))
 	(cond ((string-contains line "v " 0 2)
@@ -24,10 +25,12 @@
 	(list vlst vtlst vnlst flst))))
 
 (define (parse-obj lst)
-  (let ((get-vertex (lambda (l x)
-		      (if (= (list-ref l x) -1)
-			  (list 0.0 0.0)
-			  (list-ref (list-ref lst x) (list-ref l x))))))
+  "Converts lists from read-obj-lines into 1 list of vertices"
+  (let ((get-vertex
+	 (lambda (l x)
+	   (if (= (list-ref l x) -1)
+	       (list 0.0 0.0)
+	       (list-ref (list-ref lst x) (list-ref l x))))))
     (append-map (lambda (l)
 		  (append (get-vertex l 0)
 			  (get-vertex l 1)
