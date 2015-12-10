@@ -334,5 +334,7 @@ int main (void)
 	SDL_DestroyWindow(mainwin);
 	SDL_Quit();
 
+	printf("%s\n", find_tex("assets/models/cube.mtl"));
+
 	exit(EXIT_SUCCESS);
 }

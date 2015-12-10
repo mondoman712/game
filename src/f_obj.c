@@ -5,6 +5,35 @@
 #include <GL/glew.h>
 #include <libguile.h>
 
+#define MTLBUFFSIZE 64 * sizeof(char)
+
+/*
+ * Finds the texture of an object in the mtl file, and returns the file name as
+ * a string
+ */
+char * find_tex (const char * filename)
+{
+	char * buff = malloc(MTLBUFFSIZE);
+	if (buff == NULL) {
+		fprintf(stderr, "Failed to allocate memory for: %s\n", filename);
+		return NULL;
+	}
+
+	FILE * fp = fopen(filename, "r");
+	if (fp == NULL) {
+		fprintf(stderr, "Failed to open file: %s\n", filename);
+		return NULL;
+	}
+
+	while (fgets(buff, MTLBUFFSIZE, fp))
+		if (buff[4] == 'K' && buff[5] == 'd')
+			break;
+
+	fclose(fp);
+
+	return buff + 7;
+}
+
 /* 
  * Reads obj file and deposits vertices into float array
  */
