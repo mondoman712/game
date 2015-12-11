@@ -109,17 +109,17 @@ void look_at (vec3 eye, vec3 centre, vec3 up, GLfloat * mat4)
 	*mat4 = s.x;
 	*(mat4 + 1) = u.x;
 	*(mat4 + 2) = -f.x;
-	*(mat4 + 3) = 1;
+	*(mat4 + 3) = 0;
 
 	*(mat4 + 4) = s.y;
 	*(mat4 + 5) = u.y;
 	*(mat4 + 6) = -f.y;
-	*(mat4 + 7) = 1;
+	*(mat4 + 7) = 0;
 
 	*(mat4 + 8) = s.z;
 	*(mat4 + 9) = u.z;
 	*(mat4 + 10) = -f.z;
-	*(mat4 + 11) = 1;
+	*(mat4 + 11) = 0;
 
 	*(mat4 + 12) = - dot_vec3(s, eye);
 	*(mat4 + 13) = - dot_vec3(u, eye);
