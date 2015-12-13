@@ -39,6 +39,11 @@ void rotatey (GLfloat ang, GLfloat * mat4);
 void rotatez (GLfloat ang, GLfloat * mat4);
 
 /*
+ * Defines a matrix transformation for rotations in the x, y and z axes.
+ */
+void rotate (GLfloat x, GLfloat y, GLfloat z, GLfloat * mat4);
+
+/*
  * Creates a matrix to move a vector by the vector pos
  */
 void translate (vec3 pos, GLfloat * mat4);
