@@ -284,14 +284,15 @@ int main (void)
 	glUniformMatrix4fv(uni_proj, 1, GL_FALSE, proj);
 
 	GLfloat pos[16];
-	vec3 p = {1.0, 0.0, 0.0};
+	vec3 p = {0.0, 0.0, 0.0};
 	translate(p, pos);
 	GLint uni_pos = glGetUniformLocation(shader_prog, "pos");
 	glUniformMatrix4fv(uni_pos, 1, GL_FALSE, pos);
 
 	GLfloat model[16];
 	GLint uni_model = glGetUniformLocation(shader_prog, "model");
-	clock_t k;
+	rotatez(PI, model);
+	glUniformMatrix4fv(uni_model, 1, GL_FALSE, model);
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -311,10 +312,6 @@ int main (void)
 		}
 		glClearColor(0.0, 0.0, 0.0, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		k = clock();
-		rotatez((PI / 180) * k / 10000.0, model);
-		glUniformMatrix4fv(uni_model, 1, GL_FALSE, model);
 
 		glDrawArrays(GL_TRIANGLES, 0, (GLuint) *verts);
 

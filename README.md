@@ -10,3 +10,4 @@ That's just the project title for what will eventually become a quake-like fps.
 * sky box textures
 * User controls
 * OpenGL ES Support 
+* Maps/worlds
