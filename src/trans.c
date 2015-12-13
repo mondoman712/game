@@ -175,7 +175,7 @@ void rotatex (GLfloat ang, GLfloat * mat4)
 	*(mat4 + 5) = cos(ang);
 	*(mat4 + 6) = sin(ang);
 
-	*(mat4 + 9) = sin(ang);
+	*(mat4 + 9) = -sin(ang);
 	*(mat4 + 10) = cos(ang);
 }
 
@@ -193,7 +193,7 @@ void rotatey (GLfloat ang, GLfloat * mat4)
 	identity(mat4);
 
 	*mat4 = cos(ang);
-	*(mat4 + 2) = sin(ang);
+	*(mat4 + 2) = -sin(ang);
 
 	*(mat4 + 8) = sin(ang);
 	*(mat4 + 10) = cos(ang);
@@ -210,7 +210,7 @@ void rotatez (GLfloat ang, GLfloat * mat4)
 	 * 0 		0 		1 		0
 	 * 0 		0 		0 		1
 	 */
-	zeros(mat4);
+	identity(mat4);
 
 	*mat4 = cos(ang);
 	*(mat4 + 1) = sin(ang);
