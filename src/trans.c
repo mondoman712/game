@@ -9,6 +9,7 @@
  * 2 	6 	10 	14
  * 3 	7 	11 	15
  */
+
 #include <math.h>
 #include <assert.h>
 
@@ -159,26 +160,63 @@ void perspective (GLfloat fovy, GLfloat asp, GLfloat znear, GLfloat zfar,
 }
 
 /*
+ * Defines a matrix transformation to rotate around the x axis
+ */
+void rotatex (GLfloat ang, GLfloat * mat4)
+{
+	/*
+	 * 1 		0 		0 		0
+	 * 0 		cos(ang) 	-sin(ang) 	0
+	 * 0 		sin(ang) 	cos(ang) 	0
+	 * 0 		0 		0 		1
+	 */
+	identity(mat4);
+
+	*(mat4 + 5) = cos(ang);
+	*(mat4 + 6) = sin(ang);
+
+	*(mat4 + 9) = sin(ang);
+	*(mat4 + 10) = cos(ang);
+}
+
+/*
+ * Defines a matrix transformation to rotate around the y axis
+ */
+void rotatey (GLfloat ang, GLfloat * mat4)
+{
+	/*
+	 * cos(ang)	0		sin(ang) 	0
+	 * 0 		1 		0 		0
+	 * -sin(ang) 	0 		cos(ang)	0
+	 * 0 		0 		0 		1
+	 */
+	identity(mat4);
+
+	*mat4 = cos(ang);
+	*(mat4 + 2) = sin(ang);
+
+	*(mat4 + 8) = sin(ang);
+	*(mat4 + 10) = cos(ang);
+}
+
+/*
  * Defines a matrix transformation to rotate around the Z axis
  */
 void rotatez (GLfloat ang, GLfloat * mat4)
 {
 	/*
-	 * 0 		-sin(ang)	0 	 	0
+	 * cos(ang)	-sin(ang)	0 	 	0
 	 * sin(ang) 	cos(ang)	0 		0
 	 * 0 		0 		1 		0
 	 * 0 		0 		0 		1
 	 */
 	zeros(mat4);
+
 	*mat4 = cos(ang);
 	*(mat4 + 1) = sin(ang);
 
 	*(mat4 + 4) = -sin(ang);
 	*(mat4 + 5) = cos(ang);
-
-	*(mat4 + 10) = 1;
-
-	*(mat4 + 15) = 1;
 }
 
 /*

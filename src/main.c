@@ -6,7 +6,7 @@
 
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
-#include<libguile.h>
+#include <libguile.h>
 
 #include "f_png.h"
 #include "trans.h"
@@ -312,7 +312,7 @@ int main (void)
 		}
 		glClearColor(0.0, 0.0, 0.0, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+		
 		glDrawArrays(GL_TRIANGLES, 0, (GLuint) *verts);
 
 		SDL_GL_SwapWindow(mainwin);

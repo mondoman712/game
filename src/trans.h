@@ -24,6 +24,16 @@ void perspective (GLfloat fovy, GLfloat asp, GLfloat znear, GLfloat zfar,
 		GLfloat * mat4);
 
 /*
+ * Defines a matrix transformation to rotate around the x axis
+ */
+void rotatex (GLfloat ang, GLfloat * mat4);
+
+/*
+ * Defines a matrix transformation to rotate around the y axis
+ */
+void rotatey (GLfloat ang, GLfloat * mat4);
+
+/*
  * Defines a matrix transformation to rotate around the Z axis
  */
 void rotatez (GLfloat ang, GLfloat * mat4);
