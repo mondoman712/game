@@ -74,7 +74,7 @@ GLuint create_shader (const GLenum shader_type, const char * filename)
 }
 
 /*
- * Takes a screenshot, saves it to scrnXXXX.png
+ * Takes a screenshot, saves it to scrn-yyyy-mm-dd-hh-mm-ss(-x).png
  */
 static GLuint take_screenshot (GLuint w, GLuint h)
 {
@@ -314,7 +314,7 @@ int main (void)
 		
 		k = clock();
 		rotate((PI / 180) * k / 10000.0,
-				-(PI / 180) * k / 10000.0,
+				(PI / 180) * k / 10000.0,
 				(PI / 180) * k / 10000.0,
 				model);
 		glUniformMatrix4fv(uni_model, 1, GL_FALSE, model);

@@ -224,13 +224,6 @@ void rotatez (GLfloat ang, GLfloat * mat4)
  */
 void rotate (GLfloat x, GLfloat y, GLfloat z, GLfloat * mat4)
 {
-	/* 
-	 * cos(y)cos(z) 			-cos(y)sin(z) 				sin(y) 		0
-	 * cos(z)sin(x)sin(y)+cos(x)sin(z) 	cos(x) cos(z)-sin(x) sin(y) sin(z) 	-cos(y) sin(x) 	0
-	 * sin(x) sin(z)-cos(x) cos(z) sin(y) 	cos(z) sin(x)+cos(x) sin(y) sin(z) 	cos(x) cos(y) 	0
- 	 * 0 					0 					0 		1)
-	 */
-	
 	*mat4 = cos(y) * cos(z);
 	*(mat4 + 1) = cos(z) * sin(x) * sin(y) + cos(x) * sin(z);
 	*(mat4 + 2) = sin(x) * sin(z) - cos(x) * cos(z) * sin(y);
