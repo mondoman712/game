@@ -14,10 +14,10 @@ EXECUTABLE = emetic
 
 $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
-	rm main.o f_obj.o trans.o f_png.o
+	rm $(OBJECTS)
 
 $(OBJECTS): $(SOURCES)
 	$(CC) $(CFLAGS) -c $(SOURCES)
 
 clean:
-	rm main.o f_obj.o trans.o f_png.o emetic
+	rm $(OBJECTS) $(EXECUTABLE)

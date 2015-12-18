@@ -9,6 +9,7 @@
  * 2 	6 	10 	14
  * 3 	7 	11 	15
  */
+
 #include <math.h>
 #include <assert.h>
 
@@ -128,6 +129,40 @@ void look_at (vec3 eye, vec3 centre, vec3 up, GLfloat * mat4)
 }
 
 /*
+ * Defines a View matrix given an eye position, and pitch and yaw angles
+ */
+void look_to (vec3 eye, GLfloat pitch, GLfloat yaw, GLfloat * mat4)
+{
+	GLfloat cp = cos(pitch);
+	GLfloat sp = sin(pitch);
+	GLfloat cy = cos(yaw);
+	GLfloat sy = sin(yaw);
+
+	vec3 x = {cy, 0, -sy};
+	vec3 y = {sy * sp, cp, cy * sp};
+	vec3 z = {sy * cp, -sp, cp * cy};
+
+	*mat4 = x.x;
+	*(mat4 + 1) = y.x;
+	*(mat4 + 2) = z.x;
+	*(mat4 + 3) = 0;
+
+	*(mat4 + 4) = x.y;
+	*(mat4 + 5) = y.y;
+	*(mat4 + 6) = z.y;
+	*(mat4 + 7) = 0;
+
+	*(mat4 + 8) = x.z;
+	*(mat4 + 9) = y.z;
+	*(mat4 + 10) = z.z;
+	*(mat4 + 11) = 0;
+
+	*(mat4 + 12) = - dot_vec3(x, eye);
+	*(mat4 + 13) = - dot_vec3(y, eye);
+	*(mat4 + 14) = - dot_vec3(z, eye);
+	*(mat4 + 15) = 1;
+}
+/*
  * Defines a perspective projection matrix transformation
  */
 void perspective (GLfloat fovy, GLfloat asp, GLfloat znear, GLfloat zfar,
@@ -159,25 +194,88 @@ void perspective (GLfloat fovy, GLfloat asp, GLfloat znear, GLfloat zfar,
 }
 
 /*
+ * Defines a matrix transformation to rotate around the x axis
+ */
+void rotatex (GLfloat ang, GLfloat * mat4)
+{
+	/*
+	 * 1 		0 		0 		0
+	 * 0 		cos(ang) 	-sin(ang) 	0
+	 * 0 		sin(ang) 	cos(ang) 	0
+	 * 0 		0 		0 		1
+	 */
+	identity(mat4);
+
+	*(mat4 + 5) = cos(ang);
+	*(mat4 + 6) = sin(ang);
+
+	*(mat4 + 9) = -sin(ang);
+	*(mat4 + 10) = cos(ang);
+}
+
+/*
+ * Defines a matrix transformation to rotate around the y axis
+ */
+void rotatey (GLfloat ang, GLfloat * mat4)
+{
+	/*
+	 * cos(ang)	0		sin(ang) 	0
+	 * 0 		1 		0 		0
+	 * -sin(ang) 	0 		cos(ang)	0
+	 * 0 		0 		0 		1
+	 */
+	identity(mat4);
+
+	*mat4 = cos(ang);
+	*(mat4 + 2) = -sin(ang);
+
+	*(mat4 + 8) = sin(ang);
+	*(mat4 + 10) = cos(ang);
+}
+
+/*
  * Defines a matrix transformation to rotate around the Z axis
  */
 void rotatez (GLfloat ang, GLfloat * mat4)
 {
 	/*
-	 * 0 		-sin(ang)	0 	 	0
+	 * cos(ang)	-sin(ang)	0 	 	0
 	 * sin(ang) 	cos(ang)	0 		0
 	 * 0 		0 		1 		0
 	 * 0 		0 		0 		1
 	 */
-	zeros(mat4);
+	identity(mat4);
+
 	*mat4 = cos(ang);
 	*(mat4 + 1) = sin(ang);
 
 	*(mat4 + 4) = -sin(ang);
 	*(mat4 + 5) = cos(ang);
+}
 
-	*(mat4 + 10) = 1;
+/*
+ * Defines a matrix transformation for rotations in the x, y and z axes.
+ */
+void rotate (GLfloat x, GLfloat y, GLfloat z, GLfloat * mat4)
+{
+	*mat4 = cos(y) * cos(z);
+	*(mat4 + 1) = cos(z) * sin(x) * sin(y) + cos(x) * sin(z);
+	*(mat4 + 2) = sin(x) * sin(z) - cos(x) * cos(z) * sin(y);
+	*(mat4 + 3) = 0;
 
+	*(mat4 + 4) = -cos(y) * sin(z);
+	*(mat4 + 5) = cos(x) * cos(z) - sin(x) * sin(y) * sin(z);
+	*(mat4 + 6) = cos(z) * sin(z) + cos(x) * sin(y) * sin(z);
+	*(mat4 + 7) = 0;
+
+	*(mat4 + 8) = sin(y);
+	*(mat4 + 9) = -cos(y) * sin(x);
+	*(mat4 + 10) = cos(x) * cos(y);
+	*(mat4 + 11) = 0;
+
+	*(mat4 + 12) = 0;
+	*(mat4 + 13) = 0;
+	*(mat4 + 14) = 0;
 	*(mat4 + 15) = 1;
 }
 

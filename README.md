@@ -9,4 +9,5 @@ That's just the project title for what will eventually become a quake-like fps.
 * handle loading multiple objects
 * sky box textures
 * User controls
-* OpenGL ES Support 
+* Vulkan Support (khronos gib vulkan)
+* Maps/worlds

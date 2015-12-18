@@ -6,7 +6,7 @@
 
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
-#include<libguile.h>
+#include <libguile.h>
 
 #include "f_png.h"
 #include "trans.h"
@@ -74,7 +74,7 @@ GLuint create_shader (const GLenum shader_type, const char * filename)
 }
 
 /*
- * Takes a screenshot, saves it to scrnXXXX.png
+ * Takes a screenshot, saves it to scrn-yyyy-mm-dd-hh-mm-ss(-x).png
  */
 static GLuint take_screenshot (GLuint w, GLuint h)
 {
@@ -121,11 +121,11 @@ static GLuint take_screenshot (GLuint w, GLuint h)
 static GLuint handle_keyup (SDL_Event e, GLuint w, GLuint h)
 {
 	switch(e.key.keysym.sym) {
-	case (SDLK_q):
-		return 1;
-	case (SDLK_F10):
-		take_screenshot(w, h);
-		break;
+		case (SDLK_q):
+			return 1;
+		case (SDLK_F10):
+			take_screenshot(w, h);
+			break;
 	}
 	
 	return 0;
@@ -245,21 +245,6 @@ int main (void)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glGenerateMipmap(GL_TEXTURE_2D);
 
-	/*
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, tex[1]);
-	img_data = read_png("assets/textures/dog.png", &w, &h);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB,
-			GL_UNSIGNED_BYTE, img_data);
-	free(img_data);
-	glUniform1i(glGetUniformLocation(shader_prog, "texbmo"), 1);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	*/
-
 	GLuint pos_attr = glGetAttribLocation(shader_prog, "position");
 	glEnableVertexAttribArray(pos_attr);
 	glVertexAttribPointer(pos_attr, 3, GL_FLOAT, GL_FALSE,
@@ -271,12 +256,8 @@ int main (void)
 			8 * sizeof(GLfloat), (void *)(3 * sizeof(GLfloat)));
 
 	GLfloat view[16];
-	vec3 eye = {3.0, 2.0, 2.0};
-	vec3 cent = {0.0, 0.0, 0.0};
-	vec3 up = {0.0, 0.0, 1.0};
-	look_at(eye, cent, up, view);
+	vec3 eye = {4.0, 0.0, 0.0};
 	GLint uni_view = glGetUniformLocation(shader_prog, "view");
-	glUniformMatrix4fv(uni_view, 1, GL_FALSE, view);
 
 	GLfloat proj[16];
 	perspective(PI / 2, w / h, 0.1, 100.0, proj);
@@ -284,7 +265,7 @@ int main (void)
 	glUniformMatrix4fv(uni_proj, 1, GL_FALSE, proj);
 
 	GLfloat pos[16];
-	vec3 p = {1.0, 0.0, 0.0};
+	vec3 p = {0.0, 0.0, 0.0};
 	translate(p, pos);
 	GLint uni_pos = glGetUniformLocation(shader_prog, "pos");
 	glUniformMatrix4fv(uni_pos, 1, GL_FALSE, pos);
@@ -294,6 +275,11 @@ int main (void)
 	clock_t k;
 
 	glEnable(GL_DEPTH_TEST);
+
+	SDL_SetRelativeMouseMode(SDL_TRUE);
+	int mx = 0, my = 0;
+	GLfloat pitch = 0, yaw = PI / 2;
+	GLfloat sens = 1;
 
 	SDL_Event e;
 	while (1) {
@@ -311,10 +297,17 @@ int main (void)
 		}
 		glClearColor(0.0, 0.0, 0.0, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+		
 		k = clock();
-		rotatez((PI / 180) * k / 10000.0, model);
+		rotate(k / 1000000.0, k / 1000000.0, k / 1000000.0, model);
 		glUniformMatrix4fv(uni_model, 1, GL_FALSE, model);
+		
+		SDL_GetRelativeMouseState(&mx, &my);
+		pitch -= ((GLfloat) my / (GLfloat) h) * sens;
+		yaw -= ((GLfloat) mx / (GLfloat) w) * sens;
+		look_to(eye, pitch, yaw, 
+				view);
+		glUniformMatrix4fv(uni_view, 1, GL_FALSE, view);
 
 		glDrawArrays(GL_TRIANGLES, 0, (GLuint) *verts);
 
