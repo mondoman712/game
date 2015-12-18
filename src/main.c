@@ -245,21 +245,6 @@ int main (void)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glGenerateMipmap(GL_TEXTURE_2D);
 
-	/*
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, tex[1]);
-	img_data = read_png("assets/textures/dog.png", &w, &h);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB,
-			GL_UNSIGNED_BYTE, img_data);
-	free(img_data);
-	glUniform1i(glGetUniformLocation(shader_prog, "texbmo"), 1);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	*/
-
 	GLuint pos_attr = glGetAttribLocation(shader_prog, "position");
 	glEnableVertexAttribArray(pos_attr);
 	glVertexAttribPointer(pos_attr, 3, GL_FLOAT, GL_FALSE,
@@ -271,7 +256,7 @@ int main (void)
 			8 * sizeof(GLfloat), (void *)(3 * sizeof(GLfloat)));
 
 	GLfloat view[16];
-	vec3 eye = {3.0, 2.0, 2.0};
+	vec3 eye = {0.0, -4.0, 0.0};
 	vec3 cent = {0.0, 0.0, 0.0};
 	vec3 up = {0.0, 0.0, 1.0};
 	look_at(eye, cent, up, view);
@@ -291,9 +276,13 @@ int main (void)
 
 	GLfloat model[16];
 	GLint uni_model = glGetUniformLocation(shader_prog, "model");
-	clock_t k;
+	rotate(0, 0, 0, model);
+	glUniformMatrix4fv(uni_model, 1, GL_FALSE, model);
 
 	glEnable(GL_DEPTH_TEST);
+
+	SDL_SetRelativeMouseMode(SDL_TRUE);
+	int mx, my;
 
 	SDL_Event e;
 	while (1) {
@@ -312,12 +301,11 @@ int main (void)
 		glClearColor(0.0, 0.0, 0.0, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
-		k = clock();
-		rotate((PI / 180) * k / 10000.0,
-				(PI / 180) * k / 10000.0,
-				(PI / 180) * k / 10000.0,
-				model);
-		glUniformMatrix4fv(uni_model, 1, GL_FALSE, model);
+		SDL_GetMouseState(&mx, &my);
+		cent.x = mx / 100.0;
+		cent.z = my / 100.0;
+		look_at(eye, cent, up, view);
+		glUniformMatrix4fv(uni_view, 1, GL_FALSE, view);
 		
 		glDrawArrays(GL_TRIANGLES, 0, (GLuint) *verts);
 
