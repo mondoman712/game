@@ -121,11 +121,11 @@ static GLuint take_screenshot (GLuint w, GLuint h)
 static GLuint handle_keyup (SDL_Event e, GLuint w, GLuint h)
 {
 	switch(e.key.keysym.sym) {
-	case (SDLK_q):
-		return 1;
-	case (SDLK_F10):
-		take_screenshot(w, h);
-		break;
+		case (SDLK_q):
+			return 1;
+		case (SDLK_F10):
+			take_screenshot(w, h);
+			break;
 	}
 	
 	return 0;
@@ -256,12 +256,8 @@ int main (void)
 			8 * sizeof(GLfloat), (void *)(3 * sizeof(GLfloat)));
 
 	GLfloat view[16];
-	vec3 eye = {0.0, -4.0, 0.0};
-	vec3 cent = {0.0, 0.0, 0.0};
-	vec3 up = {0.0, 0.0, 1.0};
-	look_at(eye, cent, up, view);
+	vec3 eye = {4.0, 0.0, 0.0};
 	GLint uni_view = glGetUniformLocation(shader_prog, "view");
-	glUniformMatrix4fv(uni_view, 1, GL_FALSE, view);
 
 	GLfloat proj[16];
 	perspective(PI / 2, w / h, 0.1, 100.0, proj);
@@ -276,8 +272,7 @@ int main (void)
 
 	GLfloat model[16];
 	GLint uni_model = glGetUniformLocation(shader_prog, "model");
-	rotate(0, 0, 0, model);
-	glUniformMatrix4fv(uni_model, 1, GL_FALSE, model);
+	clock_t k;
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -301,12 +296,19 @@ int main (void)
 		glClearColor(0.0, 0.0, 0.0, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
-		SDL_GetMouseState(&mx, &my);
-		cent.x = mx / 100.0;
-		cent.z = my / 100.0;
-		look_at(eye, cent, up, view);
-		glUniformMatrix4fv(uni_view, 1, GL_FALSE, view);
+		k = clock();
+		rotate(k / 1000000.0, k / 1000000.0, k / 1000000.0, model);
+		glUniformMatrix4fv(uni_model, 1, GL_FALSE, model);
 		
+		SDL_GetMouseState(&mx, &my);
+		/*
+		look_to(eye, ((mx / w) - 0.5) * (PI / 2), (my / h) * 2 * PI,
+				view);
+		*/
+		look_to(eye, 0, (((GLfloat) mx / (GLfloat) w) * 2 * PI) + PI / 2, 
+				view);
+		glUniformMatrix4fv(uni_view, 1, GL_FALSE, view);
+
 		glDrawArrays(GL_TRIANGLES, 0, (GLuint) *verts);
 
 		SDL_GL_SwapWindow(mainwin);

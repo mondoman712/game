@@ -129,6 +129,40 @@ void look_at (vec3 eye, vec3 centre, vec3 up, GLfloat * mat4)
 }
 
 /*
+ * Defines a View matrix given an eye position, and pitch and yaw angles
+ */
+void look_to (vec3 eye, GLfloat pitch, GLfloat yaw, GLfloat * mat4)
+{
+	GLfloat cp = cos(pitch);
+	GLfloat sp = sin(pitch);
+	GLfloat cy = cos(yaw);
+	GLfloat sy = sin(yaw);
+
+	vec3 x = {cy, 0, -sy};
+	vec3 y = {sy * sp, cp, cy * sp};
+	vec3 z = {sy * cp, -sp, cp * cy};
+
+	*mat4 = x.x;
+	*(mat4 + 1) = y.x;
+	*(mat4 + 2) = z.x;
+	*(mat4 + 3) = 0;
+
+	*(mat4 + 4) = x.y;
+	*(mat4 + 5) = y.y;
+	*(mat4 + 6) = z.y;
+	*(mat4 + 7) = 0;
+
+	*(mat4 + 8) = x.z;
+	*(mat4 + 9) = y.z;
+	*(mat4 + 10) = z.z;
+	*(mat4 + 11) = 0;
+
+	*(mat4 + 12) = - dot_vec3(x, eye);
+	*(mat4 + 13) = - dot_vec3(y, eye);
+	*(mat4 + 14) = - dot_vec3(z, eye);
+	*(mat4 + 15) = 1;
+}
+/*
  * Defines a perspective projection matrix transformation
  */
 void perspective (GLfloat fovy, GLfloat asp, GLfloat znear, GLfloat zfar,

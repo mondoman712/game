@@ -18,6 +18,11 @@ void vec3_array (vec3 in, GLfloat * array);
 void look_at (vec3 eye, vec3 centre, vec3 up, GLfloat * mat4);
 
 /*
+ * Defines a View matrix given an eye position, and pitch and yaw angles
+ */
+void look_to (vec3 eye, GLfloat pitch, GLfloat yaw, GLfloat * mat4);
+
+/*
  * Defines a perspective projection matrix transformation
  */
 void perspective (GLfloat fovy, GLfloat asp, GLfloat znear, GLfloat zfar,
