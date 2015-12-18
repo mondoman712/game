@@ -33,6 +33,7 @@ GLuint create_shader (const GLenum shader_type, const char * filename)
 	char _source[4096];
 	char dest[64];
 
+	/* Create full filename */
 	strcpy(dest, SHADER_DIR);
 	strcat(dest, filename);
 	strcat(dest, SHADER_EXT);
@@ -43,20 +44,26 @@ GLuint create_shader (const GLenum shader_type, const char * filename)
 		return 1;
 	}
 
+	/* Read all lines in file */
 	int i = 0;
 	char inc;
 	while (fscanf(s, "%c", &inc) > 0)
 		_source[i++] = inc;
 	
+	/* Add string terminator to file */
 	_source[i - 1] = '\0';
 
+	/* Change type of source */
 	const char * source = _source;
+
 	fclose(s);
 
+	/* Compile Shader */
 	GLuint shader = glCreateShader(shader_type);
 	glShaderSource(shader, 1, &source, NULL);
 	glCompileShader(shader);
 
+	/* Check for and report errors */
 	GLint status;
 	glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
 	if (status == GL_TRUE) {
@@ -88,19 +95,23 @@ static GLuint take_screenshot (GLuint w, GLuint h)
 	GLushort i = 1;
 	char filename[128];
 	
+	/* Get pixel data from OpenGL */
 	glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, w, h);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
 	glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, (GLvoid *) pix);
 	
+	/* Create filename based on time */
 	t = time(NULL);
 	tm = localtime(&t);
 	strftime(strtime, sizeof(strtime), "%Y-%m-%d-%H-%M-%S", tm);
 	printf("%s\n", strtime);
 	sprintf(filename, "screenshot-%s.png", strtime);
 
+	/* If another file of this name exists add digits to the end */
 	while (access(filename, F_OK) != -1)
 		sprintf(filename, "screenshot-%s-%d.png", strtime, i++);
 
+	/* Save the file and print out a message */
 	if (access(filename, F_OK) == -1) {
 		if (save_png(filename, pix, w, h)) { 
 			ret = 1;
@@ -109,7 +120,6 @@ static GLuint take_screenshot (GLuint w, GLuint h)
 			printf("Taken screenshot %s\n", filename);
 		}
 	}
-
 
 	free(pix);
 	return ret;
@@ -305,8 +315,7 @@ int main (void)
 		SDL_GetRelativeMouseState(&mx, &my);
 		pitch -= ((GLfloat) my / (GLfloat) h) * sens;
 		yaw -= ((GLfloat) mx / (GLfloat) w) * sens;
-		look_to(eye, pitch, yaw, 
-				view);
+		look_to(eye, pitch, yaw, view);
 		glUniformMatrix4fv(uni_view, 1, GL_FALSE, view);
 
 		glDrawArrays(GL_TRIANGLES, 0, (GLuint) *verts);
