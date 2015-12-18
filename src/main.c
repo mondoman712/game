@@ -277,7 +277,9 @@ int main (void)
 	glEnable(GL_DEPTH_TEST);
 
 	SDL_SetRelativeMouseMode(SDL_TRUE);
-	int mx, my;
+	int mx = 0, my = 0;
+	GLfloat pitch = 0, yaw = PI / 2;
+	GLfloat sens = 1;
 
 	SDL_Event e;
 	while (1) {
@@ -300,12 +302,10 @@ int main (void)
 		rotate(k / 1000000.0, k / 1000000.0, k / 1000000.0, model);
 		glUniformMatrix4fv(uni_model, 1, GL_FALSE, model);
 		
-		SDL_GetMouseState(&mx, &my);
-		/*
-		look_to(eye, ((mx / w) - 0.5) * (PI / 2), (my / h) * 2 * PI,
-				view);
-		*/
-		look_to(eye, 0, (((GLfloat) mx / (GLfloat) w) * 2 * PI) + PI / 2, 
+		SDL_GetRelativeMouseState(&mx, &my);
+		pitch -= ((GLfloat) my / (GLfloat) h) * sens;
+		yaw -= ((GLfloat) mx / (GLfloat) w) * sens;
+		look_to(eye, pitch, yaw, 
 				view);
 		glUniformMatrix4fv(uni_view, 1, GL_FALSE, view);
 
