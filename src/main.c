@@ -269,8 +269,9 @@ int main (void)
 	vec3 eye = {4.0, 0.0, 0.0};
 	GLint uni_view = glGetUniformLocation(shader_prog, "view");
 
+	GLfloat fov = PI / 2;
 	GLfloat proj[16];
-	perspective(PI / 2, w / h, 0.1, 100.0, proj);
+	perspective(fov, w / h, 0.1, 100.0, proj);
 	GLint uni_proj = glGetUniformLocation(shader_prog, "proj");
 	glUniformMatrix4fv(uni_proj, 1, GL_FALSE, proj);
 
@@ -300,11 +301,12 @@ int main (void)
 				break;
 			} else if (e.window.event == SDL_WINDOWEVENT_RESIZED) {
 				window_resize(mainwin, &w, &h);
-				perspective(PI / 2, (GLfloat) w / (GLfloat) h,
+				perspective(fov, (GLfloat) w / (GLfloat) h,
 						0.1, 100.0, proj);
 				glUniformMatrix4fv(uni_proj, 1, GL_FALSE, proj);
 			}
 		}
+
 		glClearColor(0.0, 0.0, 0.0, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
@@ -336,7 +338,7 @@ int main (void)
 	SDL_DestroyWindow(mainwin);
 	SDL_Quit();
 
-	printf("%s\n", find_tex("assets/models/cube.mtl"));
+	printf("%s", find_tex("assets/models/cube.mtl"));
 
 	exit(EXIT_SUCCESS);
 }
