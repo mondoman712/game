@@ -128,14 +128,23 @@ static GLuint take_screenshot (GLuint w, GLuint h)
 /*
  * Handles key up event in main loop
  */
-static GLuint handle_keyup (SDL_Event e, GLuint w, GLuint h)
+static GLuint handle_keyup (SDL_Event e, GLuint w, GLuint h, GLushort * pause)
 {
 	switch(e.key.keysym.sym) {
-		case (SDLK_q):
-			return 1;
-		case (SDLK_F10):
-			take_screenshot(w, h);
-			break;
+	case (SDLK_q):
+		return 1;
+	case (SDLK_F10):
+		take_screenshot(w, h);
+		break;
+	case (SDLK_SPACE):
+		if (*pause) {
+			SDL_SetRelativeMouseMode(SDL_TRUE);
+			*pause = 0;
+		} else {
+			SDL_SetRelativeMouseMode(SDL_FALSE);
+			*pause = 1;
+		}
+		break;
 	}
 	
 	return 0;
@@ -276,8 +285,8 @@ int main (void)
 	glUniformMatrix4fv(uni_proj, 1, GL_FALSE, proj);
 
 	GLfloat pos[16];
-	vec3 p = {0.0, 0.0, 0.0};
-	translate(p, pos);
+	vec3 ps = {0.0, 0.0, 0.0};
+	translate(ps, pos);
 	GLint uni_pos = glGetUniformLocation(shader_prog, "pos");
 	glUniformMatrix4fv(uni_pos, 1, GL_FALSE, pos);
 
@@ -291,13 +300,14 @@ int main (void)
 	int mx = 0, my = 0;
 	GLfloat pitch = 0, yaw = PI / 2;
 	GLfloat sens = 1;
+	GLushort p = 0;
 
 	SDL_Event e;
 	while (1) {
 		if (SDL_PollEvent(&e)) {
 			if (e.type == SDL_QUIT) {
 				break;
-			} else if (e.type == SDL_KEYUP && handle_keyup(e, w, h)) {
+			} else if (e.type == SDL_KEYUP && handle_keyup(e, w, h, &p)) {
 				break;
 			} else if (e.window.event == SDL_WINDOWEVENT_RESIZED) {
 				window_resize(mainwin, &w, &h);
@@ -307,21 +317,22 @@ int main (void)
 			}
 		}
 
-		glClearColor(0.0, 0.0, 0.0, 0.0);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
-		k = clock();
-		rotate(k / 1000000.0, k / 1000000.0, k / 1000000.0, model);
-		glUniformMatrix4fv(uni_model, 1, GL_FALSE, model);
-		
-		SDL_GetRelativeMouseState(&mx, &my);
-		pitch -= ((GLfloat) my / (GLfloat) h) * sens;
-		yaw -= ((GLfloat) mx / (GLfloat) w) * sens;
-		look_to(eye, pitch, yaw, view);
-		glUniformMatrix4fv(uni_view, 1, GL_FALSE, view);
+		if (!p) {
+			glClearColor(0.0, 0.0, 0.0, 0.0);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			
+			k = clock();
+			rotate(k / 1000000.0, k / 1000000.0, k / 1000000.0, model);
+			glUniformMatrix4fv(uni_model, 1, GL_FALSE, model);
+			
+			SDL_GetRelativeMouseState(&mx, &my);
+			pitch -= ((GLfloat) my / (GLfloat) h) * sens;
+			yaw -= ((GLfloat) mx / (GLfloat) w) * sens;
+			look_to(eye, pitch, yaw, view);
+			glUniformMatrix4fv(uni_view, 1, GL_FALSE, view);
+		}
 
 		glDrawArrays(GL_TRIANGLES, 0, (GLuint) *verts);
-
 		SDL_GL_SwapWindow(mainwin);
 	}
 
