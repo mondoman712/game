@@ -50,13 +50,13 @@ GLuint create_shader (const GLenum shader_type, const char * filename)
 	while (fscanf(s, "%c", &inc) > 0)
 		_source[i++] = inc;
 	
+	fclose(s);
+
 	/* Add string terminator to file */
 	_source[i - 1] = '\0';
 
 	/* Change type of source */
 	const char * source = _source;
-
-	fclose(s);
 
 	/* Compile Shader */
 	GLuint shader = glCreateShader(shader_type);
@@ -307,8 +307,8 @@ int main (void)
 		if (SDL_PollEvent(&e)) {
 			if (e.type == SDL_QUIT) {
 				break;
-			} else if (e.type == SDL_KEYUP && handle_keyup(e, w, h, &p)) {
-				break;
+			} else if (e.type == SDL_KEYUP) {
+				if (handle_keyup(e, w, h, &p)) break;
 			} else if (e.window.event == SDL_WINDOWEVENT_RESIZED) {
 				window_resize(mainwin, &w, &h);
 				perspective(fov, (GLfloat) w / (GLfloat) h,
@@ -322,7 +322,8 @@ int main (void)
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			
 			k = clock();
-			rotate(k / 1000000.0, k / 1000000.0, k / 1000000.0, model);
+			rotate(k / 1000000.0, k / 1000000.0, k / 1000000.0,
+					model);
 			glUniformMatrix4fv(uni_model, 1, GL_FALSE, model);
 			
 			SDL_GetRelativeMouseState(&mx, &my);
