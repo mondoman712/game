@@ -7,7 +7,8 @@
 /*
  * Reads png file
  */
-png_byte * read_png(const char * filename, GLuint * width, GLuint * height);
+png_byte * read_png(const char * filename, GLuint * width, GLuint * height,
+		GLuint * colour_type);
 
 /*
  * Saves a byte array stored in pixels of width w and height h as a png into

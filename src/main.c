@@ -250,11 +250,12 @@ int main (void)
 	GLuint tex;
 	glGenTextures(1, &tex);
 	GLuint tw, th;
+	GLuint colour_type;
 	png_byte * img_data;
 
 	glBindTexture(GL_TEXTURE_2D, tex);
-	img_data = read_png("assets/textures/dog.png", &tw, &th);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tw, th, 0, GL_RGB,
+	img_data = read_png("assets/textures/dog.png", &tw, &th, &colour_type);
+	glTexImage2D(GL_TEXTURE_2D, 0, colour_type, tw, th, 0, colour_type,
 			GL_UNSIGNED_BYTE, img_data);
 	free(img_data);
 	glUniform1i(glGetUniformLocation(shader_prog, "tex"), 0);

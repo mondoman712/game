@@ -20,7 +20,8 @@ static GLuint readpng_checksig (FILE * stream)
 /*
  * Reads png file
  */
-png_byte * read_png(const char * filename, GLuint * width, GLuint * height)
+png_byte * read_png(const char * filename, GLuint * width, GLuint * height,
+		GLuint * colour_type)
 {
 	/* Open File */
 	FILE * fp = fopen(filename, "rb");
@@ -76,9 +77,11 @@ png_byte * read_png(const char * filename, GLuint * width, GLuint * height)
 	switch (act_colour_type) {
 	case PNG_COLOR_TYPE_RGB:
 		s = "RGB";
+		*colour_type = GL_RGB;
 		break;
 	case PNG_COLOR_TYPE_RGB_ALPHA:
 		s = "RGBA";
+		*colour_type = GL_RGBA;
 		break;
 	default:
 		s = "Unknown";
@@ -108,7 +111,7 @@ png_byte * read_png(const char * filename, GLuint * width, GLuint * height)
 	GLuint i;
 	for (i = 0; i < tmph; i++)
 		row_ptrs[tmph - 1 - i] = img_data + i * rowbytes;
-
+			
 	png_read_image(png, row_ptrs);
 
 	/* Free data and close file */
