@@ -38,6 +38,7 @@ GLuint create_shader (const GLenum shader_type, const char * filename)
 	strcat(dest, filename);
 	strcat(dest, SHADER_EXT);
 
+	/* Open file */
 	FILE * s = fopen(dest, "r");
 	if (s == NULL) {
 		fprintf(stderr, "Could not open file %s\n", dest);
@@ -50,6 +51,7 @@ GLuint create_shader (const GLenum shader_type, const char * filename)
 	while (fscanf(s, "%c", &inc) > 0)
 		_source[i++] = inc;
 	
+	/* Close file */
 	fclose(s);
 
 	/* Add string terminator to file */
@@ -81,36 +83,46 @@ GLuint create_shader (const GLenum shader_type, const char * filename)
 }
 
 /*
- * Takes a screenshot, saves it to scrn-yyyy-mm-dd-hh-mm-ss(-x).png
+ * Create filename for screenshot
  */
-static GLuint take_screenshot (GLuint w, GLuint h)
+static char * ss_filename (void)
 {
-	GLuint ret = 0;
-	GLubyte * pix = malloc(w * h * 3 * sizeof(GLubyte));
-
 	struct tm * tm;
 	time_t t;
 	char strtime[128];
 
+	char * filename = malloc(128 * sizeof(char));
 	GLushort i = 1;
-	char filename[128];
-	
-	/* Get pixel data from OpenGL */
-	glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, w, h);
-	glPixelStorei(GL_PACK_ALIGNMENT, 1);
-	glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, (GLvoid *) pix);
 	
 	/* Create filename based on time */
 	t = time(NULL);
 	tm = localtime(&t);
 	strftime(strtime, sizeof(strtime), "%Y-%m-%d-%H-%M-%S", tm);
-	printf("%s\n", strtime);
 	sprintf(filename, "screenshot-%s.png", strtime);
 
 	/* If another file of this name exists add digits to the end */
 	while (access(filename, F_OK) != -1)
 		sprintf(filename, "screenshot-%s-%d.png", strtime, i++);
 
+	return filename;
+}
+
+/*
+ * Takes a screenshot, saves it to scrn-yyyy-mm-dd-hh-mm-ss(-x).png
+ */
+static GLuint take_screenshot (GLuint w, GLuint h)
+{
+	GLuint ret = 0;
+	GLubyte * pix = malloc(w * h * 3 * sizeof(GLubyte));
+	char * filename;
+
+	/* Get pixel data from OpenGL */
+	glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, w, h);
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+	glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, (GLvoid *) pix);
+
+	filename = ss_filename();
+	
 	/* Save the file and print out a message */
 	if (access(filename, F_OK) == -1) {
 		if (save_png(filename, pix, w, h)) { 
@@ -122,6 +134,8 @@ static GLuint take_screenshot (GLuint w, GLuint h)
 	}
 
 	free(pix);
+	free(filename);
+
 	return ret;
 }
 
