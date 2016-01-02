@@ -121,6 +121,7 @@ static GLuint take_screenshot (GLuint w, GLuint h)
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
 	glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, (GLvoid *) pix);
 
+	/* Get filename */
 	filename = ss_filename();
 	
 	/* Save the file and print out a message */
@@ -195,13 +196,12 @@ int main (void)
 	}
 
 	SDL_Window * mainwin;
-	mainwin = SDL_CreateWindow(
-			WIN_TITLE,
-			SDL_WINDOWPOS_UNDEFINED,
-			SDL_WINDOWPOS_UNDEFINED,
+	mainwin = SDL_CreateWindow(WIN_TITLE,
+			SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
 			w, h,
 			SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL
 				| SDL_WINDOW_RESIZABLE);
+
 	if (mainwin == NULL) {
 		fprintf(stderr, "Failed to create SDL window\n");
 		exit(EXIT_FAILURE);
@@ -313,17 +313,19 @@ int main (void)
 
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 	int mx = 0, my = 0;
-	GLfloat pitch = 0, yaw = PI / 2;
+	GLfloat pitch = 0;
+       	GLfloat yaw = PI / 2;
 	GLfloat sens = 1;
-	GLushort p = 0;
+	GLushort pause = 0;
 
 	SDL_Event e;
 	while (1) {
+		/* Handle Events */
 		if (SDL_PollEvent(&e)) {
 			if (e.type == SDL_QUIT) {
 				break;
 			} else if (e.type == SDL_KEYUP) {
-				if (handle_keyup(e, w, h, &p)) break;
+				if (handle_keyup(e, w, h, &pause)) break;
 			} else if (e.window.event == SDL_WINDOWEVENT_RESIZED) {
 				window_resize(mainwin, &w, &h);
 				perspective(fov, (GLfloat) w / (GLfloat) h,
@@ -332,15 +334,18 @@ int main (void)
 			}
 		}
 
-		if (!p) {
+		if (!pause) {
+			/* Set Screen to black */
 			glClearColor(0.0, 0.0, 0.0, 0.0);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			
+			/* Rotation of monkey based on time */
 			k = clock();
 			rotate(k / 1000000.0, k / 1000000.0, k / 1000000.0,
 					model);
 			glUniformMatrix4fv(uni_model, 1, GL_FALSE, model);
 			
+			/* Handle mouse movement */
 			SDL_GetRelativeMouseState(&mx, &my);
 			pitch -= ((GLfloat) my / (GLfloat) h) * sens;
 			yaw -= ((GLfloat) mx / (GLfloat) w) * sens;
@@ -348,6 +353,7 @@ int main (void)
 			glUniformMatrix4fv(uni_view, 1, GL_FALSE, view);
 		}
 
+		/* Draw objects */
 		glDrawArrays(GL_TRIANGLES, 0, (GLuint) *verts);
 		SDL_GL_SwapWindow(mainwin);
 	}

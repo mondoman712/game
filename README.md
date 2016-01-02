@@ -7,6 +7,8 @@ That's just the project title for what will eventually become a quake-like fps.
 * find textures in mtl file
 * handle loading multiple objects
 * sky box textures
-* User controls
 * Vulkan Support (khronos gib vulkan)
 * Maps/worlds
+* Player movement
+* command line options
+* Move rendering out of main
