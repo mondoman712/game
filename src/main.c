@@ -19,7 +19,7 @@
 #define PI 3.141592653589
 
 #define GL_MAJOR_VER 3
-#define GL_MINOR_VER 0
+#define GL_MINOR_VER 3
 
 #define SHADER_DIR "src/shaders/"
 #define SHADER_EXT ".glsl"
@@ -279,15 +279,25 @@ int main (void)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glGenerateMipmap(GL_TEXTURE_2D);
 
-	GLuint pos_attr = glGetAttribLocation(shader_prog, "position");
+	GLint uni_lightp = glGetUniformLocation(shader_prog, "light.position");
+	glUniform3f(uni_lightp, 1.0, 1.0, 1.0);
+	GLint uni_lighti = glGetUniformLocation(shader_prog, "light.intensities");
+	glUniform3f(uni_lighti, 1.0, 1.0, 1.0);
+
+	GLuint pos_attr = glGetAttribLocation(shader_prog, "vert");
 	glEnableVertexAttribArray(pos_attr);
 	glVertexAttribPointer(pos_attr, 3, GL_FLOAT, GL_FALSE,
 			8 * sizeof(GLfloat), 0);
 
-	GLint tex_attr = glGetAttribLocation(shader_prog, "texcoord");
+	GLint tex_attr = glGetAttribLocation(shader_prog, "verttexcoord");
 	glEnableVertexAttribArray(tex_attr);
 	glVertexAttribPointer(tex_attr, 2, GL_FLOAT, GL_FALSE,
 			8 * sizeof(GLfloat), (void *)(3 * sizeof(GLfloat)));
+
+	GLint nrm_attr = glGetAttribLocation(shader_prog, "vertnorm");
+	glEnableVertexAttribArray(nrm_attr);
+	glVertexAttribPointer(nrm_attr, 3, GL_FLOAT, GL_FALSE,
+			8 * sizeof(GLfloat), (void *)(5 * sizeof(GLfloat)));
 
 	GLfloat view[16];
 	vec3 eye = {4.0, 0.0, 0.0};
@@ -309,14 +319,14 @@ int main (void)
 	GLint uni_model = glGetUniformLocation(shader_prog, "model");
 	clock_t k;
 
-	glEnable(GL_DEPTH_TEST);
-
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 	int mx = 0, my = 0;
 	GLfloat pitch = 0;
        	GLfloat yaw = PI / 2;
 	GLfloat sens = 1;
 	GLushort pause = 0;
+
+	glEnable(GL_DEPTH_TEST);
 
 	SDL_Event e;
 	while (1) {
