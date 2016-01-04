@@ -328,8 +328,14 @@ int main (void)
 
 	glEnable(GL_DEPTH_TEST);
 
+	clock_t t;
+	/* Add some text that I can overwrite later */
+	printf("0.000000");
+
 	SDL_Event e;
 	while (1) {
+		t = clock();
+
 		/* Handle Events */
 		if (SDL_PollEvent(&e)) {
 			if (e.type == SDL_QUIT) {
@@ -366,7 +372,11 @@ int main (void)
 		/* Draw objects */
 		glDrawArrays(GL_TRIANGLES, 0, (GLuint) *verts);
 		SDL_GL_SwapWindow(mainwin);
+	
+		t = clock() - t;
+		printf("\r%1.6fms", ((double) t) / CLOCKS_PER_SEC * 1000);
 	}
+	printf("\n");
 
 	free(verts);
 
@@ -377,8 +387,7 @@ int main (void)
 	glDeleteBuffers(1, &vbo);
 	glDeleteVertexArrays(1, &vao);
 
-	SDL_GL_DeleteContext(gl_context);
-	SDL_DestroyWindow(mainwin);
+	SDL_GL_DeleteContext(gl_context); SDL_DestroyWindow(mainwin);
 	SDL_Quit();
 
 	printf("%s", find_tex("assets/models/cube.mtl"));
