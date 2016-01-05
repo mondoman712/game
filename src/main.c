@@ -15,6 +15,7 @@
 #define WIN_TITLE "window title"
 #define DEFAULT_SCREEN_X 960
 #define DEFAULT_SCREEN_Y 960
+#define MAX_FPS 0
 
 #define PI 3.141592653589
 
@@ -328,13 +329,13 @@ int main (void)
 
 	glEnable(GL_DEPTH_TEST);
 
-	clock_t t;
+	clock_t ts, te;
 	/* Add some text that I can overwrite later */
 	printf("0.000000");
 
 	SDL_Event e;
 	while (1) {
-		t = clock();
+		ts = clock();
 
 		/* Handle Events */
 		if (SDL_PollEvent(&e)) {
@@ -373,8 +374,12 @@ int main (void)
 		glDrawArrays(GL_TRIANGLES, 0, (GLuint) *verts);
 		SDL_GL_SwapWindow(mainwin);
 	
-		t = clock() - t;
-		printf("\r%1.6fms", ((double) t) / CLOCKS_PER_SEC * 1000);
+		if (MAX_FPS)
+			while (CLOCKS_PER_SEC / (te = clock() - ts) >= MAX_FPS);
+		else
+			te = clock() - ts;
+
+		printf("\r%1.6fms", ((double) te) / CLOCKS_PER_SEC * 1000);
 	}
 	printf("\n");
 
