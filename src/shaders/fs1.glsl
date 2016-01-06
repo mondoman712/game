@@ -7,26 +7,53 @@ in vec3 fragnorm;
 out vec4 out_colour;
 
 uniform mat4 model;
+uniform vec3 campos;
+
 uniform sampler2D tex;
+uniform float mat_shine;
+uniform vec3 mat_specularcol;
+
 uniform struct Light {
 	vec3 position;
 	vec3 intensities;
+	float attenuation;
+	float ambient_coefficient;
 } light;
 
 void main()
 {
-	mat3 norm_mat = transpose(inverse(mat3(model)));
-	vec3 norm = normalize(norm_mat * fragnorm);
+	vec3 norm = normalize(transpose(inverse(mat3(model))) * fragnorm);
+	vec3 surfpos = vec3(model * vec4(fragvert, 1));
+	vec4 surfcol = texture(tex, fragtexcoord);
+	vec3 surf2light = normalize(light.position - surfpos);
 
-	vec3 fragpos = vec3(model * vec4(fragvert, 1));
+	/* Diffuse Lighting */
+	float diffuse_coefficient = max(0.0, dot(norm, surf2light));
+	vec3 diffuse = diffuse_coefficient * surfcol.rgb * light.intensities;
 
-	vec3 surf2light = light.position - fragpos;
+	/* Ambient Lighting */
+	vec3 ambient = light.ambient_coefficient * surfcol.rgb *
+		light.intensities;
 
-	float brightness = dot(norm, surf2light) / (length(surf2light) *
-			length(norm));
-	brightness = clamp(brightness, 0, 1);
+	/* Specular Lighting */
+	vec3 incidence = -surf2light;
+	vec3 reflection = reflect(incidence, norm);
+	vec3 surf2cam = normalize(campos - surfpos);
+	float cosang = max(0.0, dot(surf2cam, reflection));
+	float specular_coefficient = pow(cosang, mat_shine);
 
-	vec4 surfcol = texture(tex, fragtexcoord); 
-	out_colour = vec4(brightness * light.intensities * surfcol.rgb,
-			surfcol.a);
+	vec3 specular = specular_coefficient * mat_specularcol *
+		light.intensities;
+
+	/* Attenuation (Inverse Square Rule) */
+	float dist2light = length(light.position - surfpos);
+	float attenuation = 1.0 / (1.0 + light.attenuation
+			* pow(dist2light, 2));
+
+	vec3 linear_colour = ambient + attenuation * (diffuse + specular);
+
+	/* Gamma Correction */
+	vec3 gamma = vec3(1.0 / 2.2);
+
+	out_colour = vec4(pow(linear_colour, gamma), surfcol.a);
 }

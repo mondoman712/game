@@ -284,6 +284,18 @@ int main (void)
 	glUniform3f(uni_lightp, 1.0, 1.0, 1.0);
 	GLint uni_lighti = glGetUniformLocation(shader_prog, "light.intensities");
 	glUniform3f(uni_lighti, 1.0, 1.0, 1.0);
+	GLint uni_lighta = glGetUniformLocation(shader_prog, "light.attenuation");
+	glUniform1f(uni_lighta, 0.2);
+	GLint uni_lightc = glGetUniformLocation(shader_prog, 
+			"light.ambient_coefficient");
+	glUniform1f(uni_lightc, 0.005);
+
+	GLint uni_matshine = glGetUniformLocation(shader_prog, "mat_shine");
+	glUniform1f(uni_matshine, 80.0);
+	GLint uni_matcol = glGetUniformLocation(shader_prog, "mat_specularcol");
+	glUniform3f(uni_matcol, 1.0, 1.0, 1.0);
+
+	GLint uni_campos = glGetUniformLocation(shader_prog, "campos");
 
 	GLuint pos_attr = glGetAttribLocation(shader_prog, "vert");
 	glEnableVertexAttribArray(pos_attr);
@@ -303,6 +315,7 @@ int main (void)
 	GLfloat view[16];
 	vec3 eye = {4.0, 0.0, 0.0};
 	GLint uni_view = glGetUniformLocation(shader_prog, "view");
+	glUniform3f(uni_campos, eye.x, eye.y, eye.z);
 
 	GLfloat fov = PI / 2;
 	GLfloat proj[16];
