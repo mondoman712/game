@@ -1,4 +1,4 @@
-#version 150
+#version 330 core
 
 in vec3 vert;
 in vec2 verttexcoord;

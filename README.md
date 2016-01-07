@@ -4,6 +4,7 @@ That's just the project title for what will eventually become a quake-like fps.
 ### TODO
 * split things into more functions
 * find textures in mtl file
+* get material info from mtl file
 * handle loading multiple objects
 * sky box textures
 * Vulkan Support (khronos gib vulkan)
