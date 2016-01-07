@@ -13,13 +13,18 @@
  */
 char * find_tex (const char * filename)
 {
-	char * buff = malloc(MTLBUFFSIZE);
+	char * buff;
+	FILE * fp;
+
+	char * tex = malloc(sizeof(MTLBUFFSIZE));
+
+	buff = malloc(MTLBUFFSIZE);
 	if (buff == NULL) {
 		fprintf(stderr, "Failed to allocate memory for: %s\n", filename);
 		return NULL;
 	}
 
-	FILE * fp = fopen(filename, "r");
+ 	fp = fopen(filename, "r");
 	if (fp == NULL) {
 		fprintf(stderr, "Failed to open file: %s\n", filename);
 		return NULL;
@@ -27,11 +32,11 @@ char * find_tex (const char * filename)
 
 	while (fgets(buff, MTLBUFFSIZE, fp))
 		if (buff[4] == 'K' && buff[5] == 'd')
-			break;
+			strcpy(tex, buff + 7);
 
 	fclose(fp);
 
-	return buff + 7;
+	return tex;
 }
 
 /* 
