@@ -342,13 +342,14 @@ int main (void)
 
 	glEnable(GL_DEPTH_TEST);
 
-	clock_t ts, te;
+	Uint64 ts, te;
+	double tpf;
 	/* Add some text that I can overwrite later */
 	printf("0.000000");
 
 	SDL_Event e;
 	while (1) {
-		ts = clock();
+		ts = SDL_GetPerformanceCounter();
 
 		/* Handle Events */
 		if (SDL_PollEvent(&e)) {
@@ -388,11 +389,14 @@ int main (void)
 		SDL_GL_SwapWindow(mainwin);
 	
 		if (MAX_FPS)
-			while (CLOCKS_PER_SEC / (te = clock() - ts) >= MAX_FPS);
+			while (SDL_GetPerformanceFrequency()
+					/ (te = SDL_GetPerformanceCounter() - ts)
+					>= MAX_FPS);
 		else
-			te = clock() - ts;
+			te = SDL_GetPerformanceCounter() - ts;
 
-		printf("\r%1.6fms", ((double) te) / CLOCKS_PER_SEC * 1000);
+		tpf = (double) te / (double) SDL_GetPerformanceFrequency() * 1000;
+		printf("\r%1.6fms", tpf);
 	}
 	printf("\n");
 
