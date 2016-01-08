@@ -15,7 +15,6 @@
 #define WIN_TITLE "window title"
 #define DEFAULT_SCREEN_X 960
 #define DEFAULT_SCREEN_Y 960
-#define MAX_FPS 0
 
 #define PI 3.141592653589
 
@@ -388,13 +387,7 @@ int main (void)
 		glDrawArrays(GL_TRIANGLES, 0, (GLuint) *verts);
 		SDL_GL_SwapWindow(mainwin);
 	
-		if (MAX_FPS)
-			while (SDL_GetPerformanceFrequency()
-					/ (te = SDL_GetPerformanceCounter() - ts)
-					>= MAX_FPS);
-		else
-			te = SDL_GetPerformanceCounter() - ts;
-
+		te = SDL_GetPerformanceCounter() - ts;
 		tpf = (double) te / (double) SDL_GetPerformanceFrequency() * 1000;
 		printf("\r%1.6fms", tpf);
 	}
