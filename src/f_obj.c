@@ -7,8 +7,6 @@
 
 #define MTLBUFFSIZE 64 * sizeof(char)
 
-#define MODEL_DIR "assets/models/"
-
 /*
  * Finds the texture of an object in the mtl file, and returns the file name as
  * a string
@@ -18,7 +16,7 @@ char * find_tex (const char * filename)
 	char * buff = malloc(MTLBUFFSIZE);
 	FILE * fp;
 
-	char * tex = malloc(MTLBUFFSIZE);
+	char * tex;
 
 	if (buff == NULL) {
 		fprintf(stderr, "Failed to allocate memory for: %s\n", filename);
@@ -33,7 +31,11 @@ char * find_tex (const char * filename)
 
 	while (fgets(buff, MTLBUFFSIZE, fp))
 		if (buff[4] == 'K' && buff[5] == 'd')
-			strcpy(tex, buff + 7);
+			break;
+
+	tex = malloc(1 + strlen(buff + 7));
+	strcpy(tex, buff + 7);
+	*(tex + strlen(tex) - 1) = '\0';
 
 	free(buff);
 	fclose(fp);

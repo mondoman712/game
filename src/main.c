@@ -24,6 +24,8 @@
 #define SHADER_DIR "src/shaders/"
 #define SHADER_EXT ".glsl"
 
+#define MODEL_DIR "assets/models/"
+
 /*
  * Reads and compiles a .glsl shader file in the shaders folder, from just the
  * core of the filename (to use shaders/vs1.glsl, filename is just vsl)
@@ -241,6 +243,11 @@ int main (void)
 	GLfloat * verts = NULL;
 	read_obj("assets/models/monkey.obj", &verts);
 
+	char * tmp = find_tex("assets/models/monkey.mtl");
+	char * tex_loc = malloc(1 + strlen(tmp) + strlen(MODEL_DIR));
+	strcpy(tex_loc, MODEL_DIR);
+	strcat(tex_loc, tmp);
+
 	GLuint vbo;
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -268,7 +275,7 @@ int main (void)
 	png_byte * img_data;
 
 	glBindTexture(GL_TEXTURE_2D, tex);
-	img_data = read_png("assets/textures/dog.png", &tw, &th, &colour_type);
+	img_data = read_png(tex_loc, &tw, &th, &colour_type);
 	glTexImage2D(GL_TEXTURE_2D, 0, colour_type, tw, th, 0, colour_type,
 			GL_UNSIGNED_BYTE, img_data);
 	free(img_data);
@@ -394,6 +401,7 @@ int main (void)
 	printf("\n");
 
 	free(verts);
+	free(tex_loc);
 
 	glDeleteProgram(shader_prog);
 	glDeleteShader(frag_shader);
@@ -404,8 +412,6 @@ int main (void)
 
 	SDL_GL_DeleteContext(gl_context); SDL_DestroyWindow(mainwin);
 	SDL_Quit();
-
-	printf("%s", find_tex("assets/models/cube.mtl"));
 
 	exit(EXIT_SUCCESS);
 }
