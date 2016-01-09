@@ -240,10 +240,13 @@ int main (void)
 		printf("GLEW is working\n");
 	}
 
+	const char * model_loc = "assets/models/monkey.obj";
 	GLfloat * verts = NULL;
-	read_obj("assets/models/monkey.obj", &verts);
+	read_obj(model_loc, &verts);
 
-	char * tmp = find_tex("assets/models/monkey.mtl");
+	vec3 speccol;
+	GLfloat specexp;
+	char * tmp = read_mtl("assets/models/monkey.mtl", &speccol, &specexp);
 	char * tex_loc = malloc(1 + strlen(tmp) + strlen(MODEL_DIR));
 	strcpy(tex_loc, MODEL_DIR);
 	strcat(tex_loc, tmp);
@@ -297,9 +300,9 @@ int main (void)
 	glUniform1f(uni_lightc, 0.005);
 
 	GLint uni_matshine = glGetUniformLocation(shader_prog, "mat_shine");
-	glUniform1f(uni_matshine, 80.0);
+	glUniform1f(uni_matshine, specexp);
 	GLint uni_matcol = glGetUniformLocation(shader_prog, "mat_specularcol");
-	glUniform3f(uni_matcol, 1.0, 1.0, 1.0);
+	glUniform3f(uni_matcol, speccol.x, speccol.y, speccol.z);
 
 	GLint uni_campos = glGetUniformLocation(shader_prog, "campos");
 

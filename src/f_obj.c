@@ -5,13 +5,15 @@
 #include <GL/glew.h>
 #include <libguile.h>
 
+#include "trans.h"
+
 #define MTLBUFFSIZE 64 * sizeof(char)
 
 /*
- * Finds the texture of an object in the mtl file, and returns the file name as
- * a string
- */
-char * find_tex (const char * filename)
+ * Gets the texture, specular colour and specular exponent of a material from
+ * the mtl file
+ */ 
+char * read_mtl (const char * filename, vec3 * speccol, GLfloat * specexp)
 {
 	char * buff = malloc(MTLBUFFSIZE);
 	FILE * fp;
@@ -29,13 +31,21 @@ char * find_tex (const char * filename)
 		return NULL;
 	}
 
-	while (fgets(buff, MTLBUFFSIZE, fp))
-		if (buff[4] == 'K' && buff[5] == 'd')
-			break;
-
-	tex = malloc(1 + strlen(buff + 7));
-	strcpy(tex, buff + 7);
-	*(tex + strlen(tex) - 1) = '\0';
+	while (fgets(buff, MTLBUFFSIZE, fp)) {
+		if (buff[4] == 'K' && buff[5] == 'd') {
+			tex = malloc(1 + strlen(buff + 7));
+			strcpy(tex, buff + 7);
+			*(tex + strlen(tex) - 1) = '\0';
+		} else if (buff[0] == 'K' && buff[1] == 's') {
+			strtok(buff, " ");
+			speccol->x = atof(strtok(NULL, " "));
+			speccol->y = atof(strtok(NULL, " "));
+			speccol->z = atof(strtok(NULL, " "));
+		} else if (buff[0] == 'N' && buff[1] == 's') {
+			strtok(buff, " ");
+			*specexp = atof(strtok(NULL, " "));
+		}
+	}
 
 	free(buff);
 	fclose(fp);

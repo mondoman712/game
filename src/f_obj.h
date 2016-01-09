@@ -2,10 +2,10 @@
 #define _OBJ_H
 
 /*
- * Finds the texture of an object in the mtl file, and returns the file name as
- * a string
- */
-char * find_tex (const char * filename);
+ * Gets the texture, specular colour and specular exponent of a material from
+ * the mtl file
+ */ 
+char * read_mtl (const char * filename, vec3 * speccol, GLfloat * specexp);
 
 /* 
  * Reads obj file and deposits vertices into float array
