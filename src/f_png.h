@@ -4,11 +4,17 @@
 #include <GL/glew.h>
 #include <png.h>
 
+typedef struct {
+	GLuint w;
+	GLuint h;
+	png_byte * data;
+	GLuint colour_type;
+} image;
+
 /*
  * Reads png file
  */
-png_byte * read_png(const char * filename, GLuint * width, GLuint * height,
-		GLuint * colour_type);
+image read_png (const char * filename);
 
 /*
  * Saves a byte array stored in pixels of width w and height h as a png into

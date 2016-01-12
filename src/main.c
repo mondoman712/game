@@ -273,15 +273,12 @@ int main (void)
 
 	GLuint tex;
 	glGenTextures(1, &tex);
-	GLuint tw, th;
-	GLuint colour_type;
-	png_byte * img_data;
+	image img;
 
 	glBindTexture(GL_TEXTURE_2D, tex);
-	img_data = read_png(tex_loc, &tw, &th, &colour_type);
-	glTexImage2D(GL_TEXTURE_2D, 0, colour_type, tw, th, 0, colour_type,
-			GL_UNSIGNED_BYTE, img_data);
-	free(img_data);
+	img = read_png(tex_loc);
+	glTexImage2D(GL_TEXTURE_2D, 0, img.colour_type, img.w, img.h, 0,
+			img.colour_type, GL_UNSIGNED_BYTE, img.data);
 	glUniform1i(glGetUniformLocation(shader_prog, "tex"), 0);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);

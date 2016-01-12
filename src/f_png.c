@@ -5,6 +5,8 @@
 #include <zlib.h>
 #include <png.h>
 
+#include "f_png.h"
+
 #define PNG_SIGBYTES 8
 
 /*
@@ -20,14 +22,19 @@ static GLuint readpng_checksig (FILE * stream)
 /*
  * Reads png file
  */
-png_byte * read_png(const char * filename, GLuint * width, GLuint * height,
-		GLuint * colour_type)
+image read_png (const char * filename)
 {
+	image ret;
+	ret.w = 0;
+	ret.h = 0;
+	ret.data = NULL;
+	ret.colour_type = 0;
+
 	/* Open File */
 	FILE * fp = fopen(filename, "rb");
 	if (fp == NULL) {
 		fprintf(stderr, "Error opening file %s\n", filename);
-		return NULL;
+		return ret;
 	}
 
 	/* Check Signature */
@@ -70,18 +77,18 @@ png_byte * read_png(const char * filename, GLuint * width, GLuint * height,
 	png_get_IHDR(png, info, &tmpw, &tmph, &bit_depth, &act_colour_type, NULL,
 			NULL, NULL);
 
-	if (width) *width = tmpw;
-	if (height) *height = tmph;
+	ret.w = tmpw;
+	ret.h = tmph;
 
 	char * s;
 	switch (act_colour_type) {
 	case PNG_COLOR_TYPE_RGB:
 		s = "RGB";
-		*colour_type = GL_RGB;
+		ret.colour_type = GL_RGB;
 		break;
 	case PNG_COLOR_TYPE_RGB_ALPHA:
 		s = "RGBA";
-		*colour_type = GL_RGBA;
+		ret.colour_type = GL_RGBA;
 		break;
 	default:
 		s = "Unknown";
@@ -114,13 +121,15 @@ png_byte * read_png(const char * filename, GLuint * width, GLuint * height,
 			
 	png_read_image(png, row_ptrs);
 
+	ret.data = img_data;
+
 	/* Free data and close file */
 	free(row_ptrs);
 cleanup1:
 	png_destroy_read_struct(&png, &info, &end_info);
 cleanup:
 	fclose(fp);
-	return img_data;
+	return ret;
 }
 
 /*
