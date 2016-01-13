@@ -6,6 +6,7 @@
 #include <libguile.h>
 
 #include "trans.h"
+#include "f_obj.h"
 
 #define MTLBUFFSIZE 64 * sizeof(char)
 
@@ -13,44 +14,44 @@
  * Gets the texture, specular colour and specular exponent of a material from
  * the mtl file
  */ 
-char * read_mtl (const char * filename, vec3 * speccol, GLfloat * specexp)
+material read_mtl (const char * filename)
 {
 	char * buff = malloc(MTLBUFFSIZE);
 	FILE * fp;
 
-	char * tex;
+	material ret;
 
 	if (buff == NULL) {
 		fprintf(stderr, "Failed to allocate memory for: %s\n", filename);
-		return NULL;
+		return ret;
 	}
 
  	fp = fopen(filename, "r");
 	if (fp == NULL) {
 		fprintf(stderr, "Failed to open file: %s\n", filename);
-		return NULL;
+		return ret;
 	}
 
 	while (fgets(buff, MTLBUFFSIZE, fp)) {
 		if (buff[4] == 'K' && buff[5] == 'd') {
-			tex = malloc(1 + strlen(buff + 7));
-			strcpy(tex, buff + 7);
-			*(tex + strlen(tex) - 1) = '\0';
+			ret.tex = malloc(1 + strlen(buff + 7));
+			strcpy(ret.tex, buff + 7);
+			*(ret.tex + strlen(ret.tex) - 1) = '\0';
 		} else if (buff[0] == 'K' && buff[1] == 's') {
 			strtok(buff, " ");
-			speccol->x = atof(strtok(NULL, " "));
-			speccol->y = atof(strtok(NULL, " "));
-			speccol->z = atof(strtok(NULL, " "));
+			ret.spec_col.x = atof(strtok(NULL, " "));
+			ret.spec_col.y = atof(strtok(NULL, " "));
+			ret.spec_col.z = atof(strtok(NULL, " "));
 		} else if (buff[0] == 'N' && buff[1] == 's') {
 			strtok(buff, " ");
-			*specexp = atof(strtok(NULL, " "));
+			ret.shine = atof(strtok(NULL, " "));
 		}
 	}
 
 	free(buff);
 	fclose(fp);
 
-	return tex;
+	return ret;
 }
 
 /* 

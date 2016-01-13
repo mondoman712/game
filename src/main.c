@@ -244,12 +244,10 @@ int main (void)
 	GLfloat * verts = NULL;
 	read_obj(model_loc, &verts);
 
-	vec3 speccol;
-	GLfloat specexp;
-	char * tmp = read_mtl("assets/models/monkey.mtl", &speccol, &specexp);
-	char * tex_loc = malloc(1 + strlen(tmp) + strlen(MODEL_DIR));
+	material tmp = read_mtl("assets/models/monkey.mtl");
+	char * tex_loc = malloc(1 + strlen(tmp.tex) + strlen(MODEL_DIR));
 	strcpy(tex_loc, MODEL_DIR);
-	strcat(tex_loc, tmp);
+	strcat(tex_loc, tmp.tex);
 
 	GLuint vbo;
 	glGenBuffers(1, &vbo);
@@ -297,9 +295,9 @@ int main (void)
 	glUniform1f(uni_lightc, 0.005);
 
 	GLint uni_matshine = glGetUniformLocation(shader_prog, "mat_shine");
-	glUniform1f(uni_matshine, specexp);
+	glUniform1f(uni_matshine, tmp.shine);
 	GLint uni_matcol = glGetUniformLocation(shader_prog, "mat_specularcol");
-	glUniform3f(uni_matcol, speccol.x, speccol.y, speccol.z);
+	glUniform3f(uni_matcol, tmp.spec_col.x, tmp.spec_col.y, tmp.spec_col.z);
 
 	GLint uni_campos = glGetUniformLocation(shader_prog, "campos");
 
