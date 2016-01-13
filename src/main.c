@@ -132,7 +132,7 @@ static GLuint take_screenshot (GLuint w, GLuint h)
 			ret = 1;
 			fprintf(stderr, "Screenshot Failed\n");
 		} else {
-			printf("Taken screenshot %s\n", filename);
+			printf("\nTaken screenshot %s\n", filename);
 		}
 	}
 
