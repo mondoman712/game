@@ -12,6 +12,7 @@ uniform vec3 campos;
 uniform sampler2D tex;
 uniform float mat_shine;
 uniform vec3 mat_specularcol;
+uniform int illum;
 
 uniform struct Light {
 	vec3 position;
@@ -22,6 +23,11 @@ uniform struct Light {
 
 void main()
 {
+	if (illum == 0) {
+		out_colour = texture(tex, fragtexcoord);
+		return;
+	}
+
 	vec3 norm = normalize(transpose(inverse(mat3(model))) * fragnorm);
 	vec3 surfpos = vec3(model * vec4(fragvert, 1));
 	vec4 surfcol = texture(tex, fragtexcoord);

@@ -256,7 +256,7 @@ int main (void)
 	glLinkProgram(shader_prog);
 	glUseProgram(shader_prog);
 
-	object monkey = build_obj("monkey", shader_prog);
+	object monkey = build_obj("skybox", shader_prog);
 
 	GLuint vbo;
 	glGenBuffers(1, &vbo);
@@ -283,6 +283,8 @@ int main (void)
 	GLint uni_matcol = glGetUniformLocation(shader_prog, "mat_specularcol");
 	glUniform3f(uni_matcol, monkey.mat.spec_col.x, monkey.mat.spec_col.y,
 			monkey.mat.spec_col.z);
+	GLint uni_illum = glGetUniformLocation(shader_prog, "illum");
+	glUniform1ui(uni_illum, monkey.mat.illum);
 
 	GLint uni_campos = glGetUniformLocation(shader_prog, "campos");
 
@@ -358,7 +360,10 @@ int main (void)
 			/* Rotation of monkey based on time */
 			k = clock();
 
+			/*
 			rot = (vec3) {-k / 1000000.0, 0, k / 1000000.0};
+			*/
+			rot = (vec3) {0, 0, 0};
 			trans_rot(ps, rot, model);
 			glUniformMatrix4fv(uni_model, 1, GL_FALSE, model);
 			

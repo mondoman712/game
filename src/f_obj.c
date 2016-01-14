@@ -51,6 +51,9 @@ material read_mtl (const char * filename, GLuint shader_prog)
 		} else if (buff[0] == 'N' && buff[1] == 's') {
 			strtok(buff, " ");
 			ret.shine = atof(strtok(NULL, " "));
+		} else if (buff[0] == 'i' && buff[4] == 'm') {
+			strtok(buff, " ");
+			ret.illum = atoi(strtok(NULL, " "));
 		}
 	}
 
