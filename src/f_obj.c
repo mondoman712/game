@@ -10,7 +10,10 @@
 #include "f_png.h"
 
 #define MTLBUFFSIZE 64 * sizeof(char)
+
 #define MODEL_DIR "assets/models/"
+#define MODEL_EXT ".obj"
+#define MTL_EXT ".mtl"
 
 /*
  * Gets the texture, specular colour and specular exponent of a material from
@@ -116,4 +119,29 @@ GLushort read_obj (const char * filename, GLfloat ** vertices)
 						scm_from_int(i)));
 
 	return 0;
+}
+
+object build_obj (const char * name, GLuint shader_prog)
+{
+	object ret;
+
+	char * objloc = malloc(1 + strlen(name) + strlen(MODEL_DIR)
+			+ strlen(MODEL_EXT));
+	strcpy(objloc, MODEL_DIR);
+	strcat(objloc, name);
+	strcat(objloc, MODEL_EXT);
+
+	read_obj(objloc, &ret.verts); 
+
+	free(objloc);
+
+	char * mtlloc = malloc(1 + strlen(name) + strlen(MODEL_DIR)
+			+ strlen(MTL_EXT));
+	strcpy(mtlloc, MODEL_DIR);
+	strcat(mtlloc, name);
+	strcat(mtlloc, MTL_EXT);
+
+	ret.mat = read_mtl(mtlloc, shader_prog);
+
+	return ret;
 }

@@ -238,20 +238,6 @@ int main (void)
 		printf("GLEW is working\n");
 	}
 
-	const char * model_loc = "assets/models/monkey.obj";
-	GLfloat * verts = NULL;
-	read_obj(model_loc, &verts);
-
-	GLuint vbo;
-	glGenBuffers(1, &vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, (int) (*verts * sizeof(GLfloat)),
-			verts + 1, GL_STATIC_DRAW);	
-
-	GLuint vao;
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
-
 	GLuint vert_shader = create_shader(GL_VERTEX_SHADER, "vs1");
 	GLuint frag_shader = create_shader(GL_FRAGMENT_SHADER, "fs1");
 
@@ -262,7 +248,17 @@ int main (void)
 	glLinkProgram(shader_prog);
 	glUseProgram(shader_prog);
 
-	material tmp = read_mtl("assets/models/monkey.mtl", shader_prog);
+	object monkey = build_obj("monkey", shader_prog);
+
+	GLuint vbo;
+	glGenBuffers(1, &vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, (int) (*monkey.verts * sizeof(GLfloat)),
+			monkey.verts + 1, GL_STATIC_DRAW);	
+
+	GLuint vao;
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
 
 	GLint uni_lightp = glGetUniformLocation(shader_prog, "light.position");
 	glUniform3f(uni_lightp, 1.0, 1.0, 1.0);
@@ -275,9 +271,10 @@ int main (void)
 	glUniform1f(uni_lightc, 0.005);
 
 	GLint uni_matshine = glGetUniformLocation(shader_prog, "mat_shine");
-	glUniform1f(uni_matshine, tmp.shine);
+	glUniform1f(uni_matshine, monkey.mat.shine);
 	GLint uni_matcol = glGetUniformLocation(shader_prog, "mat_specularcol");
-	glUniform3f(uni_matcol, tmp.spec_col.x, tmp.spec_col.y, tmp.spec_col.z);
+	glUniform3f(uni_matcol, monkey.mat.spec_col.x, monkey.mat.spec_col.y,
+			monkey.mat.spec_col.z);
 
 	GLint uni_campos = glGetUniformLocation(shader_prog, "campos");
 
@@ -369,7 +366,7 @@ int main (void)
 		}
 
 		/* Draw objects */
-		glDrawArrays(GL_TRIANGLES, 0, (GLuint) *verts);
+		glDrawArrays(GL_TRIANGLES, 0, (GLuint) *monkey.verts);
 		SDL_GL_SwapWindow(mainwin);
 	
 		te = SDL_GetPerformanceCounter() - ts;
@@ -378,7 +375,7 @@ int main (void)
 	}
 	printf("\n");
 
-	free(verts);
+	free(monkey.verts);
 
 	glDeleteProgram(shader_prog);
 	glDeleteShader(frag_shader);
