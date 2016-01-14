@@ -8,6 +8,7 @@ typedef struct {
 } material;
 
 typedef struct {
+	vec3 pos;
 	material mat;
 	GLfloat * verts;
 } object;

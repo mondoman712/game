@@ -180,6 +180,11 @@ static void window_resize (SDL_Window * window, GLuint * width,
 	if (h > 0) *height = h;
 }
 
+void draw_object (object obj)
+{
+	glDrawArrays(GL_TRIANGLES, 0, (GLuint) *obj.verts);
+}
+
 /*
  * Main
  */
@@ -366,7 +371,7 @@ int main (void)
 		}
 
 		/* Draw objects */
-		glDrawArrays(GL_TRIANGLES, 0, (GLuint) *monkey.verts);
+		draw_object(monkey);
 		SDL_GL_SwapWindow(mainwin);
 	
 		te = SDL_GetPerformanceCounter() - ts;
