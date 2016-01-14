@@ -180,7 +180,10 @@ static void window_resize (SDL_Window * window, GLuint * width,
 	if (h > 0) *height = h;
 }
 
-void draw_object (object obj)
+/*
+ * Draws the given object to the screen
+ */
+static void draw_object (object obj)
 {
 	glDrawArrays(GL_TRIANGLES, 0, (GLuint) *obj.verts);
 }
@@ -358,7 +361,7 @@ int main (void)
 			
 			/* Rotation of monkey based on time */
 			k = clock();
-			rotate(k / 1000000.0, 0, 0,
+			rotate(-k / 1000000.0, 0, k / 1000000.0,
 					model);
 			glUniformMatrix4fv(uni_model, 1, GL_FALSE, model);
 			

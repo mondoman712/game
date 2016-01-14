@@ -125,6 +125,9 @@ GLushort read_obj (const char * filename, GLfloat ** vertices)
 	return 0;
 }
 
+/*
+ * Builds an object struct and loads the information needed from files
+ */
 object build_obj (const char * name, GLuint shader_prog)
 {
 	object ret;

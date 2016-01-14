@@ -24,6 +24,9 @@ material read_mtl (const char * filename, GLuint shader_prog);
  */
 GLushort read_obj (const char * filename, GLfloat ** vertices);
 
+/*
+ * Builds an object struct and loads the information needed from files
+ */
 object build_obj (const char * name, GLuint shader_prog);
 
 #endif /* _OBJ_H */
