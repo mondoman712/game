@@ -76,6 +76,10 @@ material read_mtl (const char * filename, GLuint shader_prog)
 	ret.tex = tex;
 
 	free(buff);
+	free(texloc);
+	free(fulltexloc);
+	free(img.data);
+
 	fclose(fp);
 
 	return ret;
@@ -132,7 +136,6 @@ object build_obj (const char * name, GLuint shader_prog)
 	strcat(objloc, MODEL_EXT);
 
 	read_obj(objloc, &ret.verts); 
-
 	free(objloc);
 
 	char * mtlloc = malloc(1 + strlen(name) + strlen(MODEL_DIR)
@@ -142,6 +145,7 @@ object build_obj (const char * name, GLuint shader_prog)
 	strcat(mtlloc, MTL_EXT);
 
 	ret.mat = read_mtl(mtlloc, shader_prog);
+	free(mtlloc);
 
 	return ret;
 }
