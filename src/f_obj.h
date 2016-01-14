@@ -2,7 +2,7 @@
 #define _OBJ_H
 
 typedef struct {
-	char * tex;
+	GLint tex;
 	GLfloat shine;
 	vec3 spec_col;
 } material;
@@ -11,7 +11,7 @@ typedef struct {
  * Gets the texture, specular colour and specular exponent of a material from
  * the mtl file
  */ 
-material read_mtl (const char * filename);
+material read_mtl (const char * filename, GLuint shader_prog);
 
 /* 
  * Reads obj file and deposits vertices into float array

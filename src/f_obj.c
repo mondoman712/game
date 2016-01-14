@@ -7,16 +7,19 @@
 
 #include "trans.h"
 #include "f_obj.h"
+#include "f_png.h"
 
 #define MTLBUFFSIZE 64 * sizeof(char)
+#define MODEL_DIR "assets/models/"
 
 /*
  * Gets the texture, specular colour and specular exponent of a material from
  * the mtl file
  */ 
-material read_mtl (const char * filename)
+material read_mtl (const char * filename, GLuint shader_prog)
 {
 	char * buff = malloc(MTLBUFFSIZE);
+	char * texloc = malloc(MTLBUFFSIZE);
 	FILE * fp;
 
 	material ret;
@@ -34,9 +37,9 @@ material read_mtl (const char * filename)
 
 	while (fgets(buff, MTLBUFFSIZE, fp)) {
 		if (buff[4] == 'K' && buff[5] == 'd') {
-			ret.tex = malloc(1 + strlen(buff + 7));
-			strcpy(ret.tex, buff + 7);
-			*(ret.tex + strlen(ret.tex) - 1) = '\0';
+			texloc = malloc(1 + strlen(buff + 7));
+			strcpy(texloc, buff + 7);
+			*(texloc + strlen(texloc) - 1) = '\0';
 		} else if (buff[0] == 'K' && buff[1] == 's') {
 			strtok(buff, " ");
 			ret.spec_col.x = atof(strtok(NULL, " "));
@@ -47,6 +50,27 @@ material read_mtl (const char * filename)
 			ret.shine = atof(strtok(NULL, " "));
 		}
 	}
+
+	GLuint tex;
+	glGenTextures(1, &tex);
+	image img;
+
+	char * fulltexloc = malloc(1 + strlen(texloc) + strlen(MODEL_DIR));
+	strcpy(fulltexloc, MODEL_DIR);
+	strcat(fulltexloc, texloc);
+
+	glBindTexture(GL_TEXTURE_2D, tex);
+	img = read_png(fulltexloc);
+	glTexImage2D(GL_TEXTURE_2D, 0, img.colour_type, img.w, img.h, 0,
+			img.colour_type, GL_UNSIGNED_BYTE, img.data);
+	glUniform1i(glGetUniformLocation(shader_prog, "tex"), 0);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	ret.tex = tex;
 
 	free(buff);
 	fclose(fp);

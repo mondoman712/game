@@ -24,8 +24,6 @@
 #define SHADER_DIR "src/shaders/"
 #define SHADER_EXT ".glsl"
 
-#define MODEL_DIR "assets/models/"
-
 /*
  * Reads and compiles a .glsl shader file in the shaders folder, from just the
  * core of the filename (to use shaders/vs1.glsl, filename is just vsl)
@@ -244,11 +242,6 @@ int main (void)
 	GLfloat * verts = NULL;
 	read_obj(model_loc, &verts);
 
-	material tmp = read_mtl("assets/models/monkey.mtl");
-	char * tex_loc = malloc(1 + strlen(tmp.tex) + strlen(MODEL_DIR));
-	strcpy(tex_loc, MODEL_DIR);
-	strcat(tex_loc, tmp.tex);
-
 	GLuint vbo;
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -269,20 +262,7 @@ int main (void)
 	glLinkProgram(shader_prog);
 	glUseProgram(shader_prog);
 
-	GLuint tex;
-	glGenTextures(1, &tex);
-	image img;
-
-	glBindTexture(GL_TEXTURE_2D, tex);
-	img = read_png(tex_loc);
-	glTexImage2D(GL_TEXTURE_2D, 0, img.colour_type, img.w, img.h, 0,
-			img.colour_type, GL_UNSIGNED_BYTE, img.data);
-	glUniform1i(glGetUniformLocation(shader_prog, "tex"), 0);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glGenerateMipmap(GL_TEXTURE_2D);
+	material tmp = read_mtl("assets/models/monkey.mtl", shader_prog);
 
 	GLint uni_lightp = glGetUniformLocation(shader_prog, "light.position");
 	glUniform3f(uni_lightp, 1.0, 1.0, 1.0);
@@ -399,7 +379,6 @@ int main (void)
 	printf("\n");
 
 	free(verts);
-	free(tex_loc);
 
 	glDeleteProgram(shader_prog);
 	glDeleteShader(frag_shader);
