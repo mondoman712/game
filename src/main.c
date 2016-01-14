@@ -312,13 +312,9 @@ int main (void)
 	GLint uni_proj = glGetUniformLocation(shader_prog, "proj");
 	glUniformMatrix4fv(uni_proj, 1, GL_FALSE, proj);
 
-	GLfloat pos[16];
-	vec3 ps = {0.0, 0.0, 0.0};
-	translate(ps, pos);
-	GLint uni_pos = glGetUniformLocation(shader_prog, "pos");
-	glUniformMatrix4fv(uni_pos, 1, GL_FALSE, pos);
-
 	GLfloat model[16];
+	vec3 ps = {0.0, 0.0, 0.0};
+	vec3 rot = {0.0, 0.0, 0.0};
 	GLint uni_model = glGetUniformLocation(shader_prog, "model");
 	clock_t k;
 
@@ -361,8 +357,9 @@ int main (void)
 			
 			/* Rotation of monkey based on time */
 			k = clock();
-			rotate(-k / 1000000.0, 0, k / 1000000.0,
-					model);
+
+			rot = (vec3) {-k / 1000000.0, 0, k / 1000000.0};
+			trans_rot(ps, rot, model);
 			glUniformMatrix4fv(uni_model, 1, GL_FALSE, model);
 			
 			/* Handle mouse movement */

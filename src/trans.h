@@ -53,4 +53,9 @@ void rotate (GLfloat x, GLfloat y, GLfloat z, GLfloat * mat4);
  */
 void translate (vec3 pos, GLfloat * mat4);
 
+/*
+ * Defines a matrix transformation that moves a vector and rotates it
+ */
+void trans_rot (vec3 pos, vec3 rot, GLfloat *mat4);
+
 #endif /* _TRANS_H */

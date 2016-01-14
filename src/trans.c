@@ -290,3 +290,33 @@ void translate (vec3 pos, GLfloat * mat4)
 	*(mat4 + 13) = pos.y;
 	*(mat4 + 14) = pos.z;
 }
+
+/*
+ * Defines a matrix transformation that moves a vector and rotates it
+ */
+void trans_rot (vec3 pos, vec3 rot, GLfloat *mat4)
+{
+	*mat4 = cos(rot.y) * cos(rot.z);
+	*(mat4 + 1) = cos(rot.z) * sin(rot.x) * sin(rot.y) + cos(rot.x)
+		* sin(rot.z);
+	*(mat4 + 2) = sin(rot.x) * sin(rot.z) - cos(rot.x) * cos(rot.z)
+		* sin(rot.y);
+	*(mat4 + 3) = 0;
+
+	*(mat4 + 4) = -cos(rot.y) * sin(rot.z);
+	*(mat4 + 5) = cos(rot.x) * cos(rot.z) - sin(rot.x) * sin(rot.y)
+		* sin(rot.z);
+	*(mat4 + 6) = cos(rot.z) * sin(rot.x) + cos(rot.x) * sin(rot.y)
+		* sin(rot.z);
+	*(mat4 + 7) = 0;
+
+	*(mat4 + 8) = sin(rot.y);
+	*(mat4 + 9) = -cos(rot.y) * sin(rot.x);
+	*(mat4 + 10) = cos(rot.x) * cos(rot.y);
+	*(mat4 + 11) = 0;
+
+	*(mat4 + 12) = pos.x;
+	*(mat4 + 13) = pos.y;
+	*(mat4 + 14) = pos.z;
+	*(mat4 + 15) = 1;
+}

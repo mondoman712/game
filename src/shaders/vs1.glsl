@@ -11,7 +11,6 @@ out vec3 fragnorm;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 proj;
-uniform mat4 pos;
 
 void main()
 {
@@ -19,5 +18,5 @@ void main()
 	fragtexcoord = verttexcoord;
 	fragnorm = vertnorm;
 
-	gl_Position = proj * view * model * pos * vec4(vert, 1.0);
+	gl_Position = proj * view * model * vec4(vert, 1.0);
 }
