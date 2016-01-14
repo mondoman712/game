@@ -265,7 +265,7 @@ void rotate (GLfloat x, GLfloat y, GLfloat z, GLfloat * mat4)
 
 	*(mat4 + 4) = -cos(y) * sin(z);
 	*(mat4 + 5) = cos(x) * cos(z) - sin(x) * sin(y) * sin(z);
-	*(mat4 + 6) = cos(z) * sin(z) + cos(x) * sin(y) * sin(z);
+	*(mat4 + 6) = cos(z) * sin(x) + cos(x) * sin(y) * sin(z);
 	*(mat4 + 7) = 0;
 
 	*(mat4 + 8) = sin(y);

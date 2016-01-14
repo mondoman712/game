@@ -358,7 +358,7 @@ int main (void)
 			
 			/* Rotation of monkey based on time */
 			k = clock();
-			rotate(k / 1000000.0, k / 1000000.0, k / 1000000.0,
+			rotate(k / 1000000.0, 0, 0,
 					model);
 			glUniformMatrix4fv(uni_model, 1, GL_FALSE, model);
 			
