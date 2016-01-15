@@ -200,6 +200,9 @@ static void draw_object (object obj, attrib attr)
 
 	glBindTexture(GL_TEXTURE_2D, obj.mat.tex);
 
+	glUniform1f(attr.matshine, obj.mat.shine);
+	glUniform3f(attr.matcol, obj.mat.spec_col.x, obj.mat.spec_col.y,
+			obj.mat.spec_col.z);
 	glUniform1i(attr.illum, obj.mat.illum);
 
 	GLfloat model[16];
@@ -303,11 +306,8 @@ int main (void)
 			"light.ambient_coefficient");
 	glUniform1f(uni_lightc, 0.005);
 
-	GLint uni_matshine = glGetUniformLocation(shader_prog, "mat_shine");
-	glUniform1f(uni_matshine, skybox.mat.shine);
-	GLint uni_matcol = glGetUniformLocation(shader_prog, "mat_specularcol");
-	glUniform3f(uni_matcol, skybox.mat.spec_col.x, skybox.mat.spec_col.y,
-			skybox.mat.spec_col.z);
+	attr.matshine = glGetUniformLocation(shader_prog, "mat_shine");
+	attr.matcol = glGetUniformLocation(shader_prog, "mat_specularcol");
 	attr.illum = glGetUniformLocation(shader_prog, "illum");
 
 	GLint uni_campos = glGetUniformLocation(shader_prog, "campos");
