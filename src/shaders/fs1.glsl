@@ -21,13 +21,8 @@ uniform struct Light {
 	float ambient_coefficient;
 } light;
 
-void main()
+void lit (out vec4 col)
 {
-	if (illum == 0) {
-		out_colour = texture(tex, fragtexcoord);
-		return;
-	}
-
 	vec3 norm = normalize(transpose(inverse(mat3(model))) * fragnorm);
 	vec3 surfpos = vec3(model * vec4(fragvert, 1));
 	vec4 surfcol = texture(tex, fragtexcoord);
@@ -61,5 +56,22 @@ void main()
 	/* Gamma Correction */
 	vec3 gamma = vec3(1.0 / 2.2);
 
-	out_colour = vec4(pow(linear_colour, gamma), surfcol.a);
+	col = vec4(pow(linear_colour, gamma), surfcol.a);
+}
+
+void unlit (out vec4 col)
+{
+	col = texture(tex, fragtexcoord);
+}
+
+void main ()
+{
+	switch (illum) {
+		case 0:
+			unlit(out_colour);
+			break;
+		default:
+			lit(out_colour);
+			break;
+	}
 }

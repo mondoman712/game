@@ -24,6 +24,16 @@
 #define SHADER_DIR "src/shaders/"
 #define SHADER_EXT ".glsl"
 
+typedef struct {
+	GLuint program;
+	GLuint pos;
+	GLuint tex;
+	GLuint norm;
+	GLuint matshine;
+	GLuint matcol;
+	GLuint illum;
+} attrib;
+
 /*
  * Reads and compiles a .glsl shader file in the shaders folder, from just the
  * core of the filename (to use shaders/vs1.glsl, filename is just vsl)
@@ -183,8 +193,21 @@ static void window_resize (SDL_Window * window, GLuint * width,
 /*
  * Draws the given object to the screen
  */
-static void draw_object (object obj)
+static void draw_object (object obj, attrib attr)
 {
+	glBindBuffer(GL_ARRAY_BUFFER, obj.vbo);
+
+	glBindTexture(GL_TEXTURE_2D, obj.mat.tex);
+
+	glUniform1i(attr.illum, obj.mat.illum);
+
+	glVertexAttribPointer(attr.pos, 3, GL_FLOAT, GL_FALSE,
+			8 * sizeof(GLfloat), 0);
+	glVertexAttribPointer(attr.tex, 2, GL_FLOAT, GL_FALSE,
+			8 * sizeof(GLfloat), (void *)(3 * sizeof(GLfloat)));
+	glVertexAttribPointer(attr.norm, 3, GL_FLOAT, GL_FALSE,
+			8 * sizeof(GLfloat), (void *)(5 * sizeof(GLfloat)));
+
 	glDrawArrays(GL_TRIANGLES, 0, (GLuint) *obj.verts);
 }
 
@@ -256,13 +279,9 @@ int main (void)
 	glLinkProgram(shader_prog);
 	glUseProgram(shader_prog);
 
-	object monkey = build_obj("skybox", shader_prog);
-
-	GLuint vbo;
-	glGenBuffers(1, &vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, (int) (*monkey.verts * sizeof(GLfloat)),
-			monkey.verts + 1, GL_STATIC_DRAW);	
+	object skybox = build_obj("skybox", shader_prog);
+	object monkey = build_obj("monkey", shader_prog);
+	attrib attr;
 
 	GLuint vao;
 	glGenVertexArrays(1, &vao);
@@ -279,29 +298,22 @@ int main (void)
 	glUniform1f(uni_lightc, 0.005);
 
 	GLint uni_matshine = glGetUniformLocation(shader_prog, "mat_shine");
-	glUniform1f(uni_matshine, monkey.mat.shine);
+	glUniform1f(uni_matshine, skybox.mat.shine);
 	GLint uni_matcol = glGetUniformLocation(shader_prog, "mat_specularcol");
-	glUniform3f(uni_matcol, monkey.mat.spec_col.x, monkey.mat.spec_col.y,
-			monkey.mat.spec_col.z);
-	GLint uni_illum = glGetUniformLocation(shader_prog, "illum");
-	glUniform1ui(uni_illum, monkey.mat.illum);
+	glUniform3f(uni_matcol, skybox.mat.spec_col.x, skybox.mat.spec_col.y,
+			skybox.mat.spec_col.z);
+	attr.illum = glGetUniformLocation(shader_prog, "illum");
 
 	GLint uni_campos = glGetUniformLocation(shader_prog, "campos");
 
-	GLuint pos_attr = glGetAttribLocation(shader_prog, "vert");
-	glEnableVertexAttribArray(pos_attr);
-	glVertexAttribPointer(pos_attr, 3, GL_FLOAT, GL_FALSE,
-			8 * sizeof(GLfloat), 0);
+	attr.pos = glGetAttribLocation(shader_prog, "vert");
+	glEnableVertexAttribArray(attr.pos);
 
-	GLint tex_attr = glGetAttribLocation(shader_prog, "verttexcoord");
-	glEnableVertexAttribArray(tex_attr);
-	glVertexAttribPointer(tex_attr, 2, GL_FLOAT, GL_FALSE,
-			8 * sizeof(GLfloat), (void *)(3 * sizeof(GLfloat)));
+	attr.tex = glGetAttribLocation(shader_prog, "verttexcoord");
+	glEnableVertexAttribArray(attr.tex);
 
-	GLint nrm_attr = glGetAttribLocation(shader_prog, "vertnorm");
-	glEnableVertexAttribArray(nrm_attr);
-	glVertexAttribPointer(nrm_attr, 3, GL_FLOAT, GL_FALSE,
-			8 * sizeof(GLfloat), (void *)(5 * sizeof(GLfloat)));
+	attr.norm = glGetAttribLocation(shader_prog, "vertnorm");
+	glEnableVertexAttribArray(attr.norm);
 
 	GLfloat view[16];
 	vec3 eye = {4.0, 0.0, 0.0};
@@ -376,7 +388,9 @@ int main (void)
 		}
 
 		/* Draw objects */
-		draw_object(monkey);
+		draw_object(skybox, attr);
+		draw_object(monkey, attr);
+
 		SDL_GL_SwapWindow(mainwin);
 	
 		te = SDL_GetPerformanceCounter() - ts;
@@ -385,13 +399,13 @@ int main (void)
 	}
 	printf("\n");
 
-	free(monkey.verts);
+	free(skybox.verts);
 
 	glDeleteProgram(shader_prog);
 	glDeleteShader(frag_shader);
 	glDeleteShader(vert_shader);
 
-	glDeleteBuffers(1, &vbo);
+	glDeleteBuffers(1, &skybox.vbo);
 	glDeleteVertexArrays(1, &vao);
 
 	SDL_GL_DeleteContext(gl_context); SDL_DestroyWindow(mainwin);

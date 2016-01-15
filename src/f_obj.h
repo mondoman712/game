@@ -5,10 +5,11 @@ typedef struct {
 	GLint tex;
 	GLfloat shine;
 	vec3 spec_col;
-	GLuint illum;
+	GLint illum;
 } material;
 
 typedef struct {
+	GLuint vbo;
 	vec3 pos;
 	material mat;
 	GLfloat * verts;

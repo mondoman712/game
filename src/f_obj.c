@@ -154,5 +154,10 @@ object build_obj (const char * name, GLuint shader_prog)
 	ret.mat = read_mtl(mtlloc, shader_prog);
 	free(mtlloc);
 
+	glGenBuffers(1, &ret.vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, ret.vbo);
+	glBufferData(GL_ARRAY_BUFFER, (int) (*ret.verts * sizeof(GLfloat)),
+			ret.verts + 1, GL_STATIC_DRAW);	
+
 	return ret;
 }
