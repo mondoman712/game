@@ -11,6 +11,7 @@ typedef struct {
 typedef struct {
 	GLuint vbo;
 	vec3 pos;
+	vec3 rot;
 	material mat;
 	GLfloat * verts;
 } object;

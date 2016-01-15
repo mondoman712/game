@@ -26,9 +26,10 @@
 
 typedef struct {
 	GLuint program;
-	GLuint pos;
+	GLuint vert;
 	GLuint tex;
 	GLuint norm;
+	GLuint model;
 	GLuint matshine;
 	GLuint matcol;
 	GLuint illum;
@@ -201,7 +202,11 @@ static void draw_object (object obj, attrib attr)
 
 	glUniform1i(attr.illum, obj.mat.illum);
 
-	glVertexAttribPointer(attr.pos, 3, GL_FLOAT, GL_FALSE,
+	GLfloat model[16];
+	trans_rot(obj.pos, obj.rot, model);
+	glUniformMatrix4fv(attr.model, 1, GL_FALSE, model);
+
+	glVertexAttribPointer(attr.vert, 3, GL_FLOAT, GL_FALSE,
 			8 * sizeof(GLfloat), 0);
 	glVertexAttribPointer(attr.tex, 2, GL_FLOAT, GL_FALSE,
 			8 * sizeof(GLfloat), (void *)(3 * sizeof(GLfloat)));
@@ -306,8 +311,8 @@ int main (void)
 
 	GLint uni_campos = glGetUniformLocation(shader_prog, "campos");
 
-	attr.pos = glGetAttribLocation(shader_prog, "vert");
-	glEnableVertexAttribArray(attr.pos);
+	attr.vert = glGetAttribLocation(shader_prog, "vert");
+	glEnableVertexAttribArray(attr.vert);
 
 	attr.tex = glGetAttribLocation(shader_prog, "verttexcoord");
 	glEnableVertexAttribArray(attr.tex);
@@ -326,10 +331,7 @@ int main (void)
 	GLint uni_proj = glGetUniformLocation(shader_prog, "proj");
 	glUniformMatrix4fv(uni_proj, 1, GL_FALSE, proj);
 
-	GLfloat model[16];
-	vec3 ps = {0.0, 0.0, 0.0};
-	vec3 rot = {0.0, 0.0, 0.0};
-	GLint uni_model = glGetUniformLocation(shader_prog, "model");
+	attr.model = glGetUniformLocation(shader_prog, "model");
 	clock_t k;
 
 	SDL_SetRelativeMouseMode(SDL_TRUE);
@@ -372,12 +374,7 @@ int main (void)
 			/* Rotation of monkey based on time */
 			k = clock();
 
-			/*
-			rot = (vec3) {-k / 1000000.0, 0, k / 1000000.0};
-			*/
-			rot = (vec3) {0, 0, 0};
-			trans_rot(ps, rot, model);
-			glUniformMatrix4fv(uni_model, 1, GL_FALSE, model);
+			monkey.rot = (vec3) {-k / 1000000.0, 0, k / 1000000.0};
 			
 			/* Handle mouse movement */
 			SDL_GetRelativeMouseState(&mx, &my);
@@ -411,5 +408,5 @@ int main (void)
 	SDL_GL_DeleteContext(gl_context); SDL_DestroyWindow(mainwin);
 	SDL_Quit();
 
-	exit(EXIT_SUCCESS);
+	;exit(EXIT_SUCCESS);
 }
