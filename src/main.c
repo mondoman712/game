@@ -286,6 +286,7 @@ int main (void)
 
 	object skybox = build_obj("skybox", shader_prog);
 	object monkey = build_obj("monkey", shader_prog);
+	monkey.pos = (vec3) {-4.0, 0.0, 0.0};
 	attrib attr;
 
 	GLuint vao;
@@ -293,7 +294,7 @@ int main (void)
 	glBindVertexArray(vao);
 
 	GLint uni_lightp = glGetUniformLocation(shader_prog, "light.position");
-	glUniform3f(uni_lightp, 1.0, 1.0, 1.0);
+	glUniform3f(uni_lightp, -1.0, -1.0, -1.0);
 	GLint uni_lighti = glGetUniformLocation(shader_prog, "light.intensities");
 	glUniform3f(uni_lighti, 1.0, 1.0, 1.0);
 	GLint uni_lighta = glGetUniformLocation(shader_prog, "light.attenuation");
@@ -321,7 +322,7 @@ int main (void)
 	glEnableVertexAttribArray(attr.norm);
 
 	GLfloat view[16];
-	vec3 eye = {4.0, 0.0, 0.0};
+	vec3 eye = {0.0, 0.0, 0.0};
 	GLint uni_view = glGetUniformLocation(shader_prog, "view");
 	glUniform3f(uni_campos, eye.x, eye.y, eye.z);
 

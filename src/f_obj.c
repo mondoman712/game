@@ -135,6 +135,7 @@ object build_obj (const char * name, GLuint shader_prog)
 {
 	object ret;
 	ret.pos = (vec3) {0.0, 0.0, 0.0};
+	ret.rot = (vec3) {0.0, 0.0, 0.0};
 
 	char * objloc = malloc(1 + strlen(name) + strlen(MODEL_DIR)
 			+ strlen(MODEL_EXT));
