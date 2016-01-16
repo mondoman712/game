@@ -290,6 +290,8 @@ int main (void)
 	object skybox = build_obj("skybox", shader_prog);
 	object monkey = build_obj("monkey", shader_prog);
 	monkey.pos = (vec3) {-4.0, 0.0, 0.0};
+	object cube = build_obj("cube", shader_prog);
+	cube.pos = (vec3) {2.0, 2.0, 0.0};
 	attrib attr;
 
 	GLuint vao;
@@ -376,6 +378,8 @@ int main (void)
 			k = clock();
 
 			monkey.rot = (vec3) {-k / 1000000.0, 0, k / 1000000.0};
+			cube.pos = (vec3) {10 * sin(k / 1000000.0), 
+				0, 10 * cos(k / 1000000.0)};
 			
 			/* Handle mouse movement */
 			SDL_GetRelativeMouseState(&mx, &my);
@@ -388,6 +392,7 @@ int main (void)
 		/* Draw objects */
 		draw_object(skybox, attr);
 		draw_object(monkey, attr);
+		draw_object(cube, attr);
 
 		SDL_GL_SwapWindow(mainwin);
 	
