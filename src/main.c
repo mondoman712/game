@@ -388,14 +388,14 @@ int main (void)
 			yaw -= ((GLfloat) mx / (GLfloat) w) * sens;
 			look_to(eye, pitch, yaw, view);
 			glUniformMatrix4fv(uni_view, 1, GL_FALSE, view);
+
+			/* Draw objects */
+			draw_object(skybox, attr);
+			draw_object(monkey, attr);
+			draw_object(cube, attr);
+
+			SDL_GL_SwapWindow(mainwin);
 		}
-
-		/* Draw objects */
-		draw_object(skybox, attr);
-		draw_object(monkey, attr);
-		draw_object(cube, attr);
-
-		SDL_GL_SwapWindow(mainwin);
 	
 		te = SDL_GetPerformanceCounter() - ts;
 		tpf = (double) te / (double) SDL_GetPerformanceFrequency() * 1000;
