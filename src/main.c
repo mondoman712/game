@@ -378,6 +378,7 @@ int main (void)
 			k = clock();
 
 			monkey.rot = (vec3) {-k / 1000000.0, 0, k / 1000000.0};
+			cube.rot = (vec3) {k / 1000000.0, 0, 0};
 			cube.pos = (vec3) {10 * sin(k / 1000000.0), 
 				0, 10 * cos(k / 1000000.0)};
 			

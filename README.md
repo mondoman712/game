@@ -3,13 +3,15 @@ That's just the project title for what will eventually become a quake-like fps.
 
 ### TODO
 * split things into more functions
-* find textures in mtl file
-* get material info from mtl file
-* handle loading multiple objects
-* sky box textures
 * Vulkan Support (khronos gib vulkan)
 * Maps/worlds
 * Player movement
 * command line options
 * Move rendering out of main
-* improve lighting
+* Get and handle more material options
+* Add config file support
+* Get it working on windows
+* In game text
+* In game menu
+* Sounds
+* Multiple light sources
