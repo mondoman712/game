@@ -35,6 +35,12 @@ typedef struct {
 	GLuint illum;
 } attrib;
 
+typedef struct {
+	vec3 pos;
+	GLfloat pitch;
+	GLfloat yaw;
+} camera;
+
 /*
  * Reads and compiles a .glsl shader file in the shaders folder, from just the
  * core of the filename (to use shaders/vs1.glsl, filename is just vsl)
@@ -156,7 +162,7 @@ static GLuint take_screenshot (GLuint w, GLuint h)
  */
 static GLuint handle_keyup (SDL_Event e, GLuint w, GLuint h, GLushort * pause)
 {
-	switch(e.key.keysym.sym) {
+	switch (e.key.keysym.sym) {
 	case (SDLK_q):
 		return 1;
 	case (SDLK_F10):
@@ -173,6 +179,22 @@ static GLuint handle_keyup (SDL_Event e, GLuint w, GLuint h, GLushort * pause)
 		break;
 	}
 	
+	return 0;
+}
+
+static GLuint handle_keydown (SDL_Event e, camera * cam)
+{
+	switch (e.key.keysym.sym) {
+	case (SDLK_w):
+		cam->pos.x -= 0.1 * cos(cam->pitch);
+		cam->pos.z -= 0.1 * sin(cam->pitch);
+		break;
+	case (SDLK_s):
+		cam->pos.x += 0.1 * cos(cam->pitch);
+		cam->pos.z += 0.1 * sin(cam->pitch);
+		break;
+	}
+
 	return 0;
 }
 
@@ -323,10 +345,11 @@ int main (void)
 	attr.norm = glGetAttribLocation(shader_prog, "vertnorm");
 	glEnableVertexAttribArray(attr.norm);
 
+	camera cam;
 	GLfloat view[16];
-	vec3 eye = {0.0, 0.0, 0.0};
+	cam.pos = (vec3) {0.0, 0.0, 0.0};
 	GLint uni_view = glGetUniformLocation(shader_prog, "view");
-	glUniform3f(uni_campos, eye.x, eye.y, eye.z);
+	glUniform3f(uni_campos, cam.pos.x, cam.pos.y, cam.pos.z);
 
 	GLfloat fov = PI / 2;
 	GLfloat proj[16];
@@ -348,8 +371,6 @@ int main (void)
 
 	Uint64 ts, te;
 	double tpf;
-	/* Add some text that I can overwrite later */
-	printf("0.000000");
 
 	SDL_Event e;
 	while (1) {
@@ -361,6 +382,11 @@ int main (void)
 				break;
 			} else if (e.type == SDL_KEYUP) {
 				if (handle_keyup(e, w, h, &pause)) break;
+			} else if (e.type == SDL_KEYDOWN) {
+				if (handle_keydown(e, &cam)) break;
+				glUniform3f(uni_campos, cam.pos.x, cam.pos.y,
+						cam.pos.z);
+				glUniformMatrix4fv(uni_view, 1, GL_FALSE, view);
 			} else if (e.window.event == SDL_WINDOWEVENT_RESIZED) {
 				window_resize(mainwin, &w, &h);
 				perspective(fov, (GLfloat) w / (GLfloat) h,
@@ -369,14 +395,13 @@ int main (void)
 			}
 		}
 
+		/* Set Screen to black */
+		glClearColor(0.0, 0.0, 0.0, 0.0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 		if (!pause) {
-			/* Set Screen to black */
-			glClearColor(0.0, 0.0, 0.0, 0.0);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			
 			/* Rotation of monkey based on time */
 			k = clock();
-
 			monkey.rot = (vec3) {-k / 1000000.0, 0, k / 1000000.0};
 			cube.rot = (vec3) {k / 1000000.0, 0, 0};
 			cube.pos = (vec3) {10 * sin(k / 1000000.0), 
@@ -386,21 +411,22 @@ int main (void)
 			SDL_GetRelativeMouseState(&mx, &my);
 			pitch -= ((GLfloat) my / (GLfloat) h) * sens;
 			yaw -= ((GLfloat) mx / (GLfloat) w) * sens;
-			look_to(eye, pitch, yaw, view);
+			look_to(cam.pos, pitch, yaw, view);
 			glUniformMatrix4fv(uni_view, 1, GL_FALSE, view);
-
-			/* Draw objects */
-			draw_object(skybox, attr);
-			draw_object(monkey, attr);
-			draw_object(cube, attr);
-
-			SDL_GL_SwapWindow(mainwin);
 		}
+
+		/* Draw objects */
+		draw_object(skybox, attr);
+		draw_object(monkey, attr);
+		draw_object(cube, attr);
+
+		SDL_GL_SwapWindow(mainwin);
 	
 		te = SDL_GetPerformanceCounter() - ts;
 		tpf = (double) te / (double) SDL_GetPerformanceFrequency() * 1000;
-		printf("\r%1.6fms", tpf);
+		printf("\r%02.6fms", tpf);
 	}
+
 	printf("\n");
 
 	free(skybox.verts);
@@ -412,8 +438,9 @@ int main (void)
 	glDeleteBuffers(1, &skybox.vbo);
 	glDeleteVertexArrays(1, &vao);
 
-	SDL_GL_DeleteContext(gl_context); SDL_DestroyWindow(mainwin);
+	SDL_GL_DeleteContext(gl_context); 
+	SDL_DestroyWindow(mainwin);
 	SDL_Quit();
 
-	;exit(EXIT_SUCCESS);
+	exit(EXIT_SUCCESS);
 }
