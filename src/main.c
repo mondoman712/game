@@ -186,12 +186,20 @@ static GLuint handle_keydown (SDL_Event e, camera * cam)
 {
 	switch (e.key.keysym.sym) {
 	case (SDLK_w):
-		cam->pos.x -= 0.1 * cos(cam->pitch);
-		cam->pos.z -= 0.1 * sin(cam->pitch);
+		cam->pos.x -= 0.1 * sin(cam->yaw);
+		cam->pos.z -= 0.1 * cos(cam->yaw);
 		break;
 	case (SDLK_s):
-		cam->pos.x += 0.1 * cos(cam->pitch);
-		cam->pos.z += 0.1 * sin(cam->pitch);
+		cam->pos.x += 0.1 * sin(cam->yaw);
+		cam->pos.z += 0.1 * cos(cam->yaw);
+		break;
+	case (SDLK_a):
+		cam->pos.x -= 0.1 * sin(cam->yaw + PI / 2);
+		cam->pos.z -= 0.1 * cos(cam->yaw + PI / 2);
+		break;
+	case (SDLK_d):
+		cam->pos.x += 0.1 * sin(cam->yaw + PI / 2);
+		cam->pos.z += 0.1 * cos(cam->yaw + PI / 2);
 		break;
 	}
 
@@ -362,8 +370,8 @@ int main (void)
 
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 	int mx = 0, my = 0;
-	GLfloat pitch = 0;
-       	GLfloat yaw = PI / 2;
+	cam.pitch = 0;
+       	cam.yaw = PI / 2;
 	GLfloat sens = 1;
 	GLushort pause = 0;
 
@@ -409,9 +417,9 @@ int main (void)
 			
 			/* Handle mouse movement */
 			SDL_GetRelativeMouseState(&mx, &my);
-			pitch -= ((GLfloat) my / (GLfloat) h) * sens;
-			yaw -= ((GLfloat) mx / (GLfloat) w) * sens;
-			look_to(cam.pos, pitch, yaw, view);
+			cam.pitch -= ((GLfloat) my / (GLfloat) h) * sens;
+			cam.yaw -= ((GLfloat) mx / (GLfloat) w) * sens;
+			look_to(cam.pos, cam.pitch, cam.yaw, view);
 			glUniformMatrix4fv(uni_view, 1, GL_FALSE, view);
 		}
 
