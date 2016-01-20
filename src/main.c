@@ -185,24 +185,23 @@ static GLuint handle_keyup (SDL_Event e, GLuint w, GLuint h, GLushort * pause)
 static GLuint handle_keydown (SDL_Event e, camera * cam, Uint64 dt)
 {
 	GLfloat ms = 100 *(double) dt / (double) SDL_GetPerformanceFrequency();
+	const Uint8 * state = SDL_GetKeyboardState(NULL);
 
-	switch (e.key.keysym.sym) {
-	case (SDLK_w):
+	if (state[SDL_SCANCODE_W]) {
 		cam->pos.x -= ms * sin(cam->yaw);
 		cam->pos.z -= ms * cos(cam->yaw);
-		break;
-	case (SDLK_s):
+	}
+	if (state[SDL_SCANCODE_S]) {
 		cam->pos.x += ms * sin(cam->yaw);
 		cam->pos.z += ms * cos(cam->yaw);
-		break;
-	case (SDLK_a):
+	}
+	if (state[SDL_SCANCODE_A]) {
 		cam->pos.x -= ms * sin(cam->yaw + PI / 2);
 		cam->pos.z -= ms * cos(cam->yaw + PI / 2);
-		break;
-	case (SDLK_d):
+	}
+	if (state[SDL_SCANCODE_D]) {
 		cam->pos.x += ms * sin(cam->yaw + PI / 2);
 		cam->pos.z += ms * cos(cam->yaw + PI / 2);
-		break;
 	}
 
 	return 0;
