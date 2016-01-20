@@ -182,24 +182,26 @@ static GLuint handle_keyup (SDL_Event e, GLuint w, GLuint h, GLushort * pause)
 	return 0;
 }
 
-static GLuint handle_keydown (SDL_Event e, camera * cam)
+static GLuint handle_keydown (SDL_Event e, camera * cam, Uint64 dt)
 {
+	GLfloat ms = 100 *(double) dt / (double) SDL_GetPerformanceFrequency();
+
 	switch (e.key.keysym.sym) {
 	case (SDLK_w):
-		cam->pos.x -= 0.1 * sin(cam->yaw);
-		cam->pos.z -= 0.1 * cos(cam->yaw);
+		cam->pos.x -= ms * sin(cam->yaw);
+		cam->pos.z -= ms * cos(cam->yaw);
 		break;
 	case (SDLK_s):
-		cam->pos.x += 0.1 * sin(cam->yaw);
-		cam->pos.z += 0.1 * cos(cam->yaw);
+		cam->pos.x += ms * sin(cam->yaw);
+		cam->pos.z += ms * cos(cam->yaw);
 		break;
 	case (SDLK_a):
-		cam->pos.x -= 0.1 * sin(cam->yaw + PI / 2);
-		cam->pos.z -= 0.1 * cos(cam->yaw + PI / 2);
+		cam->pos.x -= ms * sin(cam->yaw + PI / 2);
+		cam->pos.z -= ms * cos(cam->yaw + PI / 2);
 		break;
 	case (SDLK_d):
-		cam->pos.x += 0.1 * sin(cam->yaw + PI / 2);
-		cam->pos.z += 0.1 * cos(cam->yaw + PI / 2);
+		cam->pos.x += ms * sin(cam->yaw + PI / 2);
+		cam->pos.z += ms * cos(cam->yaw + PI / 2);
 		break;
 	}
 
@@ -391,7 +393,7 @@ int main (void)
 			} else if (e.type == SDL_KEYUP) {
 				if (handle_keyup(e, w, h, &pause)) break;
 			} else if (e.type == SDL_KEYDOWN) {
-				if (handle_keydown(e, &cam)) break;
+				if (handle_keydown(e, &cam, te)) break;
 				glUniform3f(uni_campos, cam.pos.x, cam.pos.y,
 						cam.pos.z);
 				glUniformMatrix4fv(uni_view, 1, GL_FALSE, view);
