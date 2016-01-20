@@ -1,3 +1,4 @@
+CC = gcc
 CSTD = c90
 
 GUILE_CFLAGS = $(shell pkg-config guile-2.0 --cflags)

@@ -25,7 +25,7 @@ material read_mtl (const char * filename, GLuint shader_prog)
 	char * texloc = malloc(MTLBUFFSIZE);
 	FILE * fp;
 
-	material ret;
+	material ret = {0, 0, (vec3) {0, 0, 0}, 0};
 
 	if (buff == NULL) {
 		fprintf(stderr, "Failed to allocate memory for: %s\n", filename);
