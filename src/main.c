@@ -182,10 +182,9 @@ static GLuint handle_keyup (SDL_Event e, GLuint w, GLuint h, GLushort * pause)
 	return 0;
 }
 
-static GLuint handle_keydown (SDL_Event e, camera * cam, Uint64 dt)
+static GLuint handle_keydown (const Uint8 * state, camera * cam, Uint64 dt)
 {
-	GLfloat ms = 100 *(double) dt / (double) SDL_GetPerformanceFrequency();
-	const Uint8 * state = SDL_GetKeyboardState(NULL);
+	GLfloat ms = 10 * (double) dt / (double) SDL_GetPerformanceFrequency();
 
 	if (state[SDL_SCANCODE_W]) {
 		cam->pos.x -= ms * sin(cam->yaw);
@@ -381,6 +380,7 @@ int main (void)
 	Uint64 ts, te;
 	double tpf;
 
+	const Uint8 * state = SDL_GetKeyboardState(NULL);
 	SDL_Event e;
 	while (1) {
 		ts = SDL_GetPerformanceCounter();
@@ -392,10 +392,6 @@ int main (void)
 			} else if (e.type == SDL_KEYUP) {
 				if (handle_keyup(e, w, h, &pause)) break;
 			} else if (e.type == SDL_KEYDOWN) {
-				if (handle_keydown(e, &cam, te)) break;
-				glUniform3f(uni_campos, cam.pos.x, cam.pos.y,
-						cam.pos.z);
-				glUniformMatrix4fv(uni_view, 1, GL_FALSE, view);
 			} else if (e.window.event == SDL_WINDOWEVENT_RESIZED) {
 				window_resize(mainwin, &w, &h);
 				perspective(fov, (GLfloat) w / (GLfloat) h,
@@ -403,6 +399,10 @@ int main (void)
 				glUniformMatrix4fv(uni_proj, 1, GL_FALSE, proj);
 			}
 		}
+		if (handle_keydown(state, &cam, te)) break;
+		glUniform3f(uni_campos, cam.pos.x, cam.pos.y,
+				cam.pos.z);
+		glUniformMatrix4fv(uni_view, 1, GL_FALSE, view);
 
 		/* Set Screen to black */
 		glClearColor(0.0, 0.0, 0.0, 0.0);
