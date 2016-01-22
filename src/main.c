@@ -186,19 +186,19 @@ static GLuint handle_keydown (const Uint8 * state, camera * cam, Uint64 dt)
 {
 	GLfloat ms = 10 * (double) dt / (double) SDL_GetPerformanceFrequency();
 
-	if (state[SDL_SCANCODE_W]) {
+	if (state[SDL_SCANCODE_W] || state[SDL_SCANCODE_UP]) {
 		cam->pos.x -= ms * sin(cam->yaw);
 		cam->pos.z -= ms * cos(cam->yaw);
 	}
-	if (state[SDL_SCANCODE_S]) {
+	if (state[SDL_SCANCODE_S] || state[SDL_SCANCODE_DOWN]) {
 		cam->pos.x += ms * sin(cam->yaw);
 		cam->pos.z += ms * cos(cam->yaw);
 	}
-	if (state[SDL_SCANCODE_A]) {
+	if (state[SDL_SCANCODE_A] || state[SDL_SCANCODE_LEFT]) {
 		cam->pos.x -= ms * sin(cam->yaw + PI / 2);
 		cam->pos.z -= ms * cos(cam->yaw + PI / 2);
 	}
-	if (state[SDL_SCANCODE_D]) {
+	if (state[SDL_SCANCODE_D] || state[SDL_SCANCODE_RIGHT]) {
 		cam->pos.x += ms * sin(cam->yaw + PI / 2);
 		cam->pos.z += ms * cos(cam->yaw + PI / 2);
 	}
