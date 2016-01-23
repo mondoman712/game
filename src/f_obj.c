@@ -91,10 +91,9 @@ material read_mtl (const char * filename, GLuint shader_prog)
 /* 
  * Reads obj file and deposits vertices into float array
  */
-GLushort read_obj (const char * filename, GLfloat ** vertices)
+GLushort read_obj (const char * filename, GLfloat ** vertices, char ** mtl_loc)
 {
 	int i;
-
 	SCM vrts;
 
 	/* load scheme source file */
@@ -110,6 +109,11 @@ GLushort read_obj (const char * filename, GLfloat ** vertices)
 
 	/* call scheme function */
 	vrts = scm_call_1(load_obj, scm_from_locale_string(filename));
+
+	*mtl_loc = scm_to_locale_string(scm_list_ref(vrts, scm_from_int(1)));
+	vrts = scm_list_ref(vrts, scm_from_int(0));
+
+	printf("%s\n", *mtl_loc);
 
 	/* Copy vertices from scm list into array */
 	*vertices = (GLfloat *) malloc((1 + scm_to_int(scm_length(vrts))) 
@@ -143,14 +147,14 @@ object build_obj (const char * name, GLuint shader_prog)
 	strcat(objloc, name);
 	strcat(objloc, MODEL_EXT);
 
-	read_obj(objloc, &ret.verts); 
+	char * mtl = NULL;
+	read_obj(objloc, &ret.verts, &mtl); 
 	free(objloc);
 
-	char * mtlloc = malloc(1 + strlen(name) + strlen(MODEL_DIR)
-			+ strlen(MTL_EXT));
+	char * mtlloc = malloc(1 + strlen(mtl) + strlen(MODEL_DIR));
 	strcpy(mtlloc, MODEL_DIR);
-	strcat(mtlloc, name);
-	strcat(mtlloc, MTL_EXT);
+	strcat(mtlloc, mtl);
+	printf("%s\n", mtlloc);
 
 	ret.mat = read_mtl(mtlloc, shader_prog);
 	free(mtlloc);

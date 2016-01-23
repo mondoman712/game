@@ -3,7 +3,7 @@ CSTD = c99
 
 GUILE_CFLAGS = $(shell pkg-config guile-2.0 --cflags)
 SDL_CFLAGS = $(shell sdl2-config --cflags)
-CFLAGS = -g -W -Wall -Werror -pedantic -std=$(CSTD) $(SDL_CFLAGS) $(GUILE_CFLAGS)
+CFLAGS = -g -W -Wall -pedantic -std=$(CSTD) $(SDL_CFLAGS) $(GUILE_CFLAGS)
 
 GUILE_LDFLAGS = $(shell pkg-config guile-2.0 --libs)
 SDL_LDFLAGS = $(shell sdl2-config --libs)
