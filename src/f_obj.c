@@ -113,8 +113,6 @@ GLushort read_obj (const char * filename, GLfloat ** vertices, char ** mtl_loc)
 	*mtl_loc = scm_to_locale_string(scm_list_ref(vrts, scm_from_int(1)));
 	vrts = scm_list_ref(vrts, scm_from_int(0));
 
-	printf("%s\n", *mtl_loc);
-
 	/* Copy vertices from scm list into array */
 	*vertices = (GLfloat *) malloc((1 + scm_to_int(scm_length(vrts))) 
 			* sizeof(GLfloat));
@@ -154,7 +152,6 @@ object build_obj (const char * name, GLuint shader_prog)
 	char * mtlloc = malloc(1 + strlen(mtl) + strlen(MODEL_DIR));
 	strcpy(mtlloc, MODEL_DIR);
 	strcat(mtlloc, mtl);
-	printf("%s\n", mtlloc);
 
 	ret.mat = read_mtl(mtlloc, shader_prog);
 	free(mtlloc);

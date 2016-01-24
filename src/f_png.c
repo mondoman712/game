@@ -94,8 +94,8 @@ image read_png (const char * filename)
 		s = "Unknown";
 	}
 
-	printf("%s:\n", filename);
-	printf("\twidth = %i,\t height = %i\n", tmpw, tmph);
+	printf("%s:", filename);
+	printf("\twidth = %i,\t height = %i", tmpw, tmph);
 	printf("\tbit depth = %i,\t colour type = %s\n", bit_depth, s);
 
 	png_read_update_info(png, info);

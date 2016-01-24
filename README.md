@@ -15,3 +15,5 @@ That's just the project title for what will eventually become a quake-like fps.
 * In game menu
 * Sounds
 * Multiple light sources
+* Rewrite obj loading in C
+* Crosshairs

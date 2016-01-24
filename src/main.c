@@ -85,9 +85,7 @@ GLuint create_shader (const GLenum shader_type, const char * filename)
 	/* Check for and report errors */
 	GLint status;
 	glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
-	if (status == GL_TRUE) {
-		printf("Shader %s has been compiled\n", filename);
-	} else {
+	if (status == GL_FALSE) {
 		char buff[512];
 		glGetShaderInfoLog(shader, 512, NULL, buff);
 		fprintf(stderr, "Shader %s failed to compile with error:\n", 
@@ -274,16 +272,12 @@ int main (void)
 	if (mainwin == NULL) {
 		fprintf(stderr, "Failed to create SDL window\n");
 		exit(EXIT_FAILURE);
-	} else {
-		printf("SDL window created\n");
 	}
 
 	SDL_GLContext gl_context = SDL_GL_CreateContext(mainwin);
 	if (gl_context == NULL) {
 		fprintf(stderr, "Failed to create OpenGL context\n");
 		exit(EXIT_FAILURE);
-	} else {
-		printf("OpenGL context created\n");
 	}
 
 	const unsigned char * version = glGetString(GL_VERSION);
@@ -303,8 +297,6 @@ int main (void)
 	if (glew_status) {
 		fprintf(stderr, "Error %s\n", glewGetErrorString(glew_status));
 		exit(EXIT_FAILURE);
-	} else {
-		printf("GLEW is working\n");
 	}
 
 	GLuint vert_shader = create_shader(GL_VERTEX_SHADER, "vs1");
