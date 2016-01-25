@@ -92,6 +92,8 @@ image read_png (const char * filename)
 		break;
 	default:
 		s = "Unknown";
+		ret.colour_type = GL_RGB;
+		break;
 	}
 
 	printf("%s:", filename);
