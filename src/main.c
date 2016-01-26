@@ -411,6 +411,10 @@ int main (void)
 			/* Handle mouse movement */
 			SDL_GetRelativeMouseState(&mx, &my);
 			cam.pitch -= ((GLfloat) my / (GLfloat) h) * sens;
+			if (cam.pitch > PI / 2)
+				cam.pitch = PI / 2;
+			else if (cam.pitch < - PI / 2)
+				cam.pitch = - PI / 2;
 			cam.yaw -= ((GLfloat) mx / (GLfloat) w) * sens;
 			look_to(cam.pos, cam.pitch, cam.yaw, view);
 			glUniformMatrix4fv(uni_view, 1, GL_FALSE, view);
