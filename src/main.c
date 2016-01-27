@@ -315,13 +315,15 @@ int main (void)
 	object cube = build_obj("cube", shader_prog);
 	cube.pos = (vec3) {2.0, 2.0, 0.0};
 	attrib attr;
+	object monkey2 = build_obj("monkey", shader_prog);
+	monkey2.pos = (vec3) {4.0, 0.0, 0.0};
 
 	GLuint vao;
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 
 	GLint uni_lightp = glGetUniformLocation(shader_prog, "light.position");
-	glUniform3f(uni_lightp, -1.0, -1.0, -1.0);
+	glUniform4f(uni_lightp, 1.0, 0.0, 0.0, 1.0);
 	GLint uni_lighti = glGetUniformLocation(shader_prog, "light.intensities");
 	glUniform3f(uni_lighti, 1.0, 1.0, 1.0);
 	GLint uni_lighta = glGetUniformLocation(shader_prog, "light.attenuation");
@@ -407,6 +409,7 @@ int main (void)
 			cube.rot = (vec3) {k / 1000000.0, 0, 0};
 			cube.pos = (vec3) {10 * sin(k / 1000000.0), 
 				0, 10 * cos(k / 1000000.0)};
+			monkey2.rot = (vec3) {-k / 1000000.0, 0, k / 1000000.0};
 			
 			/* Handle mouse movement */
 			SDL_GetRelativeMouseState(&mx, &my);
@@ -424,6 +427,7 @@ int main (void)
 		draw_object(skybox, attr);
 		draw_object(monkey, attr);
 		draw_object(cube, attr);
+		draw_object(monkey2, attr);
 
 		SDL_GL_SwapWindow(mainwin);
 	
