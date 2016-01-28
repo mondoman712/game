@@ -318,10 +318,6 @@ int main (void)
 	object monkey2 = build_obj("monkey", shader_prog);
 	monkey2.pos = (vec3) {4.0, 0.0, 0.0};
 
-	GLuint vao;
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
-
 	GLint uni_lightp = glGetUniformLocation(shader_prog, "light.position");
 	glUniform4f(uni_lightp, 1.0, 0.0, 0.0, 1.0);
 	GLint uni_lighti = glGetUniformLocation(shader_prog, "light.intensities");
@@ -372,7 +368,7 @@ int main (void)
 	glEnable(GL_DEPTH_TEST);
 
 	Uint64 ts, te;
-	double tpf;
+	GLdouble tpf;
 
 	const Uint8 * state = SDL_GetKeyboardState(NULL);
 	SDL_Event e;
@@ -445,7 +441,6 @@ int main (void)
 	glDeleteShader(vert_shader);
 
 	glDeleteBuffers(1, &skybox.vbo);
-	glDeleteVertexArrays(1, &vao);
 
 	SDL_GL_DeleteContext(gl_context); 
 	SDL_DestroyWindow(mainwin);
