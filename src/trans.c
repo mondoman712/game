@@ -162,6 +162,7 @@ void look_to (vec3 eye, GLfloat pitch, GLfloat yaw, GLfloat * mat4)
 	*(mat4 + 14) = - dot_vec3(z, eye);
 	*(mat4 + 15) = 1;
 }
+
 /*
  * Defines a perspective projection matrix transformation
  */
