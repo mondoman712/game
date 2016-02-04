@@ -14,16 +14,17 @@ DEPS = $(shell find src/ -name '*.h')
 OBJECTS = $(patsubst %.c,%.o,$(SOURCES))
 EXECUTABLE = emetic
 
-$(EXECUTABLE): $(OBJECTS)
-	@echo -e "C compiler: \t" $(CC) 
-	@echo -e "C flags: \t" $(CFLAGS)
-	@echo -e "Library flags: \t" $(LDFLAGS)
-	@echo -e "C files: \t" $(SOURCES)
-	@echo -e "Header files: \t"  $(DEPS)
+$(EXECUTABLE): pre $(OBJECTS)
 	@$(CC) $(LDFLAGS) $(OBJECTS) -o $@
 	@rm $(OBJECTS)
 
+pre:
+	@echo -e "C compiler: \t" $(CC) 
+	@echo -e "C flags: \t" $(CFLAGS)
+	@echo -e "Library flags: \t" $(LDFLAGS)
+
 %.o: %.c $(DEPS)
+	@echo "Building" $@
 	@$(CC) $(CFLAGS) -c -o $@ $<
 
 clean:
