@@ -7,7 +7,7 @@
 
 #include "slibs/trans.h"
 #include "f_obj.h"
-#include "f_png.h"
+#include "slibs/f_png.h"
 
 #define MTLBUFFSIZE 64 * sizeof(char)
 

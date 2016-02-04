@@ -8,7 +8,7 @@
 #include <SDL2/SDL.h>
 #include <libguile.h>
 
-#include "f_png.h"
+#include "slibs/f_png.h"
 #include "slibs/trans.h"
 #include "f_obj.h"
 
