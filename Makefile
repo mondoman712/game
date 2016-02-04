@@ -9,7 +9,7 @@ GUILE_LDFLAGS = $(shell pkg-config guile-2.0 --libs)
 SDL_LDFLAGS = $(shell sdl2-config --libs)
 LDFLAGS = -lGL -lGLEW -lm -lpng -lz  $(SDL_LDFLAGS) $(GUILE_LDFLAGS)
 
-SOURCES = $(wildcard src/*.c)
+SOURCES = $(wildcard src/*.c) $(wildcard src/slibs/*.c)
 OBJECTS = $(notdir $(SOURCES:.c=.o))
 EXECUTABLE = emetic
 

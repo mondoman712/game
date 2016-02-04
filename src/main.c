@@ -9,7 +9,7 @@
 #include <libguile.h>
 
 #include "f_png.h"
-#include "trans.h"
+#include "slibs/trans.h"
 #include "f_obj.h"
 
 #define WIN_TITLE "window title"

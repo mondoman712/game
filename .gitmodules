@@ -1,0 +1,3 @@
+[submodule "src/slibs"]
+	path = src/slibs
+	url = git@github.com:mondoman712/slibs.git
