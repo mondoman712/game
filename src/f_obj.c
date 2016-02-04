@@ -5,7 +5,7 @@
 #include <GL/glew.h>
 #include <libguile.h>
 
-#include "slibs/trans.h"
+#include "slibs/v_3dt.h"
 #include "f_obj.h"
 #include "slibs/f_png.h"
 

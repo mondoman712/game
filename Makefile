@@ -9,16 +9,22 @@ GUILE_LDFLAGS = $(shell pkg-config guile-2.0 --libs)
 SDL_LDFLAGS = $(shell sdl2-config --libs)
 LDFLAGS = -lGL -lGLEW -lm -lpng -lz  $(SDL_LDFLAGS) $(GUILE_LDFLAGS)
 
-SOURCES = $(wildcard src/*.c) $(wildcard src/slibs/*.c)
-OBJECTS = $(notdir $(SOURCES:.c=.o))
+SOURCES = $(shell find src/ -name '*.c')
+DEPS = $(shell find src/ -name '*.h')
+OBJECTS = $(patsubst %.c,%.o,$(SOURCES))
 EXECUTABLE = emetic
 
 $(EXECUTABLE): $(OBJECTS)
-	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
-	rm $(OBJECTS)
+	@echo -e "C compiler: \t" $(CC) 
+	@echo -e "C flags: \t" $(CFLAGS)
+	@echo -e "Library flags: \t" $(LDFLAGS)
+	@echo -e "C files: \t" $(SOURCES)
+	@echo -e "Header files: \t"  $(DEPS)
+	@$(CC) $(LDFLAGS) $(OBJECTS) -o $@
+	@rm $(OBJECTS)
 
-$(OBJECTS): $(SOURCES)
-	$(CC) $(CFLAGS) -c $(SOURCES)
+%.o: %.c $(DEPS)
+	@$(CC) $(CFLAGS) -c -o $@ $<
 
 clean:
 	rm $(OBJECTS) $(EXECUTABLE)
