@@ -16,7 +16,6 @@ EXECUTABLE = emetic
 
 $(EXECUTABLE): pre $(OBJECTS)
 	@$(CC) $(LDFLAGS) $(OBJECTS) -o $@
-	@rm $(OBJECTS)
 
 pre:
 	@echo -e "C compiler: \t" $(CC) 

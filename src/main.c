@@ -19,9 +19,6 @@
 
 #define PI 3.141592653589
 
-#define GL_MAJOR_VER 3
-#define GL_MINOR_VER 3
-
 typedef struct {
 	GLuint program;
 	GLuint vert;
@@ -126,47 +123,9 @@ int main (void)
 	GLuint w = DEFAULT_SCREEN_X;
 	GLuint h = DEFAULT_SCREEN_Y;
 
-	if (SDL_Init(SDL_INIT_VIDEO)) {
-		fprintf(stderr, "Failed to initialise SDL\n");
+	Window mainwin = create_window(w, h, WIN_TITLE);
+	if (mainwin.win == NULL || mainwin.glc == NULL)
 		exit(EXIT_FAILURE);
-	}
-
-	SDL_Window * mainwin;
-	mainwin = SDL_CreateWindow(WIN_TITLE,
-			SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-			w, h,
-			SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL
-				| SDL_WINDOW_RESIZABLE);
-
-	if (mainwin == NULL) {
-		fprintf(stderr, "Failed to create SDL window\n");
-		exit(EXIT_FAILURE);
-	}
-
-	SDL_GLContext gl_context = SDL_GL_CreateContext(mainwin);
-	if (gl_context == NULL) {
-		fprintf(stderr, "Failed to create OpenGL context\n");
-		exit(EXIT_FAILURE);
-	}
-
-	const unsigned char * version = glGetString(GL_VERSION);
-	if (version == NULL) {
-		fprintf(stderr, "Failed to get GL version\n");
-		exit(EXIT_FAILURE);
-	} else {
-		printf("GL version is: %s\n", version);
-	}
-
-	SDL_GL_MakeCurrent(mainwin, gl_context);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, GL_MAJOR_VER);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, GL_MINOR_VER);
-
-	glewExperimental = GL_TRUE;
-	GLenum glew_status = glewInit();
-	if (glew_status) {
-		fprintf(stderr, "Error %s\n", glewGetErrorString(glew_status));
-		exit(EXIT_FAILURE);
-	}
 
 	GLuint vert_shader = create_shader(GL_VERTEX_SHADER, "vs1");
 	GLuint frag_shader = create_shader(GL_FRAGMENT_SHADER, "fs1");
@@ -252,7 +211,7 @@ int main (void)
 				if (handle_keyup(e, w, h, &pause)) break;
 			} else if (e.type == SDL_KEYDOWN) {
 			} else if (e.window.event == SDL_WINDOWEVENT_RESIZED) {
-				window_resize(mainwin, &w, &h);
+				window_resize(mainwin.win, &w, &h);
 				perspective(fov, (GLfloat) w / (GLfloat) h,
 						0.1, 100.0, proj);
 				glUniformMatrix4fv(uni_proj, 1, GL_FALSE, proj);
@@ -294,7 +253,7 @@ int main (void)
 		draw_object(cube, attr);
 		draw_object(monkey2, attr);
 
-		SDL_GL_SwapWindow(mainwin);
+		SDL_GL_SwapWindow(mainwin.win);
 	
 		te = SDL_GetPerformanceCounter() - ts;
 		tpf = (double) te / (double) SDL_GetPerformanceFrequency() * 1000;
@@ -311,8 +270,8 @@ int main (void)
 
 	glDeleteBuffers(1, &skybox.vbo);
 
-	SDL_GL_DeleteContext(gl_context); 
-	SDL_DestroyWindow(mainwin);
+	SDL_GL_DeleteContext(mainwin.glc); 
+	SDL_DestroyWindow(mainwin.win);
 	SDL_Quit();
 
 	exit(EXIT_SUCCESS);
