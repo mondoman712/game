@@ -120,10 +120,8 @@ int main (void)
 {
 	scm_init_guile();
 
-	GLuint w = DEFAULT_SCREEN_X;
-	GLuint h = DEFAULT_SCREEN_Y;
-
-	Window mainwin = create_window(w, h, WIN_TITLE);
+	Window mainwin = create_window(DEFAULT_SCREEN_X, DEFAULT_SCREEN_Y,
+			WIN_TITLE);
 	if (mainwin.win == NULL || mainwin.glc == NULL)
 		exit(EXIT_FAILURE);
 
@@ -179,7 +177,7 @@ int main (void)
 
 	GLfloat fov = PI / 2;
 	GLfloat proj[16];
-	perspective(fov, w / h, 0.1, 100.0, proj);
+	perspective(fov, mainwin.w / mainwin.h, 0.1, 100.0, proj);
 	GLint uni_proj = glGetUniformLocation(shader_prog, "proj");
 	glUniformMatrix4fv(uni_proj, 1, GL_FALSE, proj);
 
@@ -208,11 +206,11 @@ int main (void)
 			if (e.type == SDL_QUIT) {
 				break;
 			} else if (e.type == SDL_KEYUP) {
-				if (handle_keyup(e, w, h, &pause)) break;
+				if (handle_keyup(e, mainwin.w, mainwin.h, &pause)) break;
 			} else if (e.type == SDL_KEYDOWN) {
 			} else if (e.window.event == SDL_WINDOWEVENT_RESIZED) {
-				window_resize(mainwin.win, &w, &h);
-				perspective(fov, (GLfloat) w / (GLfloat) h,
+				window_resize(&mainwin);
+				perspective(fov, (GLfloat) mainwin.w / (GLfloat) mainwin.h,
 						0.1, 100.0, proj);
 				glUniformMatrix4fv(uni_proj, 1, GL_FALSE, proj);
 			}
@@ -237,12 +235,12 @@ int main (void)
 			
 			/* Handle mouse movement */
 			SDL_GetRelativeMouseState(&mx, &my);
-			cam.pitch -= ((GLfloat) my / (GLfloat) h) * sens;
+			cam.pitch -= ((GLfloat) my / (GLfloat) mainwin.h) * sens;
 			if (cam.pitch > PI / 2)
 				cam.pitch = PI / 2;
 			else if (cam.pitch < - PI / 2)
 				cam.pitch = - PI / 2;
-			cam.yaw -= ((GLfloat) mx / (GLfloat) w) * sens;
+			cam.yaw -= ((GLfloat) mx / (GLfloat) mainwin.w) * sens;
 			look_to(cam.pos, cam.pitch, cam.yaw, view);
 			glUniformMatrix4fv(uni_view, 1, GL_FALSE, view);
 		}
