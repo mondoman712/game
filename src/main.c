@@ -65,6 +65,9 @@ static GLuint handle_keydown (const Uint8 * state, camera * cam, Uint64 dt)
 {
 	GLfloat ms = 10 * (double) dt / (double) SDL_GetPerformanceFrequency();
 
+	if (state[SDL_SCANCODE_Q]) {
+		return 1;
+	}
 	if (state[SDL_SCANCODE_W] || state[SDL_SCANCODE_UP]) {
 		cam->pos.x -= ms * sin(cam->yaw);
 		cam->pos.z -= ms * cos(cam->yaw);
@@ -182,7 +185,6 @@ int main (void)
 	glUniformMatrix4fv(uni_proj, 1, GL_FALSE, proj);
 
 	attr.model = glGetUniformLocation(shader_prog, "model");
-	clock_t k;
 
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 	int mx = 0, my = 0;
@@ -194,7 +196,7 @@ int main (void)
 	glEnable(GL_DEPTH_TEST);
 
 	Uint64 ts, te;
-	GLdouble tpf;
+	GLdouble tpf = 0;
 
 	const Uint8 * state = SDL_GetKeyboardState(NULL);
 	SDL_Event e;
@@ -206,7 +208,6 @@ int main (void)
 			if (e.type == SDL_QUIT) {
 				break;
 			} else if (e.type == SDL_KEYUP) {
-				if (handle_keyup(e, mainwin.w, mainwin.h, &pause)) break;
 			} else if (e.type == SDL_KEYDOWN) {
 			} else if (e.window.event == SDL_WINDOWEVENT_RESIZED) {
 				window_resize(&mainwin);
@@ -215,6 +216,7 @@ int main (void)
 				glUniformMatrix4fv(uni_proj, 1, GL_FALSE, proj);
 			}
 		}
+		if (handle_keyup(e, mainwin.w, mainwin.h, &pause)) break;
 		if (handle_keydown(state, &cam, te)) break;
 		glUniform3f(uni_campos, cam.pos.x, cam.pos.y,
 				cam.pos.z);
@@ -226,12 +228,13 @@ int main (void)
 
 		if (!pause) {
 			/* Rotation of monkey based on time */
-			k = clock();
-			monkey.rot = (vec3) {-k / 1000000.0, 0, k / 1000000.0};
-			cube.rot = (vec3) {k / 1000000.0, 0, 0};
-			cube.pos = (vec3) {10 * sin(k / 1000000.0), 
-				0, 10 * cos(k / 1000000.0)};
-			monkey2.rot = (vec3) {-k / 1000000.0, 0, k / 1000000.0};
+			monkey.rot.x -= tpf / 1000;
+			monkey.rot.z += tpf / 1000;
+			monkey2.rot.x -= tpf / 1000;
+			monkey2.rot.z += tpf / 1000;
+			cube.rot.x += tpf / 1000;
+			cube.pos.x += 10 * sin(tpf / 1000);
+			cube.pos.z += 10 * cos(tpf / 1000);
 			
 			/* Handle mouse movement */
 			SDL_GetRelativeMouseState(&mx, &my);
