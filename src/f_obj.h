@@ -13,7 +13,7 @@ typedef struct {
 	vec3 pos;
 	vec3 rot;
 	material mat;
-	GLfloat * verts;
+	GLfloat nverts;
 } object;
 
 /*
@@ -25,7 +25,7 @@ material read_mtl (const char * filename, GLuint shader_prog);
 /* 
  * Reads obj file and deposits vertices into float array
  */
-GLushort read_obj (const char * filename, GLfloat ** vertices, char ** mtl_loc);
+GLuint read_obj (const char * filename, GLfloat ** vertices, char ** mtl_loc);
 
 /*
  * Builds an object struct and loads the information needed from files

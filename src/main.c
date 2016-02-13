@@ -113,7 +113,7 @@ static void draw_object (object obj, attrib attr)
 	glVertexAttribPointer(attr.norm, 3, GL_FLOAT, GL_FALSE,
 			8 * sizeof(GLfloat), (void *)(5 * sizeof(GLfloat)));
 
-	glDrawArrays(GL_TRIANGLES, 0, (GLuint) *obj.verts);
+	glDrawArrays(GL_TRIANGLES, 0, (GLuint) obj.nverts);
 }
 
 /*
@@ -262,8 +262,6 @@ int main (void)
 	}
 
 	printf("\n");
-
-	free(skybox.verts);
 
 	glDeleteProgram(shader_prog);
 	glDeleteShader(frag_shader);

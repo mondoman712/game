@@ -9,7 +9,7 @@ GUILE_LDFLAGS = $(shell pkg-config guile-2.0 --libs)
 SDL_LDFLAGS = $(shell sdl2-config --libs)
 LDFLAGS = -lGL -lGLEW -lm -lpng -lz  $(SDL_LDFLAGS) $(GUILE_LDFLAGS)
 
-SOURCES = $(shell find src/ -name '*.c')
+SOURCES = $(shell find src/ ! -name "test.c" -name '*.c')
 DEPS = $(shell find src/ -name '*.h')
 OBJECTS = $(patsubst %.c,%.o,$(SOURCES))
 EXECUTABLE = emetic

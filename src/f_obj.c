@@ -91,9 +91,10 @@ material read_mtl (const char * filename, GLuint shader_prog)
 /* 
  * Reads obj file and deposits vertices into float array
  */
-GLushort read_obj (const char * filename, GLfloat ** vertices, char ** mtl_loc)
+GLuint read_obj (const char * filename, GLfloat ** vertices, char ** mtl_loc)
 {
-	int i;
+	GLuint i;
+	GLuint ret;
 	SCM vrts;
 
 	/* load scheme source file */
@@ -114,20 +115,19 @@ GLushort read_obj (const char * filename, GLfloat ** vertices, char ** mtl_loc)
 	vrts = scm_list_ref(vrts, scm_from_int(0));
 
 	/* Copy vertices from scm list into array */
-	*vertices = (GLfloat *) malloc((1 + scm_to_int(scm_length(vrts))) 
-			* sizeof(GLfloat));
+	ret = (GLuint) scm_to_int(scm_length(vrts));
+
+	*vertices = (GLfloat *) malloc(ret * sizeof(GLfloat));
 	if (*vertices == NULL) {
 		fprintf(stderr, "Failed to allocate memory for %s\n", filename);
 		return 1;
 	}
 
-	**vertices = (GLfloat) scm_to_double(scm_length(vrts));
-	for (i = 0; i < **vertices; i++)
-		*(*vertices + i + 1) =
-			(GLfloat) scm_to_double(scm_list_ref(vrts,
+	for (i = 0; i < ret; i++)
+		*(*vertices + i) = (GLfloat) scm_to_double(scm_list_ref(vrts,
 						scm_from_int(i)));
 
-	return 0;
+	return ret;
 }
 
 /*
@@ -145,8 +145,9 @@ object build_obj (const char * name, GLuint shader_prog)
 	strcat(objloc, name);
 	strcat(objloc, MODEL_EXT);
 
-	char * mtl = NULL;
-	read_obj(objloc, &ret.verts, &mtl); 
+	char * mtl = malloc(256);
+	GLfloat * verts;
+	ret.nverts = read_obj(objloc, &verts, &mtl); 
 	free(objloc);
 
 	char * mtlloc = malloc(1 + strlen(mtl) + strlen(MODEL_DIR));
@@ -158,8 +159,10 @@ object build_obj (const char * name, GLuint shader_prog)
 
 	glGenBuffers(1, &ret.vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, ret.vbo);
-	glBufferData(GL_ARRAY_BUFFER, (int) (*ret.verts * sizeof(GLfloat)),
-			ret.verts + 1, GL_STATIC_DRAW);	
+	glBufferData(GL_ARRAY_BUFFER, (int) (ret.nverts * sizeof(GLfloat)),
+			verts, GL_STATIC_DRAW);	
+
+	free(verts);
 
 	return ret;
 }
