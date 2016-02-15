@@ -6,7 +6,8 @@
 #include <libguile.h>
 
 #include "slibs/v_3dt.h"
-#include "f_obj.h"
+#include "model.h"
+#include "slibs/f_obj.h"
 #include "slibs/f_png.h"
 
 #define MTLBUFFSIZE 64 * sizeof(char)
@@ -22,7 +23,7 @@
 material read_mtl (const char * filename, GLuint shader_prog)
 {
 	char * buff = malloc(MTLBUFFSIZE);
-	char * texloc = malloc(MTLBUFFSIZE);
+	char * texloc = NULL;
 	FILE * fp;
 
 	material ret = {0, 0, (vec3) {0, 0, 0}, 0};
@@ -91,7 +92,7 @@ material read_mtl (const char * filename, GLuint shader_prog)
 /* 
  * Reads obj file and deposits vertices into float array
  */
-GLuint read_obj (const char * filename, GLfloat ** vertices, char ** mtl_loc)
+GLuint read_obj1 (const char * filename, GLfloat ** vertices, char ** mtl_loc)
 {
 	GLuint i;
 	GLuint ret;
@@ -114,9 +115,9 @@ GLuint read_obj (const char * filename, GLfloat ** vertices, char ** mtl_loc)
 	*mtl_loc = scm_to_locale_string(scm_list_ref(vrts, scm_from_int(1)));
 	vrts = scm_list_ref(vrts, scm_from_int(0));
 
-	/* Copy vertices from scm list into array */
 	ret = (GLuint) scm_to_int(scm_length(vrts));
 
+	/* Copy vertices from scm list into array */
 	*vertices = (GLfloat *) malloc(ret * sizeof(GLfloat));
 	if (*vertices == NULL) {
 		fprintf(stderr, "Failed to allocate memory for %s\n", filename);
@@ -126,6 +127,19 @@ GLuint read_obj (const char * filename, GLfloat ** vertices, char ** mtl_loc)
 	for (i = 0; i < ret; i++)
 		*(*vertices + i) = (GLfloat) scm_to_double(scm_list_ref(vrts,
 						scm_from_int(i)));
+
+	printf("%i\n", ret);
+	printf("%s\n", *mtl_loc);
+	for (i = 0; i < ret * 8; i += 8) {
+		printf("%f, ", *(*vertices + i));
+		printf("%f, ", *(*vertices + i + 1));
+		printf("%f, ", *(*vertices + i + 2));
+		printf("%f, ", *(*vertices + i + 3));
+		printf("%f, ", *(*vertices + i + 4));
+		printf("%f, ", *(*vertices + i + 5));
+		printf("%f, ", *(*vertices + i + 6));
+		printf("%f\n", *(*vertices + i + 7));
+	}
 
 	return ret;
 }
@@ -146,13 +160,14 @@ object build_obj (const char * name, GLuint shader_prog)
 	strcat(objloc, MODEL_EXT);
 
 	char * mtl = malloc(256);
-	GLfloat * verts;
+	GLfloat * verts = NULL;
 	ret.nverts = read_obj(objloc, &verts, &mtl); 
 	free(objloc);
 
 	char * mtlloc = malloc(1 + strlen(mtl) + strlen(MODEL_DIR));
 	strcpy(mtlloc, MODEL_DIR);
 	strcat(mtlloc, mtl);
+	free(mtl);
 
 	ret.mat = read_mtl(mtlloc, shader_prog);
 	free(mtlloc);
