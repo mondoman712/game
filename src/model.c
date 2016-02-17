@@ -89,61 +89,6 @@ material read_mtl (const char * filename, GLuint shader_prog)
 	return ret;
 }
 
-/* 
- * Reads obj file and deposits vertices into float array
- */
-GLuint read_obj1 (const char * filename, GLfloat ** vertices, char ** mtl_loc)
-{
-	GLuint i;
-	GLuint ret;
-	SCM vrts;
-
-	/* load scheme source file */
-	scm_c_primitive_load("src/f_obj.scm");
-
-	/* load scheme packages to use */
-	scm_c_use_module("ice-9 rdelim");
-	scm_c_use_module("srfi srfi-1");
-
-	/* load necessary scheme function */
-	SCM load_obj_sym = scm_c_lookup("load-obj");
-	SCM load_obj = scm_variable_ref(load_obj_sym);
-
-	/* call scheme function */
-	vrts = scm_call_1(load_obj, scm_from_locale_string(filename));
-
-	*mtl_loc = scm_to_locale_string(scm_list_ref(vrts, scm_from_int(1)));
-	vrts = scm_list_ref(vrts, scm_from_int(0));
-
-	ret = (GLuint) scm_to_int(scm_length(vrts));
-
-	/* Copy vertices from scm list into array */
-	*vertices = (GLfloat *) malloc(ret * sizeof(GLfloat));
-	if (*vertices == NULL) {
-		fprintf(stderr, "Failed to allocate memory for %s\n", filename);
-		return 1;
-	}
-
-	for (i = 0; i < ret; i++)
-		*(*vertices + i) = (GLfloat) scm_to_double(scm_list_ref(vrts,
-						scm_from_int(i)));
-
-	printf("%i\n", ret);
-	printf("%s\n", *mtl_loc);
-	for (i = 0; i < ret * 8; i += 8) {
-		printf("%f, ", *(*vertices + i));
-		printf("%f, ", *(*vertices + i + 1));
-		printf("%f, ", *(*vertices + i + 2));
-		printf("%f, ", *(*vertices + i + 3));
-		printf("%f, ", *(*vertices + i + 4));
-		printf("%f, ", *(*vertices + i + 5));
-		printf("%f, ", *(*vertices + i + 6));
-		printf("%f\n", *(*vertices + i + 7));
-	}
-
-	return ret;
-}
-
 /*
  * Builds an object struct and loads the information needed from files
  */
