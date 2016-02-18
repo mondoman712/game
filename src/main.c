@@ -142,7 +142,7 @@ int main (void)
 	object monkey = build_obj("monkey", shader_prog);
 	monkey.pos = (vec3) {-4.0, 0.0, 0.0};
 	object cube = build_obj("cube", shader_prog);
-	cube.pos = (vec3) {2.0, 2.0, 0.0};
+	cube.pos = (vec3) {2.0, 4.0, 2.0};
 	attrib attr;
 	object monkey2 = build_obj("monkey", shader_prog);
 	monkey2.pos = (vec3) {4.0, 0.0, 0.0};
@@ -208,15 +208,17 @@ int main (void)
 			if (e.type == SDL_QUIT) {
 				break;
 			} else if (e.type == SDL_KEYUP) {
+				if (handle_keyup(e, mainwin.w, mainwin.h, &pause)) 
+					break;
 			} else if (e.type == SDL_KEYDOWN) {
 			} else if (e.window.event == SDL_WINDOWEVENT_RESIZED) {
 				window_resize(&mainwin);
-				perspective(fov, (GLfloat) mainwin.w / (GLfloat) mainwin.h,
+				perspective(fov, (GLfloat) mainwin.w 
+						/ (GLfloat) mainwin.h,
 						0.1, 100.0, proj);
 				glUniformMatrix4fv(uni_proj, 1, GL_FALSE, proj);
 			}
 		}
-		if (handle_keyup(e, mainwin.w, mainwin.h, &pause)) break;
 		if (handle_keydown(state, &cam, te)) break;
 		glUniform3f(uni_campos, cam.pos.x, cam.pos.y,
 				cam.pos.z);
@@ -233,9 +235,7 @@ int main (void)
 			monkey2.rot.x -= tpf / 1000;
 			monkey2.rot.z += tpf / 1000;
 			cube.rot.x += tpf / 1000;
-			cube.pos.x += 10 * sin(tpf / 1000);
-			cube.pos.z += 10 * cos(tpf / 1000);
-			
+
 			/* Handle mouse movement */
 			SDL_GetRelativeMouseState(&mx, &my);
 			cam.pitch -= ((GLfloat) my / (GLfloat) mainwin.h) * sens;
@@ -251,8 +251,8 @@ int main (void)
 		/* Draw objects */
 		draw_object(skybox, attr);
 		draw_object(monkey, attr);
-		draw_object(cube, attr);
 		draw_object(monkey2, attr);
+		draw_object(cube, attr);
 
 		SDL_GL_SwapWindow(mainwin.win);
 	
