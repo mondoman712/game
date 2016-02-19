@@ -146,6 +146,8 @@ int main (void)
 	attrib attr;
 	object monkey2 = build_obj("monkey", shader_prog);
 	monkey2.pos = (vec3) {4.0, 0.0, 0.0};
+	object torus = build_obj("torus", shader_prog);
+	torus.pos = (vec3) {6.0, 6.0, -3.0};
 
 	GLint uni_lightp = glGetUniformLocation(shader_prog, "light.position");
 	glUniform4f(uni_lightp, 1.0, 0.0, 0.0, 1.0);
@@ -253,6 +255,7 @@ int main (void)
 		draw_object(monkey, attr);
 		draw_object(monkey2, attr);
 		draw_object(cube, attr);
+		draw_object(torus, attr);
 
 		SDL_GL_SwapWindow(mainwin.win);
 	
