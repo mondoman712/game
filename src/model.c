@@ -58,6 +58,10 @@ material read_mtl (const char * filename, GLuint shader_prog)
 		}
 	}
 
+	/* Sets a default texture */
+	if (texloc == NULL)
+		texloc = "cat.png";
+
 	GLuint tex;
 	glGenTextures(1, &tex);
 	image img;
