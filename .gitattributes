@@ -1,2 +1,4 @@
 assets/textures/cat.png filter=lfs diff=lfs merge=lfs -text
 assets/textures/dog.png filter=lfs diff=lfs merge=lfs -text
+assets/models/torus.mtl filter=lfs diff=lfs merge=lfs -text
+assets/models/torus.obj filter=lfs diff=lfs merge=lfs -text
