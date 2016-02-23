@@ -1,6 +1,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 #include <GL/glew.h>
 #include <libguile.h>
@@ -16,6 +17,8 @@
 #define MODEL_EXT ".obj"
 #define MTL_EXT ".mtl"
 
+#define DEFAULT_TEXTURE "cat.png"
+
 /*
  * Gets the texture, specular colour and specular exponent of a material from
  * the mtl file
@@ -25,6 +28,7 @@ material read_mtl (const char * filename, GLuint shader_prog)
 	char * buff = malloc(MTLBUFFSIZE);
 	char * texloc = NULL;
 	FILE * fp;
+	bool istex = false;
 
 	material ret = {0, 0, (vec3) {0, 0, 0}, 0};
 
@@ -44,6 +48,7 @@ material read_mtl (const char * filename, GLuint shader_prog)
 			texloc = malloc(1 + strlen(buff + 7));
 			strcpy(texloc, buff + 7);
 			*(texloc + strlen(texloc) - 1) = '\0';
+			istex = true;
 		} else if (buff[0] == 'K' && buff[1] == 's') {
 			strtok(buff, " ");
 			ret.spec_col.x = atof(strtok(NULL, " "));
@@ -59,8 +64,10 @@ material read_mtl (const char * filename, GLuint shader_prog)
 	}
 
 	/* Sets a default texture */
-	if (texloc == NULL)
-		texloc = "cat.png";
+	if (istex == false) {
+		texloc = malloc(1 + strlen(DEFAULT_TEXTURE));
+		strcpy(texloc, DEFAULT_TEXTURE);
+	}
 
 	GLuint tex;
 	glGenTextures(1, &tex);
@@ -72,6 +79,7 @@ material read_mtl (const char * filename, GLuint shader_prog)
 
 	glBindTexture(GL_TEXTURE_2D, tex);
 	img = read_png(fulltexloc);
+	puts("ASDASD");
 	glTexImage2D(GL_TEXTURE_2D, 0, img.colour_type, img.w, img.h, 0,
 			img.colour_type, GL_UNSIGNED_BYTE, img.data);
 	glUniform1i(glGetUniformLocation(shader_prog, "tex"), 0);
