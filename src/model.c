@@ -79,7 +79,6 @@ material read_mtl (const char * filename, GLuint shader_prog)
 
 	glBindTexture(GL_TEXTURE_2D, tex);
 	img = read_png(fulltexloc);
-	puts("ASDASD");
 	glTexImage2D(GL_TEXTURE_2D, 0, img.colour_type, img.w, img.h, 0,
 			img.colour_type, GL_UNSIGNED_BYTE, img.data);
 	glUniform1i(glGetUniformLocation(shader_prog, "tex"), 0);
