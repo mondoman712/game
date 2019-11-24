@@ -1,9 +1,10 @@
 # emetic
-That's just the project title for what will eventually become a quake-like fps.
+That's just the project title for what was intended to eventually be a
+quake-like fps (although I knew realistically programming my own engine isn't
+the way to make a game).
 
 ### TODO
 * split things into more functions
-* Vulkan Support (khronos gib vulkan)
 * Maps/worlds
 * Player movement
 * command line options
